@@ -1,0 +1,9 @@
+flask
+flask_cors
+PyMuPDF
+sentence-transformers
+transformers
+torch
+pyngrok
+nest_asyncio
+glob2
