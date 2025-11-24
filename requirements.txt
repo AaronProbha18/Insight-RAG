@@ -1,11 +1,16 @@
 fastapi
 uvicorn[standard]
+python-multipart
 langchain
+langchain-community
+langchain-openai
+langchain-anthropic
 langchain-google-genai
 langgraph
 fastembed
 tavily-python
 python-dotenv
+pypdf
 pydantic
 rich
 pytest
