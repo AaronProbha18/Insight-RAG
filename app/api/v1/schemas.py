@@ -124,9 +124,18 @@ class RAGQueryResponse(BaseModel):
     route_reason: str = Field(..., description="Reason behind routing decision.")
     answer: str = Field(..., description="Final generated answer after retrieval and grading.")
     grounded: bool = Field(..., description="Whether the answer is grounded in retrieved context.")
-    unsupported_claims: List[str] = Field(default_factory=list, description="List of unsupported claims detected, if any.")
-    used_docs: List[int] = Field(default_factory=list, description="Indices of documents used for answer generation.")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Pipeline metrics, reasoning, and intermediate state.")
+    unsupported_claims: List[str] = Field(
+        default_factory=list,
+        description="List of unsupported or hallucinated statements identified, if any."
+    )
+    used_docs: List[str] = Field(
+        default_factory=list,
+        description="List of document identifiers (e.g., filenames or labels) used to generate the answer."
+    )    
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Pipeline metrics, relevance scores, retrieval details, and intermediate state."
+    )
 
     class Config:
         json_schema_extra = {
@@ -136,11 +145,24 @@ class RAGQueryResponse(BaseModel):
                 "route_reason": "Query appears factual/document-centered.",
                 "answer": "Retrieval-Augmented Generation (RAG) enhances LLMs by grounding their answers in retrieved external data.",
                 "grounded": True,
-                "unsupported_claims": {},
-                "used_docs": [1],
+                "unsupported_claims": [],
+                "used_docs": ["sample.pdf"],
                 "metadata": {
                     "avg_doc_score": 0.87,
                     "route_reason": "Vector route selected for factual query"
                 }
             }
         }
+
+
+class ResetIndexResponse(BaseModel):
+    status: str
+    message: str
+
+class RemoveDocumentsRequest(BaseModel):
+    filter_metadata: dict
+
+class RemoveDocumentsResponse(BaseModel):
+    status: str
+    message: str
+    removed_count: int

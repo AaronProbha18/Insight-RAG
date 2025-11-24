@@ -1,40 +1,45 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
+from app.vectorstore.loader import VectorStoreLoader
 from app.api.v1 import endpoints as api_v1_endpoints
 from app.core.langsmith_setup import init_langsmith
 
-app = FastAPI(
-    title="🚀 Adaptive RAG API",
-    description="""
-**Adaptive RAG API**
 
-This API powers the *Adaptive, Corrective, and Self-RAG System*, which integrates:
-- Vectorstore-based document retrieval (FAISS)
-- Intelligent routing (vector vs web search)
-- Document grading & answer generation
-- Hallucination detection and correction
-- LangSmith-based logging & tracing
+@asynccontextmanager
+async def lifespan(app: FastAPI):
 
-Use this interface to test RAG pipeline, vector loading, and LLM queries interactively.
-""",
-    version="1.0.0",
-    contact={
-        "name": "Aaron Probha",
-        "url": "https://github.com/AaronProbha18",
-        "email": "aaronprobha@gmail.com",
-    }
-)
+    print("🔄 Initializing VectorStoreLoader...")
+
+    # Correct initialization
+    app.state.vectorstore = VectorStoreLoader(
+        model_name="all-MiniLM-L6-v2",
+        index_path="faiss_index",
+        index_type="flat",
+        chunk_size=900,
+        chunk_overlap=150,
+        batch_size=100,
+    )
+
+    print("✅ VectorStoreLoader initialized.")
+    yield
+
+    print("🧹 Shutting down...")
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(api_v1_endpoints.router, prefix="/api/v1")
 
-# Initialize LangSmith observability
+# Observability
 init_langsmith()
 
-@app.get("/", tags=["Health & Utility"])
+
+@app.get("/")
 def root():
-    """API root endpoint — verify service availability."""
     return {"message": "🚀 Adaptive RAG API is running!"}
 
-@app.get("/health", tags=["Health & Utility"])
+
+@app.get("/health")
 def health():
-    """Health check endpoint — returns OK if the API is live."""
     return {"status": "ok"}
