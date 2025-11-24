@@ -43,10 +43,11 @@ tab1, tab2, tab3 = st.tabs(["💾 Vector Store", "💬 Query Operations", "🧠 
 with tab1:
     st.subheader("📤 Upload Documents to Vector Store")
 
+    # UPDATED: allow PDF uploads
     uploaded_files = st.file_uploader(
-        "Upload one or more .txt or .json files to build the FAISS index:",
+        "Upload .txt / .json / .pdf files to build the FAISS index:",
         accept_multiple_files=True,
-        type=["txt", "json"]
+        type=["txt", "json", "pdf"]
     )
 
     if st.button("🚀 Load into FAISS Index"):
@@ -74,7 +75,7 @@ with tab1:
         with col2:
             st.metric("Status", stats.get("status", "unknown").capitalize())
         with col3:
-            st.metric("Embedding Model", "sentence-transformers/all-MiniLM-L6-v2")
+            st.metric("Embedding Model", "all-MiniLM-L6-v2")  # small optional fix
     else:
         st.info("ℹ️ Load some documents first to view FAISS stats.")
 
