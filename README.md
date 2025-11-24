@@ -112,7 +112,7 @@ LANGCHAIN_API_KEY="<your_langsmith_api_key>"
 uvicorn app.main:app --reload
 
 # Start frontend
-streamlit run streamlit_app.py
+streamlit run frontend\streamlit_app.py
 ```
 
 ## 🧠 Example Query
