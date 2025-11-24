@@ -9,10 +9,10 @@ with the key `retrieved_docs` containing the retrieved text snippets in
 descending order of relevance.
 
 API:
-    retrieve(query: str, k: int = 4, loader: Optional[VectorStoreLoader]=None) -> dict
+    retrieve(query: str, k: int = 4, loader: Optional[DocumentIngestor]=None) -> dict
 
 Behavior:
- - Uses the application's `VectorStoreLoader` if no loader is provided.
+ - Uses the application's `DocumentIngestor` if no loader is provided.
  - Calls the vectorstore's similarity search to get top-k documents.
  - If a document is very large it will be split into character-level
    chunks using RecursiveCharacterTextSplitter, but the overall result
@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from app.core.vectorstore_loader import VectorStoreLoader
+from app.vectorstore.loader import DocumentIngestor
 from langsmith import traceable
 
 
@@ -36,7 +36,7 @@ except Exception:  # pragma: no cover - optional dependency
 def retrieve(
     query: str,
     k: int = 4,
-    loader: Optional[VectorStoreLoader] = None,
+    loader: Optional[DocumentIngestor] = None,
     chunk_size: int = 1000,
     chunk_overlap: int = 200,
 ) -> Dict[str, List[str]]:
@@ -45,7 +45,7 @@ def retrieve(
     Args:
         query: The user query.
         k: Number of text snippets to return (top-K overall).
-        loader: Optional VectorStoreLoader. If None, a new instance is created.
+        loader: Optional DocumentIngestor. If None, a new instance is created.
         chunk_size: If a returned document exceeds this many characters,
             it will be split (only if RecursiveCharacterTextSplitter is available).
         chunk_overlap: Overlap between chunks when splitting.
@@ -55,7 +55,7 @@ def retrieve(
         snippets (strings) ordered by descending relevance.
     """
     if loader is None:
-        loader = VectorStoreLoader()
+        loader = DocumentIngestor()
 
     raw_results = loader.query(query, k=k)
 

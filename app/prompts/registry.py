@@ -63,15 +63,28 @@ Document:
 
 ANSWER_PROMPT = PromptTemplate.from_template(
     """
-You are a helpful assistant that answers user questions using only the provided context.
-Rules:
-- Use only facts from the context.
-- Cite document indices using [Doc X].
-- If unsure, say "I don’t know."
+You are a precise and factual answer generation assistant. 
+You must answer ONLY using information found in the provided context.
+
+STRICT citation rules:
+- The context already contains labeled chunks using filenames inside square brackets (e.g., [biology.txt], [chapter2.json]).
+- When citing, you MUST reuse the exact same labels as shown in the context.
+- DO NOT rename, shorten (e.g., to [Doc 1]), renumber, or modify citation labels.
+- Never fabricate new citations.
+- If no supporting citation exists, say: "I don't know."
+
+Response expectations:
+- Keep the answer concise, correct, and well-structured.
+- Include citations immediately after the facts they support.
+- If multiple sentences use the same citation, repeat it when needed.
+
 Context:
 {context}
-Question: {query}
-Answer (with citations):
+
+Question:
+{query}
+
+Answer (using the exact citation labels shown above):
 """
 )
 

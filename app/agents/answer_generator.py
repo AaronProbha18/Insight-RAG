@@ -1,15 +1,8 @@
 """
 Answer generator for Corrective/Adaptive RAG.
 
-This module constructs a context-aware prompt with numbered citations and
-asks a moderately creative LLM (temperature=0.3) to produce a concise,
-fact-based answer. If the model fails or is unsure, it returns "I don't know."
-
-API:
-    generate_answer(query: str, docs: List[str], llm=None) -> Dict[str, str]
-
-Returned dict contains 'answer' (str) and 'used_docs' (list[int]) indicating which
-documents (by index) were cited.
+This module constructs a context-aware prompt with named citations based on the
+original document filename instead of generic Doc indexes.
 """
 
 from __future__ import annotations
@@ -21,36 +14,48 @@ from app.prompts.registry import ANSWER_PROMPT
 from langsmith import traceable
 
 
-def _build_context(docs: List[str]) -> Tuple[str, List[int]]:
-    """Create a numbered context string and return indices mapping.
-
-    Each document will be prefixed with [Doc {i}] where i is 1-based index.
+def _build_context(docs: List[Any]) -> Tuple[str, List[str]]:
+    """
+    Create context using actual document filenames as citation labels.
+    Supports either:
+      - List[dict] where dict contains page_content + metadata
+      - List[str] for fallback plain-text input (very rare)
     """
     parts: List[str] = []
-    indices: List[int] = []
+    labels: List[str] = []
+
     for i, doc in enumerate(docs, start=1):
-        parts.append(f"[Doc {i}] {doc.strip()[:2000]}")
-        indices.append(i)
-    return "\n\n".join(parts), indices
+
+        # Handle vectorstore dict objects
+        if isinstance(doc, dict):
+            content = str(doc.get("page_content", "")).strip()[:2000]
+            metadata = doc.get("metadata", {}) or {}
+
+            # Correct lookup priority
+            source = (
+                metadata.get("source_file") or
+                metadata.get("source") or
+                f"Doc_{i}"
+            )
+
+        # Fallback for plain string docs
+        else:
+            content = str(doc).strip()[:2000]
+            source = f"Doc_{i}"
+
+        label = f"[{source}]"
+        parts.append(f"{label} {content}")
+        labels.append(source)
+
+    return "\n\n".join(parts), labels
 
 
 @traceable(name="AnswerGenerator.Generate")
-def generate_answer(query: str, docs: List[str], llm: Optional[Any] = None) -> Dict[str, Any]:
-    """Generate a concise, cited answer given query and retrieved docs.
-
-    Args:
-        query: user question
-        docs: list of document strings (short summaries or snippets)
-        llm: optional LangChain LLM; if None, `load_model()` is used
-
-    Returns:
-        dict with keys: 'answer' (str), 'used_docs' (List[int])
-    """
+def generate_answer(query: str, docs: List[Any], llm: Optional[Any] = None) -> Dict[str, Any]:
     if not docs:
         return {"answer": "I don't know.", "used_docs": []}
 
-    # Build context with doc numbering
-    context_str, indices = _build_context(docs)
+    context_str, labels = _build_context(docs)
 
     if llm is None:
         try:
@@ -58,28 +63,22 @@ def generate_answer(query: str, docs: List[str], llm: Optional[Any] = None) -> D
         except Exception:
             return {"answer": "I don't know.", "used_docs": []}
 
-    # Use LCEL syntax instead of LLMChain
     chain = ANSWER_PROMPT | llm
-    
+
     try:
-        # Use invoke instead of run
         raw = chain.invoke({"context": context_str, "query": query})
-        
-        # Handle different response types (some LLMs return objects, some strings)
-        if hasattr(raw, 'content'):
-            text = str(raw.content).strip()
-        else:
-            text = str(raw).strip()
+        text = raw.content.strip() if hasattr(raw, "content") else str(raw).strip()
 
         used = []
-        for i in indices:
-            if f"[Doc {i}]" in text:
-                used.append(i)
+        for label in labels:
+            if f"[{label}]" in text:
+                used.append(label)
 
         if not text or "I don't know" in text:
             return {"answer": "I don't know.", "used_docs": used}
 
         return {"answer": text, "used_docs": used}
+
     except Exception:
         return {"answer": "I don't know.", "used_docs": []}
 
