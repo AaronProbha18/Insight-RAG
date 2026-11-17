@@ -102,6 +102,9 @@ no result). See [evals/README.md](evals/README.md).
 
 ## Learn more
 
+- [docs/architecture/overview.md](docs/architecture/overview.md) - how the system fits together: flows, boundary rules, data model
+- [docs/guides/backend-development-guide.md](docs/guides/backend-development-guide.md) - rules for backend code
+- [docs/guides/frontend-development-guide.md](docs/guides/frontend-development-guide.md) - rules for the chat UI
 - [docs/guides/connector-development-guide.md](docs/guides/connector-development-guide.md) - write your own connector
 - [AGENTS.md](AGENTS.md) - stack, workflow, contribution rules
 - [docs/adr/](docs/adr/) - architecture decisions
