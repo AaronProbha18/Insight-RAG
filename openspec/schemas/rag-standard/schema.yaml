@@ -1,0 +1,126 @@
+name: rag-standard
+version: 1
+description: >
+  Default tier. proposal -> design -> specs + eval-plan -> tasks ->
+  verification. Use for anything touching retrieval, prompts, the graph,
+  connectors, ingestion, auth/ACL, public API contracts, or persistence.
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Why, scope, non-goals, risk classification
+    template: proposal.md
+    instruction: |
+      Sections: Why, What Changes, Non-Goals, Capabilities (new/modified
+      capability names in kebab-case - each becomes specs/<name>/spec.md),
+      Risk, Impact.
+
+      Fill EVERY row of the Risk table deliberately - "no" is a claim,
+      not a default. The Risk table drives the rest of the chain:
+      - Answer quality = yes  -> eval-plan.md must define a real eval.
+      - Connector = yes       -> design.md must cover auth, sync cursor,
+                                 deletes, rate limits, and a fixture corpus.
+      - Auth/ACL = yes        -> design.md must state who can retrieve what,
+                                 and specs must include a denial scenario.
+      If no row is yes, suggest rag-rapid instead.
+    requires: []
+
+  - id: design
+    generates: design.md
+    description: Technical decisions, alternatives, and ADR links
+    template: design.md
+    instruction: |
+      HOW the change is built: Context, Decisions (each with alternatives
+      considered and why rejected), Interfaces (Python protocols, API
+      shapes, stream payloads - as code blocks), Data (tables, indexes,
+      migrations), Risks / Open Questions.
+
+      A decision that outlives this change (stack choice, a contract other
+      changes build on, a cross-cutting convention) belongs in a new ADR
+      under docs/adr/ - draft it and link it here. Never silently
+      contradict an Accepted ADR: follow it or draft a superseding ADR.
+
+      Mark anything unverified (library behaviour, vendor API fields) as
+      "UNVERIFIED - confirm by <how>" instead of asserting it.
+    requires:
+      - proposal
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: Delta specs for capabilities this change adds or modifies
+    template: spec.md
+    instruction: |
+      One spec per capability in the proposal's Capabilities section.
+      New: specs/<capability>/spec.md. Modified: reuse the folder name in
+      openspec/specs/ - check it first.
+
+      Delta headers: ADDED / MODIFIED / REMOVED / RENAMED Requirements.
+      MODIFIED includes the full updated requirement block. REMOVED
+      includes **Reason** and **Migration**.
+
+      `### Requirement: <name>` with SHALL/MUST wording.
+      `#### Scenario: <name>` - exactly 4 hashes or it will not parse -
+      with GIVEN (optional) / WHEN / THEN bullets. Every requirement has
+      at least one scenario.
+
+      If there is truly no capability-level change, say so; archive will
+      need --skip-specs.
+    requires:
+      - design
+
+  - id: eval-plan
+    generates: eval-plan.md
+    description: How answer/retrieval quality is measured for this change
+    template: eval-plan.md
+    instruction: |
+      If the proposal's Risk table has Answer quality = no, write only
+      "N/A - <one-line reason>" under Applicability and stop.
+
+      Otherwise define:
+      - Dataset: golden questions used (path under evals/, or new cases
+        to add). Synthetic or public data only - never real user content.
+      - Metrics with thresholds, only ones this change can move:
+        retrieval hit-rate@k, MRR, faithfulness/groundedness, citation
+        correctness, answer relevance, latency p95, cost per query.
+      - Baseline: current numbers, or "none yet - this run establishes it".
+      - Pass rule: what result blocks merge.
+      - How to run: the exact command.
+    requires:
+      - design
+
+  - id: tasks
+    generates: tasks.md
+    description: Checkbox tasks, each sized for one plan/execute loop
+    template: tasks.md
+    instruction: |
+      Numbered groups of `- [ ]` tasks. Each checkbox must fit ONE
+      rag-plan -> rag-execute loop: one coherent, reviewable slice with
+      its own tests. If a task needs "and" to describe, split it. Include
+      tasks for tests and, when eval-plan applies, for eval cases and the
+      eval run. Order so interfaces land before their consumers.
+    requires:
+      - specs
+      - eval-plan
+
+  - id: verification
+    generates: verification.md
+    description: Evidence that the change meets specs and eval-plan
+    template: verification.md
+    instruction: |
+      TIMING: written by rag-verify after all tasks are [x]. Never report
+      a check you did not run this session. Record exact commands and
+      outcomes, map each spec scenario to the test covering it, and
+      record eval results against the eval-plan baseline and pass rule.
+      Any failing check or regressed metric is a FAIL - say so plainly.
+    requires:
+      - tasks
+
+apply:
+  requires:
+    - tasks
+  tracks: tasks.md
+  instruction: |
+    Prefer the rag-plan -> rag-execute loop: one tasks.md checkbox per
+    loop. Implement strictly within design.md. Run checks after each
+    slice. STOP and ask the user if implementation needs a design change,
+    a new external dependency/service, or contradicts an Accepted ADR.

@@ -1,0 +1,62 @@
+name: rag-rapid
+version: 1
+description: >
+  Low-risk, bounded product changes: UI copy, small visual fixes, config
+  values, docs a user sees. proposal -> tasks -> verification. Anything
+  touching retrieval, prompts, connectors, ingestion, auth/ACL, a public
+  API contract, or a DB migration goes through rag-standard. Repo-internal
+  work (CI, lint, .claude/ skills, openspec schemas, dependency bumps)
+  needs no OpenSpec change at all - it ships as a chore/ PR.
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Brief proposal confirming the change is genuinely low-risk
+    template: proposal.md
+    instruction: |
+      STOP and tell the user to use rag-standard instead if ANY is true:
+      - touches retrieval, ranking, chunking, embeddings, or prompts
+        (anything that can change answer quality),
+      - touches a connector or the ingestion pipeline,
+      - touches authentication, authorization, or document ACLs,
+      - changes a public API contract or needs a DB migration,
+      - cannot be described and reviewed in one sitting.
+
+      STOP and tell the user this needs no OpenSpec change if it is
+      repo-internal (CI, lint, .claude/, openspec schemas, dependency bumps).
+
+      Sections: Why (one sentence), What changes (specific bullets),
+      Confirmed low-risk (one line on why no STOP condition applies),
+      Impact (files/packages).
+    requires: []
+
+  - id: tasks
+    generates: tasks.md
+    description: Small checkbox tasks
+    template: tasks.md
+    instruction: |
+      Small `- [ ]` checkbox tasks. One group is usually enough.
+    requires:
+      - proposal
+
+  - id: verification
+    generates: verification.md
+    description: Evidence the change works as proposed
+    template: verification.md
+    instruction: |
+      TIMING: written after implementation. PRECHECK: every tasks.md
+      checkbox is [x] and you ran the checks this session - never report
+      an unrun check as passed. Keep it short. If implementation showed
+      the change is not low-risk after all, say so instead.
+      This tier has no specs: archive with `openspec archive --skip-specs -y`.
+    requires:
+      - tasks
+
+apply:
+  requires:
+    - tasks
+  tracks: tasks.md
+  instruction: |
+    Implement the proposal directly, run the smallest relevant checks.
+    STOP and move the change to rag-standard if implementation reveals a
+    STOP condition from the proposal instruction.

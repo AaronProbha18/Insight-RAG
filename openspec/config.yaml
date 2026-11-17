@@ -1,0 +1,28 @@
+schema: rag-standard
+
+# Shown to the AI when creating any artifact. Full rules: AGENTS.md.
+context: |
+  Product: insight-rag-v2 - a RAG application. Content enters through
+    pluggable connectors, is indexed, and is answered over by a LangGraph
+    agent behind an assistant-ui chat frontend.
+  Backend: Python, LangGraph, FastAPI. Frontend: React + Vite, assistant-ui.
+  Decisions: docs/adr/. Follow Accepted ADRs; propose a superseding ADR
+    rather than silently contradicting one.
+  Tiers: rag-standard by default. rag-rapid only when nothing touches
+    retrieval, prompts, connectors, ingestion, auth/ACL, a public
+    contract, or persistence. Repo-internal tooling needs no change.
+  Data: synthetic or public data only in fixtures, evals, prompts, logs.
+    No secrets - reference env var names.
+  Honesty: mark unverified library/vendor behaviour as UNVERIFIED with how
+    to confirm it. Never report an unrun check as passed.
+
+# Per-artifact rules. Keys must be artifact ids present in BOTH schemas
+# (proposal, tasks, verification) or openspec warns under the other one.
+rules:
+  proposal:
+    - Keep Why to three sentences or fewer; detail belongs in design.
+  tasks:
+    - Each checkbox must be one plan/execute loop with its own test.
+  verification:
+    - Paste the command and a one-line result for every check; no
+      "should pass".
