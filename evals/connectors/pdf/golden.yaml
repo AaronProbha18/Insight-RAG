@@ -1,0 +1,299 @@
+# Golden set for the pdf connector. Same ids and questions as the other
+# connector; only supporting locators differ. Synthetic corpus: see evals/README.md.
+- id: q01
+  question: How many days of annual leave do full-time employees get?
+  answerable: true
+  reference_answer: Full-time employees get 25 days of annual leave per year.
+  key_fact: 25 days of annual leave
+  supporting:
+  - document: employee-handbook
+    locator: p. 2
+- id: q02
+  question: How many unused annual leave days can be carried over, and when do they expire?
+  answerable: true
+  reference_answer: Up to 5 unused days can be carried over; they expire on 31 March.
+  key_fact: expire on 31 March
+  supporting:
+  - document: employee-handbook
+    locator: p. 2
+- id: q03
+  question: How many days of paid sick leave do employees receive?
+  answerable: true
+  reference_answer: 10 days of paid sick leave per year.
+  key_fact: 10 days of paid sick leave
+  supporting:
+  - document: employee-handbook
+    locator: p. 2
+- id: q04
+  question: How many Adventure Days does each employee get, and how far ahead must they be booked?
+  answerable: true
+  reference_answer: 2 Adventure Days per year, booked at least 7 days in advance.
+  key_fact: at least 7 days in advance
+  supporting:
+  - document: employee-handbook
+    locator: p. 2
+- id: q05
+  question: What are the core hours for office staff?
+  answerable: true
+  reference_answer: 10:00 to 15:00.
+  key_fact: 10:00 to 15:00
+  supporting:
+  - document: employee-handbook
+    locator: p. 1
+- id: q06
+  question: How many days per week may office staff work remotely?
+  answerable: true
+  reference_answer: Up to 2 days per week.
+  key_fact: up to 2 days per week
+  supporting:
+  - document: employee-handbook
+    locator: p. 1
+- id: q07
+  question: How long can a store staff shift be?
+  answerable: true
+  reference_answer: Up to 8 hours.
+  key_fact: up to 8 hours
+  supporting:
+  - document: employee-handbook
+    locator: p. 1
+- id: q08
+  question: What is the mileage reimbursement rate for personal cars?
+  answerable: true
+  reference_answer: 0.30 per km.
+  key_fact: 0.30 per km
+  supporting:
+  - document: employee-handbook
+    locator: p. 3
+- id: q09
+  question: What is the daily meal allowance during business travel?
+  answerable: true
+  reference_answer: 40 per day; alcohol is not reimbursed.
+  key_fact: business travel is 40
+  supporting:
+  - document: employee-handbook
+    locator: p. 3
+- id: q10
+  question: What discount do employees get on sale items?
+  answerable: true
+  reference_answer: 10 percent on sale items (30 percent on full-price items).
+  key_fact: 10 percent on sale items
+  supporting:
+  - document: employee-handbook
+    locator: p. 3
+- id: q11
+  question: What is the general return window?
+  answerable: true
+  reference_answer: 14 days from delivery for a full refund.
+  key_fact: within 14 days of the delivery date
+  supporting:
+  - document: returns-policy
+    locator: p. 1
+- id: q12
+  question: What happens to a return made 18 days after delivery?
+  answerable: true
+  reference_answer: It is accepted for store credit only; returns between 14 and 21 days get store credit.
+  key_fact: store credit only
+  supporting:
+  - document: returns-policy
+    locator: p. 1
+- id: q13
+  question: How long do customers have to return trail shoes?
+  answerable: true
+  reference_answer: 30 days from delivery, even if worn indoors.
+  key_fact: within 30 days of delivery
+  supporting:
+  - document: returns-policy
+    locator: p. 1
+- id: q14
+  question: Can boots with mud on the soles be returned?
+  answerable: true
+  reference_answer: No. Footwear with visible outdoor wear is not eligible for return.
+  key_fact: visible outdoor wear
+  supporting:
+  - document: returns-policy
+    locator: p. 1
+- id: q15
+  question: Can gift cards be returned?
+  answerable: true
+  reference_answer: No, gift cards cannot be returned.
+  key_fact: Gift cards
+  supporting:
+  - document: returns-policy
+    locator: p. 2
+- id: q16
+  question: How long does a refund to a card take for an online purchase?
+  answerable: true
+  reference_answer: 5 to 7 business days, to the same card.
+  key_fact: 5 to 7 business days
+  supporting:
+  - document: returns-policy
+    locator: p. 2
+- id: q17
+  question: How is a purchase paid by gift card refunded?
+  answerable: true
+  reference_answer: As store credit, immediately.
+  key_fact: Gift card Store credit Immediate
+  supporting:
+  - document: returns-policy
+    locator: p. 2
+- id: q18
+  question: What is the range of the Trail E-Bike in Eco mode?
+  answerable: true
+  reference_answer: Up to 60 km on a full charge.
+  key_fact: Eco mode the bike travels up to 60 km
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 1
+- id: q19
+  question: What is the range of the Trail E-Bike in Trail mode?
+  answerable: true
+  reference_answer: Up to 45 km.
+  key_fact: In Trail mode the range is up to 45 km
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 1
+- id: q20
+  question: What is the battery capacity of the Trail E-Bike?
+  answerable: true
+  reference_answer: 500 Wh, removable lithium-ion.
+  key_fact: 500 Wh
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 1
+- id: q21
+  question: Does the Trail E-Bike come in an XL frame size?
+  answerable: true
+  reference_answer: No. The frame sizes are S, M and L.
+  key_fact: S, M, L
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 1
+- id: q22
+  question: How long does a full charge from empty take?
+  answerable: true
+  reference_answer: About 5 hours.
+  key_fact: about 5 hours
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 2
+- id: q23
+  question: What does error code E04 mean and what should the rider do?
+  answerable: true
+  reference_answer: Battery not detected; remove and reinsert the battery.
+  key_fact: E04 Battery not detected
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 2
+- id: q24
+  question: How often should the Trail E-Bike be serviced?
+  answerable: true
+  reference_answer: Every 1,000 km or every 6 months, whichever comes first.
+  key_fact: every 1,000 km or every 6 months
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 3
+- id: q25
+  question: When should brake pads be replaced?
+  answerable: true
+  reference_answer: When the pad material is thinner than 1.5 mm.
+  key_fact: thinner than 1.5 mm
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 3
+- id: q26
+  question: How long is the Trail E-Bike battery warranty?
+  answerable: true
+  reference_answer: 2 years or 500 full charge cycles, whichever comes first. The returns policy also
+    lists a 2-year battery warranty.
+  key_fact: 500 full charge cycles
+  supporting:
+  - document: trail-ebike-manual
+    locator: p. 3
+  - document: returns-policy
+    locator: p. 3
+- id: q27
+  question: What is the new Trail E-Bike launch date and why did it move?
+  answerable: true
+  reference_answer: 15 September 2026, moved from 1 September because the battery supplier delayed the
+    second shipment.
+  key_fact: 15 September 2026
+  supporting:
+  - document: meeting-notes-2026-q3
+    locator: p. 1
+- id: q28
+  question: What is the fit-out budget for the new store and who owns it?
+  answerable: true
+  reference_answer: 180,000, owned by the Head of Retail.
+  key_fact: 180,000
+  supporting:
+  - document: meeting-notes-2026-q3
+    locator: p. 1
+- id: q29
+  question: Was the general return window extended to 30 days?
+  answerable: true
+  reference_answer: No. The team discussed it but made no change and will revisit it in Q1 2027; the window
+    remains 14 days.
+  key_fact: No change was made
+  supporting:
+  - document: meeting-notes-2026-q3
+    locator: p. 2
+  - document: returns-policy
+    locator: p. 1
+- id: q30
+  question: Who must draft the hiring plan for the new store, and by when?
+  answerable: true
+  reference_answer: The Head of People Operations, by 31 August 2026.
+  key_fact: Draft the hiring plan for the new store 31 August 2026
+  supporting:
+  - document: meeting-notes-2026-q3
+    locator: p. 2
+- id: q31
+  question: How long does standard shipping take?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q32
+  question: What is the name of the company's CEO?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q33
+  question: What is the street address of the new harbour district store?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q34
+  question: How much does the Trail E-Bike cost?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q35
+  question: What is the parental leave policy?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q36
+  question: What is the waterproof rating of the Trail E-Bike battery?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q37
+  question: How many employees does Lumen Ridge Outfitters have?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q38
+  question: Which contractor was chosen for the new store fit-out?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q39
+  question: What was the return rate in Q2 2026?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
+- id: q40
+  question: Can employees use the staff discount for family members?
+  answerable: false
+  reference_answer: This is not covered by the indexed documents.
+  supporting: []
