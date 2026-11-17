@@ -1,143 +1,108 @@
-# InsightRAG — Adaptive, Self-Corrective Retrieval-Augmented Generation System
+# insight-rag
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.0-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
-[![LangChain](https://img.shields.io/badge/🦜_LangChain-0.0.330-blue)](https://github.com/hwchase17/langchain)
-[![LangGraph](https://img.shields.io/badge/LangGraph-0.0.10-purple.svg)](https://github.com/langchain-ai/langgraph)
-[![FAISS](https://img.shields.io/badge/FAISS-1.7.4-yellow.svg)](https://github.com/facebookresearch/faiss)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.28.0-FF4B4B.svg?logo=streamlit)](https://streamlit.io)
-[![Tracing](https://img.shields.io/badge/tracing-LangSmith-orange.svg)](https://smith.langchain.com/)
+Open-source retrieval-augmented generation: plug in a source through a
+connector, ask questions, and get answers that cite where they came from -
+or say the answer is not in your sources. Answer quality is measured, not
+assumed: every supported connector must clear an 80% accuracy bar on its
+evaluation set.
 
-A modular, production-ready **RAG pipeline** built with **FastAPI**, **LangGraph**, and **Streamlit**, featuring adaptive routing, self-grading, and hallucination correction for fact-grounded responses.
+**Status:** pre-alpha. PDF and Word (DOCX) documents, local models via
+Ollama or any provider LangChain supports.
 
----
+## How trust works
 
-## 🚀 Overview
-**InsightRAG** combines internal vector retrieval and external web search to deliver factual, explainable AI responses.  
-It integrates **LangGraph** for adaptive orchestration, **LangSmith** for tracing and metrics, and **FAISS** for fast semantic search.
+Every answer cites the passages it relies on, with the document title and a
+page number or heading path, and you can open each one. When the retrieved
+passages don't support an answer, insight-rag says so rather than guess.
+Each connector is gated by an evaluation run: correctness, faithfulness and
+abstention on unanswerable questions must each reach 0.80, scored by an LLM
+judge that is itself checked against human labels first.
 
-The system supports three RAG paradigms:
-- **Adaptive RAG** → Chooses between internal (FAISS) or external (web) retrieval.  
-- **Self RAG** → Grades document relevance and factual alignment.  
-- **Corrective RAG** → Regenerates hallucinated answers for better accuracy.
+## Quickstart (Docker)
 
----
+You need Docker and a model provider. The reference setup is a 16 GB Apple
+M1 running [Ollama](https://ollama.com) natively, so it uses the GPU.
 
-## 🧰 Tech Stack
+1. **Models** (check the Ollama library for current tags):
 
-| Layer | Technologies |
-|--------|---------------|
-| **Backend** | Python, FastAPI, LangGraph, LangChain |
-| **Models** | Gemini, GPT-4, Claude |
-| **Vector Store** | FAISS, HuggingFace Embeddings (`all-MiniLM-L6-v2`) |
-| **Web Search** | Tavily API |
-| **Frontend** | Streamlit |
-| **Observability** | LangSmith Tracing & Metrics |
-| **Documentation** | FastAPI Swagger/OpenAPI |
+   ```bash
+   ollama pull llama3.1:8b
+   ollama pull nomic-embed-text
+   ```
 
-For a detailed architectural diagram and agent interaction flow, check out the [LangGraph Flow Diagram](app/agents/README.md#langgraph-flow)
+2. **Configure:**
 
-## 📡 API Endpoints (FastAPI)
+   ```bash
+   cp .env.example .env
+   ```
 
-| Endpoint | Method | Description | Request Schema |
-|----------|--------|-------------|----------------|
-| `/api/v1/load_vectors` | POST | Upload and embed text/JSON documents | `UploadFile` |
-| `/api/v1/query_vectors` | POST | Query FAISS for similar docs | `QueryRequest`: `{query: str, k?: int}` |
-| `/api/v1/model_query` | POST | Direct LLM query to model | `ModelQueryRequest`: `{query: str, provider?: str, model?: str}` |
-| `/api/v1/rag_query` | POST | Run full Adaptive RAG pipeline | `RAGQueryRequest`: `{query: str, k?: int}` |
-| `/health` | GET | Health check endpoint | - |
-| `/` | GET | API root with version info | - |
+   | Variable | Required | Example | Purpose |
+   | --- | --- | --- | --- |
+   | `INSIGHT_RAG_LLM` | yes | `ollama:llama3.1:8b` | chat model, as `provider:model` |
+   | `INSIGHT_RAG_EMBEDDINGS` | yes | `ollama:nomic-embed-text` | embedding model |
+   | `INSIGHT_RAG_EMBEDDING_DIM` | yes | `768` | vector size of that embedding model; fixed at first start |
+   | `INSIGHT_RAG_MODEL_BASE_URL` | in Docker | `http://host.docker.internal:11434` | where the container reaches Ollama on your machine |
+   | `INSIGHT_RAG_JUDGE_LLM` | for evals | `ollama:llama3.1:8b` | eval judge; deliberately separate from the chat model |
+   | `INSIGHT_RAG_ABSTAIN_THRESHOLD` | no | `0.3` | minimum retrieval similarity before answering |
+   | `DATABASE_URL` | no | `postgresql://insight_rag:insight_rag@localhost:5432/insight_rag` | defaults to the compose `db` service on localhost; compose sets its own for the app |
+   | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | no | `insight_rag` | database credentials; the defaults are for local use only |
 
-## 💻 Frontend (Streamlit)
+   (`INSIGHT_RAG_UI_DIR` is set by the Docker image to serve the built UI;
+   you don't set it.)
 
-A minimal chatbot UI to demo all endpoints.
-Launch it using:
+3. **Run:**
+
+   ```bash
+   docker compose up --build
+   ```
+
+   Open <http://localhost:8000>, upload a PDF or DOCX, and ask a question.
+   To check the whole stack from a terminal, run `sh scripts/smoke.sh`.
+
+> **Changing the embedding model** changes the vector size, and the
+> database column is fixed at first start. Run `docker compose down -v`
+> (this deletes indexed documents), update `INSIGHT_RAG_EMBEDDING_DIM`, and
+> start again.
+
+Other providers: install their LangChain package by building with
+`--build-arg PROVIDER=<extra>`. Only `ollama` is wired up today; add an extra in
+`backend/pyproject.toml` for others.
+
+## Development
 
 ```bash
-streamlit run streamlit_app.py
+docker compose up -d db                     # Postgres + pgvector only
+
+cd backend
+uv sync --extra ollama
+uv run alembic upgrade head                 # needs INSIGHT_RAG_EMBEDDING_DIM
+uv run fastapi dev src/insight_rag/api/app.py   # API on :8000
+
+cd frontend
+npm install
+npm run dev                                 # UI on :5173, proxies the API
 ```
 
-## 🎯 Features
+### Tests
 
-### Core Capabilities
-- Adaptive routing between vector store and web search
-- Document relevance grading and factual alignment
-- Hallucination detection and correction
-- Multi-model support (Gemini, GPT-4, Claude)
-- Efficient FAISS-based vector similarity search
-
-### Interface
-- Interactive Streamlit chatbot interface
-- Rich metadata and source attribution
-- Support for both direct LLM and RAG queries
-- Real-time tracing and monitoring via LangSmith
-- Swagger/OpenAPI documentation
-
-### Data Handling
-- Text and JSON document ingestion
-- HuggingFace embeddings integration
-- Persistent FAISS index storage
-- Web search capability via Tavily
-- Structured response formatting
-
-## 🧪 Quick Start
-
-### 1️⃣ Clone & Setup
 ```bash
-git clone https://github.com/<yourname>/InsightRAG.git
-
-cd InsightRAG
-
-python -m venv venv
-
-source venv/bin/activate   # or venv\Scripts\activate
-
-pip install -r requirements.txt
+cd backend && uv run ruff check . && uv run pytest   # DB tests skip if Postgres is down
+cd frontend && npm run lint && npm test
 ```
 
-### 2️⃣ Environment Variables (.env)
-```bash
-GOOGLE_API_KEY="<your_google_api_key>"
-OPENAI_API_KEY="<your_openai_api_key>"
-TAVILY_API_KEY="<your_tavily_api_key>"
-LANGCHAIN_TRACING_V2="true"
-LANGCHAIN_PROJECT="AdaptiveRAG"
-LANGCHAIN_API_KEY="<your_langsmith_api_key>"
-```
+On Windows, run the frontend tests from a path with an **upper-case drive
+letter** (`D:\...`). From `d:\...`, Vitest loads itself twice and every
+suite fails with "failed to find the current suite".
 
-### 3️⃣ Run Services
-```bash
-# Start backend
-uvicorn app.main:app --reload
+### Evaluations
 
-# Start frontend
-streamlit run frontend\streamlit_app.py
-```
+`uv run insight-rag-eval` scores every connector against its golden set and
+exits 0 (pass), 1 (a connector is below 0.80) or 2 (judge not validated, so
+no result). See [evals/README.md](evals/README.md).
 
-## 🧠 Example Query
-```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/rag_query" \
--H "Content-Type: application/json" \
--d '{"query": "Explain retrieval augmented generation", "k": 3}'
-```
+## Learn more
 
-## 📈 Metrics & Tracing
-
-### LangSmith Integration
-- Comprehensive tracing of all agent nodes (Router, Retriever, Grader)
-- Real-time monitoring and debugging via LangSmith dashboard
-- Trace metadata includes: `component`, `agent`, `model`, `index`, `k`, `query_len`, `num_docs`, `avg_doc_score`
-
-### Observability
-- Environment Setup: `LANGCHAIN_TRACING_V2=true`, `LANGCHAIN_PROJECT=AdaptiveRAG`
-- LangSmith initialization at FastAPI startup
-- Privacy-aware tracing: No PII or full document content in traces
-- Performance metrics and latency tracking
-- Error monitoring and alerting capabilities
-
-## 🧭 Future Enhancements
-
-- PDF and Docx Document Support: Add capability to process PDF documents and extract text for ingestion
-- Conversation Memory: Implement chat history and context management
-- Adding Data Visualisations Capablities
+- [docs/connectors.md](docs/connectors.md) - write your own connector
+- [AGENTS.md](AGENTS.md) - stack, workflow, contribution rules
+- [docs/adr/](docs/adr/) - architecture decisions
+- [LICENSE](LICENSE) - MIT
