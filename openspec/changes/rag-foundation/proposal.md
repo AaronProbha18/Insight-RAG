@@ -26,6 +26,12 @@ meet the 80% trust bar, per connector.
 - One-command run: a single multi-stage `Dockerfile` (API + built chat UI)
   and a `docker compose up` that starts the app and its database once
   `.env` is filled in.
+- Minimal CI on free GitHub-hosted runners: backend lint + tests (with a
+  pgvector service), frontend lint + build + tests, OpenSpec validation,
+  Docker build, and a docs link check. Model-dependent evals stay manual.
+- Maintained documentation: an architecture overview and development
+  guides (backend, frontend, connectors) that humans and AI agents follow,
+  kept current by an AGENTS.md rule.
 
 ## Non-Goals
 
@@ -34,7 +40,8 @@ meet the 80% trust bar, per connector.
   PDF/DOCX.
 - Query rewriting, retrieval grading loops, reranking, hybrid search.
 - OCR for scanned PDFs, tables/images inside documents.
-- Production deployment (Kubernetes, cloud hosting, TLS, scaling); CI pipeline.
+- Production deployment (Kubernetes, cloud hosting, TLS, scaling); CD,
+  image publishing, and running real-model evals in CI.
 - Conversation history persistence across server restarts.
 
 ## Capabilities

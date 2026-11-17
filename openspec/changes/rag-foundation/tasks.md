@@ -58,3 +58,11 @@
 
 - [x] 10.1 README quickstart (`cp .env.example .env`, fill it, `docker compose up`; dev mode; run evals) and "write a connector" guide using the conformance kit
 - [x] 10.2 Update AGENTS.md Layout and Commands with the real directories and lint/test/eval commands
+
+## 11. CI and maintained documentation
+
+- [x] 11.1 `.github/workflows/ci.yml` on push/PR using free `ubuntu-latest` runners: backend (uv, ruff, format check, pytest with a pgvector service container), frontend (npm ci, lint, build, Vitest), `openspec validate --all`, Docker image build without push
+- [x] 11.2 `docs/architecture/overview.md`: layout, ingest / ask / eval flows, boundary rules, data model and migration rules, configuration sources; every named path exists
+- [x] 11.3 `docs/guides/backend-development-guide.md`: API conventions, connectors, ingestion atomicity, graph and prompt rules, models via env, migrations, testing, Do/Don't; examples match real code
+- [x] 11.4 `docs/guides/frontend-development-guide.md`: assistant-ui runtime and SSE adapter, component placement, accessibility, CSS tokens, Vitest without jsdom, Windows note, Do/Don't
+- [x] 11.5 Docs maintenance: move `docs/connectors.md` to `docs/guides/connector-development-guide.md` (update links), AGENTS.md rule that behaviour changes update the overview/guides in the same PR, a docs check in rag-execute's self-review, and a CI step checking relative links in docs and READMEs
