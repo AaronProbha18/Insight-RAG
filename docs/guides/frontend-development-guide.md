@@ -135,13 +135,14 @@ for an empty list, so abstentions show no sources without a special case:
 ## 6. Styling
 
 - Plain CSS in `src/index.css`. There's no CSS framework yet.
-- Colours are **tokens** on `:root` (`--bg`, `--fg`, `--muted`,
-  `--accent`, `--border`), redefined under `prefers-color-scheme: dark`.
-  Use `var(--token)` in new rules.
-- **Current exceptions:** `#fff` for text on `--accent`, and the error red
-  `#c0392b`. The error red has no dark-mode variant, and its contrast on
-  the dark background still needs checking. Turn both into tokens before
-  adding more colour.
+- **Every colour is a token** on `:root` (`--bg`, `--fg`, `--muted`,
+  `--accent`, `--border`, `--on-accent`, `--error`), redefined under
+  `prefers-color-scheme: dark`. Rules use `var(--token)` only; there are
+  no colour literals outside the two token blocks.
+- **Each text/background pair meets WCAG AA (≥ 4.5:1) in both themes.**
+  The measured ratio sits in a comment next to the token. When you add or
+  change a token, measure both themes; a colour that passes in light mode
+  can fail in dark mode (white on the dark-mode accent measured 2.7:1).
 
 ## 7. Testing
 
