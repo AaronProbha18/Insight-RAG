@@ -102,7 +102,7 @@ no result). See [evals/README.md](evals/README.md).
 
 ## Learn more
 
-- [docs/connectors.md](docs/connectors.md) - write your own connector
+- [docs/guides/connector-development-guide.md](docs/guides/connector-development-guide.md) - write your own connector
 - [AGENTS.md](AGENTS.md) - stack, workflow, contribution rules
 - [docs/adr/](docs/adr/) - architecture decisions
 - [LICENSE](LICENSE) - MIT

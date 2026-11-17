@@ -23,6 +23,10 @@ Implement ONE planned task. Nothing beyond its stated scope.
      no unrequested abstraction, config, or adjacent reformatting?
    - debug output, dead code, secrets, real data in fixtures?
    - unverified library behaviour asserted as fact?
+   - docs: did this change behaviour, a contract, a boundary rule or a
+     command that `docs/architecture/overview.md` or a guide in
+     `docs/guides/` describes? Update them in this task, or say why not
+     (AGENTS.md workflow rule 7).
    Fix what is in scope; report the rest.
 6. Tick the task's checkbox in `tasks.md`.
 7. Report: files changed, checks run with results, review notes, and the

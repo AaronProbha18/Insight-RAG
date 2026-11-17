@@ -47,7 +47,8 @@ evals/                     eval DATA only: corpus-src/, connectors/<name>/{corpu
                            judge/labelled.yaml, reports/ (gitignored)
 scripts/smoke.sh           full-stack smoke test
 docs/adr/                  architecture decision records - why things are the way they are
-docs/connectors.md         guide: write a connector
+docs/architecture/         overview.md: components, flows, boundary rules, data model
+docs/guides/               backend, frontend and connector development guides
 openspec/                  specs (living), changes (in flight), schemas (our workflow)
 .claude/                   Claude Code skills, commands, hooks
 Dockerfile                 one image: built UI + API
@@ -80,6 +81,11 @@ rag-plan -> rag-execute -> ... -> rag-verify -> PR (human merges) -> /opsx:archi
    never silently contradicted.
 6. **Humans merge.** Agents may draft commits and PRs; they never merge,
    force-push, or bypass checks.
+7. **Docs move with the code.** A change that alters behaviour, a public
+   contract, a boundary rule, or a command updates
+   `docs/architecture/overview.md` and the matching guide in
+   `docs/guides/` in the same PR. Docs describe what the code does; a rule
+   the code breaks is a bug in one of them.
 
 ## Data and safety rules
 

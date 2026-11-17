@@ -143,5 +143,5 @@ listed as **supported**, it must also show its answers can be trusted:
    least 20% of them unanswerable from the corpus. Copy the shape from
    `evals/connectors/pdf/golden.yaml`.
 3. Run `uv run insight-rag-eval --connectors <name>` (see
-   [evals/README.md](../evals/README.md)). Correctness, faithfulness and
+   [evals/README.md](../../evals/README.md)). Correctness, faithfulness and
    abstention must each reach **0.80**.
