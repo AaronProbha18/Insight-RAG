@@ -45,6 +45,12 @@ trivial tasks.
 Run plan -> execute once per checkbox, then verify once at the end.
 `/opsx:apply` still works for `rag-rapid` changes, where the loop is overkill.
 
+## Reviewing
+
+Before reviewing any diff (including with a code-review skill), read
+[REVIEW.md](REVIEW.md) and check the sections for the areas the diff
+touches.
+
 ## Guardrails
 
 `.claude/hooks/block-dangerous-git.mjs` denies force-push, `--no-verify`,

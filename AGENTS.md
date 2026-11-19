@@ -87,6 +87,11 @@ rag-plan -> rag-execute -> ... -> rag-verify -> PR (human merges) -> /opsx:archi
    `docs/guides/` in the same PR. Docs describe what the code does; a rule
    the code breaks is a bug in one of them.
 
+## Review
+
+[REVIEW.md](REVIEW.md) is the checklist for every diff, by area
+(backend, frontend, connectors). Reviewers, human or agent, use it.
+
 ## Data and safety rules
 
 - No real user, customer, or production data in prompts, fixtures, eval
