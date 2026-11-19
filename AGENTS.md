@@ -79,7 +79,6 @@ carry the handoff:
 | `type:*` | feature, bug, chore, docs | what kind of work; issue and PR |
 | `area:*` | backend, frontend, connector, evals, docs, infra | where it lands; issue and PR |
 | `status:*` | needs-triage -> ready-for-dev -> in-progress; blocked | where the issue is in the loops; issues only |
-| `track:*` | standard, rapid, chore | the triage route (rule 1 / rule 2); issue and PR |
 | `answer-quality` | | can change answers: an eval run is required before merge |
 
 1. **Tier.** `rag-standard` is the default (proposal -> design -> specs +

@@ -14,7 +14,4 @@
 - {name: "status:ready-for-dev", color: "0e8a16", description: "Change planned; run /rag-quick"}
 - {name: "status:in-progress", color: "c5def5", description: "A developer loop is running"}
 - {name: "status:blocked", color: "b60205", description: "Waiting on a decision or dependency"}
-- {name: "track:standard", color: "bfdadc", description: "rag-standard change (design, specs, eval plan)"}
-- {name: "track:rapid", color: "bfdadc", description: "rag-rapid change (proposal, tasks)"}
-- {name: "track:chore", color: "bfdadc", description: "No OpenSpec change (AGENTS.md rule 2)"}
 - {name: "answer-quality", color: "e99695", description: "Can change answers: eval run required before merge"}

@@ -31,7 +31,7 @@ closes it and says how each acceptance criterion was met.
 4. **Create** on approval:
    `git push -u origin HEAD`, then
    `gh pr create --draft --title "<title>" --body-file <tmpfile> --base main
-   --label <labels>`, copying the issue's `type:*`, `area:*`, `track:*` and
+   --label <labels>`, copying the issue's `type:*`, `area:*` and
    `answer-quality` labels (never `status:*`, which tracks the issue, not
    the PR). Report the PR URL.
    - `answer-quality` PRs: the body's eval line must hold real results. If

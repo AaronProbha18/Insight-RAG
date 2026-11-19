@@ -30,7 +30,7 @@ it back to the issue. Never edit code.
    - **Repo-internal** (CI, lint, `.claude/`, schemas, dependency bumps,
      docs only): no OpenSpec change (AGENTS.md rule 2). Post a comment
      saying it's a chore, swap `status:needs-triage` for
-     `status:ready-for-dev`, add `track:chore` and the `area:*` labels,
+     `status:ready-for-dev`, add the `area:*` labels,
      and stop.
    - **Answer quality "Yes"** or it touches retrieval, prompts,
      connectors, ingestion, a public contract or the database: schema
@@ -57,7 +57,7 @@ it back to the issue. Never edit code.
      and anything the issue's scope gained or lost during triage.
    - Labels (all defined in `.github/labels.yml`):
      `gh issue edit <N> --remove-label status:needs-triage --add-label
-     status:ready-for-dev,track:<standard|rapid>,area:<…>`, plus
+     status:ready-for-dev,area:<…>`, plus
      `answer-quality` if the form said "Yes" or the route is
      `rag-standard`. If triage itself is stuck on a decision, add
      `status:blocked` and say what it's waiting for.
