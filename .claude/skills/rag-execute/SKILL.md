@@ -11,7 +11,13 @@ Implement ONE planned task. Nothing beyond its stated scope.
 
 1. Read `openspec/changes/<name>/plan.md`. If it is missing, or its task
    is already `[x]` in `tasks.md`, stop and tell the user to run rag-plan.
-2. Re-read `design.md` and the specs the plan references.
+2. Re-read `design.md` and the specs the plan references, and the dev
+   guide for every area in the Files table (`frontend/` →
+   `docs/guides/frontend-development-guide.md`, `backend/` →
+   `docs/guides/backend-development-guide.md`, connectors →
+   `docs/guides/connector-development-guide.md`). The code you write
+   follows those rules; if a rule is wrong, stop and say so rather than
+   break it.
 3. Implement the plan's Files table. Write the tests from its Tests
    section alongside the code.
 4. Run every command in "Checks to run". On failure: fix if the cause is
