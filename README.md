@@ -100,6 +100,15 @@ suite fails with "failed to find the current suite".
 exits 0 (pass), 1 (a connector is below 0.80) or 2 (judge not validated, so
 no result). See [evals/README.md](evals/README.md).
 
+## Contributing
+
+Work starts as a GitHub issue: pick the **Feature or change** or **Bug**
+form. A maintainer triages it into a planned change (`/rag-triage`), then
+it's built task by task into a draft PR (`/rag-quick`). The issue is the
+source of truth throughout. The loops, labels and rules are in
+[AGENTS.md](AGENTS.md#workflow); review uses [REVIEW.md](REVIEW.md).
+Use synthetic data only, never real documents or personal data.
+
 ## Learn more
 
 - [docs/architecture/overview.md](docs/architecture/overview.md) - how the system fits together: flows, boundary rules, data model

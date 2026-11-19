@@ -1,0 +1,26 @@
+// Dev servers Claude Desktop (Code tab) can start to preview and verify a change.
+// Fields per https://code.claude.com/docs/en/desktop ("Configure preview servers").
+// No secrets here: this file is committed. Model settings come from your environment or .env.
+// Postgres must be running first: `docker compose up -d db`.
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "5173", "--strictPort"],
+      "cwd": "frontend",
+      "port": 5173,
+      "autoPort": false
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "fastapi", "dev", "src/insight_rag/api/app.py", "--port", "8000"],
+      "cwd": "backend",
+      // The Vite dev proxy expects the API on exactly :8000.
+      "port": 8000,
+      "autoPort": false
+    }
+  ]
+}

@@ -19,7 +19,15 @@ it, otherwise ask.
    `design.md` links.
 3. Pick the task: the one given, else the first unchecked `- [ ]`.
 4. Read the code the task touches. Look for existing helpers, types, and
-   patterns to reuse before planning anything new.
+   patterns to reuse before planning anything new. **Read the matching
+   guide before planning**, one per area the task touches, and follow its
+   rules in the plan:
+   - `frontend/` → `docs/guides/frontend-development-guide.md`
+   - `backend/` → `docs/guides/backend-development-guide.md`
+   - a connector, or `connectors/` → `docs/guides/connector-development-guide.md`
+
+   Also read `docs/architecture/overview.md` when the task crosses
+   modules. Name the guides you read in the plan's Scope section.
 5. Write `openspec/changes/<name>/plan.md` (overwrite; one task at a time):
 
    ```markdown

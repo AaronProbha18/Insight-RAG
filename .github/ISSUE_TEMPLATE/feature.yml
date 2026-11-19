@@ -1,0 +1,63 @@
+name: Feature or change
+description: Something new or different the system should do. Triage turns this into a planned change.
+title: "[feature] "
+labels: ["type:feature", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is the **source of truth** for the work. Triage links an OpenSpec change to it,
+        and the PR closes it. Use **synthetic data only**: no real documents, people or credentials.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who is affected and what can't they do today? One or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What is true when this is done? Describe behaviour, not implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: One scenario per item. These become spec scenarios and tests.
+      value: |
+        - GIVEN …
+          WHEN …
+          THEN …
+    validations:
+      required: true
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals
+      description: What is explicitly out of scope.
+  - type: checkboxes
+    id: area
+    attributes:
+      label: Area
+      description: Tick every area this touches. Triage applies the matching area:* labels.
+      options:
+        - label: backend (API, ingestion, retrieval, graph, models)
+        - label: frontend (chat UI)
+        - label: connector
+        - label: evals (golden sets, judge, runner)
+        - label: docs
+        - label: infra (Docker, CI, tooling)
+  - type: dropdown
+    id: answer-quality
+    attributes:
+      label: Can this change answer quality?
+      description: Retrieval, chunking, embeddings, prompts, thresholds, connectors or ingestion. "Yes" means an eval run is required.
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true

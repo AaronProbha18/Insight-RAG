@@ -1,0 +1,49 @@
+name: Bug
+description: Something does not work as documented.
+title: "[bug] "
+labels: ["type:bug", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reproduce with the synthetic corpus in `evals/connectors/` where you can.
+        **Never attach real documents, personal data, logs with secrets, or `.env` contents.**
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: Include the error message or HTTP status. Redact anything sensitive.
+    validations:
+      required: true
+  - type: checkboxes
+    id: area
+    attributes:
+      label: Area
+      options:
+        - label: backend
+        - label: frontend
+        - label: connector
+        - label: evals
+        - label: docs
+        - label: infra
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Docker or dev mode, OS, model (e.g. ollama:llama3.1:8b), commit.
