@@ -34,15 +34,22 @@ trivial tasks.
   pass `--schema rag-rapid` only when AGENTS.md's tier rule allows it
 - `/opsx:archive` - after merge-ready evidence exists
 
-## Implementation loop (project skills)
+## Loops (project skills)
 
-| Command | Edits code? | Does |
-| --- | --- | --- |
-| `/rag-plan <change>` | No | Picks the next unchecked task, writes a short plan, waits for approval |
-| `/rag-execute <change>` | Yes | Implements exactly that task, self-reviews, ticks the checkbox |
-| `/rag-verify <change>` | Evidence only | Runs all checks + eval, writes `verification.md` |
+GitHub issues are the source of truth (see AGENTS.md Workflow). `gh`
+must be signed in to the repo owner's account.
 
-Run plan -> execute once per checkbox, then verify once at the end.
+| Command | Loop | Edits code? | Does |
+| --- | --- | --- | --- |
+| `/rag-triage <issue#>` | triage | No | Preflight the issue, explore, propose, until `tasks.md` is complete; label it ready |
+| `/rag-quick <issue#>` | developer | Via stages | Preflight (branch, labels), then plan -> execute -> commit per task, verify, PR |
+| `/rag-plan <change>` | developer | No | Picks the next unchecked task, writes a short plan, waits for approval |
+| `/rag-execute <change>` | developer | Yes | Implements exactly that task, self-reviews, ticks the checkbox |
+| `/rag-verify <change>` | developer | Evidence only | Runs all checks + eval, writes `verification.md` |
+| `/rag-pr <issue#>` | developer | PR only | Drafts the PR from the template; creates a **draft** PR on approval |
+
+`/rag-quick` chains plan -> execute once per checkbox, then verify and PR;
+the stage skills also work on their own.
 `/opsx:apply` still works for `rag-rapid` changes, where the loop is overkill.
 
 ## Reviewing

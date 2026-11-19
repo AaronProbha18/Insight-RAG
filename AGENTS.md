@@ -57,10 +57,30 @@ docker-compose.yml         db (pgvector) + app
 
 ## Workflow
 
+**GitHub issues are the source of truth for work.** Every change starts as
+an issue (feature or bug form in `.github/ISSUE_TEMPLATE/`), every OpenSpec
+proposal starts with `Issue: #N`, and every PR says `Closes #N`. If scope
+changes, the issue is updated, not just the code. Two loops share it:
+
 ```text
-idea -> /opsx:explore -> /opsx:propose (pick tier) -> per tasks.md checkbox:
-rag-plan -> rag-execute -> ... -> rag-verify -> PR (human merges) -> /opsx:archive
+TRIAGE (lead)      issue #N --/rag-triage N--> preflight (gh issue view) -> explore
+                   -> propose -> until tasks.md complete -> label status:ready-for-dev
+DEVELOPER          /rag-quick N --> preflight (branch, status:in-progress)
+                   -> [rag-plan -> approve -> rag-execute -> commit] x each task
+                   -> rag-verify -> rag-pr (draft PR, Closes #N) -> human review + merge
+                   -> /opsx:archive
 ```
+
+Labels (`.github/labels.yml`, applied with `sh scripts/sync_labels.sh`)
+carry the handoff:
+
+| Group | Labels | Meaning |
+| --- | --- | --- |
+| `type:*` | feature, bug, chore, docs | what kind of work; issue and PR |
+| `area:*` | backend, frontend, connector, evals, docs, infra | where it lands; issue and PR |
+| `status:*` | needs-triage -> ready-for-dev -> in-progress; blocked | where the issue is in the loops; issues only |
+| `track:*` | standard, rapid, chore | the triage route (rule 1 / rule 2); issue and PR |
+| `answer-quality` | | can change answers: an eval run is required before merge |
 
 1. **Tier.** `rag-standard` is the default (proposal -> design -> specs +
    eval-plan -> tasks -> verification). `rag-rapid` (proposal -> tasks ->
@@ -119,6 +139,7 @@ npm test
 docker compose up -d db            # Postgres + pgvector for dev and tests
 docker compose up --build          # full app on :8000
 sh scripts/smoke.sh                # health, one upload, one chat
+sh scripts/sync_labels.sh          # create/update GitHub labels from .github/labels.yml
 
 # evals (from backend/; needs model env vars, see README)
 uv run insight-rag-eval [--connectors pdf] [--sample N]
