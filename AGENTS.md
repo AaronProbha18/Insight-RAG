@@ -50,7 +50,7 @@ docs/adr/                  architecture decision records - why things are the wa
 docs/architecture/         overview.md: components, flows, boundary rules, data model
 docs/guides/               backend, frontend and connector development guides
 openspec/                  specs (living), changes (in flight), schemas (our workflow)
-.claude/                   Claude Code skills, commands, hooks
+.claude/                   Claude Code skills, commands, hooks; launch.json (dev servers for Desktop preview)
 Dockerfile                 one image: built UI + API
 docker-compose.yml         db (pgvector) + app
 ```
