@@ -98,7 +98,7 @@ carry the handoff:
    `NNNN-kebab-title.md`, Status: Proposed / Accepted / Superseded by NNNN).
    `design.md` links to them. An Accepted ADR is followed or superseded,
    never silently contradicted.
-6. **Humans merge.** Agents may draft commits and PRs; they never merge,
+6. **Humans merge.** Enforced on `main` by `.github/rulesets/main.json`: PR + green CI, squash only, no force-push. Agents may draft commits and PRs; they never merge,
    force-push, or bypass checks.
 7. **Docs move with the code.** A change that alters behaviour, a public
    contract, a boundary rule, or a command updates
@@ -150,4 +150,7 @@ uv run --no-project --with reportlab --with python-docx python evals/generate_co
 openspec list                      # active changes
 openspec schema validate <name>    # after editing a schema
 openspec validate --all            # before opening a PR
+
+# GitHub (repo admin, from repo root; re-run after editing the files)
+sh scripts/apply_rulesets.sh       # branch ruleset for main + squash-only merging
 ```
