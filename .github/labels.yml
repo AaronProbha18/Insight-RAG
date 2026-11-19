@@ -1,0 +1,20 @@
+# Single source of truth for GitHub labels. Apply with: sh scripts/sync_labels.sh
+# Used by the issue forms and the rag-triage / rag-quick / rag-pr skills.
+- {name: "type:feature", color: "1d76db", description: "New or changed behaviour"}
+- {name: "type:bug", color: "d73a4a", description: "Does not work as documented"}
+- {name: "type:chore", color: "cfd3d7", description: "Repo-internal: CI, tooling, deps"}
+- {name: "type:docs", color: "0075ca", description: "Documentation only"}
+- {name: "area:backend", color: "5319e7", description: "API, ingestion, retrieval, graph, models"}
+- {name: "area:frontend", color: "5319e7", description: "Chat UI"}
+- {name: "area:connector", color: "5319e7", description: "Connector contract or a connector"}
+- {name: "area:evals", color: "5319e7", description: "Golden sets, judge, eval runner"}
+- {name: "area:docs", color: "5319e7", description: "Architecture overview, guides, README"}
+- {name: "area:infra", color: "5319e7", description: "Docker, CI, scripts, agent tooling"}
+- {name: "status:needs-triage", color: "fbca04", description: "Waiting for /rag-triage"}
+- {name: "status:ready-for-dev", color: "0e8a16", description: "Change planned; run /rag-quick"}
+- {name: "status:in-progress", color: "c5def5", description: "A developer loop is running"}
+- {name: "status:blocked", color: "b60205", description: "Waiting on a decision or dependency"}
+- {name: "track:standard", color: "bfdadc", description: "rag-standard change (design, specs, eval plan)"}
+- {name: "track:rapid", color: "bfdadc", description: "rag-rapid change (proposal, tasks)"}
+- {name: "track:chore", color: "bfdadc", description: "No OpenSpec change (AGENTS.md rule 2)"}
+- {name: "answer-quality", color: "e99695", description: "Can change answers: eval run required before merge"}
