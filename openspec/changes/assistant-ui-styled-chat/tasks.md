@@ -22,7 +22,7 @@
 
 ## 5. Docs
 
-- [ ] 5.1 Update `docs/guides/frontend-development-guide.md` (§1 layout, §4.1 kit not primitives, §6 Tailwind + tokens, §7 test approach, §9 table), the `REVIEW.md` frontend checklist, and the frontend mentions in `docs/architecture/overview.md`.
+- [x] 5.1 Update `docs/guides/frontend-development-guide.md` (§1 layout, §4.1 kit not primitives, §6 Tailwind + tokens, §7 test approach, §9 table), the `REVIEW.md` frontend checklist, and the frontend mentions in `docs/architecture/overview.md`.
 
 ## 6. Manual check
 

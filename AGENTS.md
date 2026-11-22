@@ -15,7 +15,7 @@ LangGraph agent, behind a chat UI.
 | --- | --- | --- |
 | Agent / orchestration | Python, LangGraph (embedded in FastAPI) | - |
 | API | FastAPI | - |
-| Frontend | React + Vite, assistant-ui | - |
+| Frontend | React + Vite, assistant-ui styled kit (vendored), Tailwind v4 | 0003 (Proposed) |
 | Connectors | Pluggable, entry-point discovered | 0001 |
 | Store | Postgres + pgvector | 0002 (Proposed) |
 | Open source | MIT | - |
@@ -40,9 +40,10 @@ backend/                   Python package `insight_rag` (uv project)
     evals/                 golden + label loaders, judge, scoring, runner (insight-rag-eval)
   migrations/              Alembic, hand-written SQL
   tests/                   pytest; `db` marker needs Postgres, `llm` needs Ollama
-frontend/                  Vite + React + assistant-ui
+frontend/                  Vite + React + assistant-ui + Tailwind v4
   src/chat/                SSE parser, assistant-ui adapter, citations
   src/upload/              upload control
+  src/components/          vendored assistant-ui kit + shadcn ui (trimmed, ADR 0003)
 evals/                     eval DATA only: corpus-src/, connectors/<name>/{corpus,golden.yaml},
                            judge/labelled.yaml, reports/ (gitignored)
 scripts/smoke.sh           full-stack smoke test

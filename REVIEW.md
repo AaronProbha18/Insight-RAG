@@ -51,11 +51,15 @@ Rules: [frontend guide](docs/guides/frontend-development-guide.md).
 
 - [ ] Only `chat/adapter.ts` calls `/chat`, and only `chat/sse.ts` parses
       SSE (§2) *(CI: `wire-format.test.ts`)*.
-- [ ] Colours come only from tokens, and every text/background pair meets
-      4.5:1 in **both** themes (§6) *(CI: `design-tokens.test.ts`)*. A new
-      pair the stylesheet uses is added to that test's `PAIRS`.
+- [ ] Colours come only from tokens, used through token utilities
+      (`bg-background`, `text-muted-foreground`), never literals or palette
+      classes, and every text/background pair meets 4.5:1 in **both**
+      themes (§6) *(CI: `design-tokens.test.ts`)*. A new pair the UI uses
+      is added to that test's `PAIRS`.
+- [ ] Vendored kit code (`src/components/`) stays trimmed to what `/chat`
+      can produce ([ADR 0003](docs/adr/0003-styled-chat-kit.md), §4.1).
 - [ ] Every new control has an accessible name and a visible
-      `:focus-visible` outline, and works by keyboard (§5). Hiding or
+      `focus-visible:` outline or ring, and works by keyboard (§5). Hiding or
       disabling a button **is not access control**: anything that must not
       happen is refused by the backend.
 - [ ] 5xx responses show generic text, never backend details (§3.2).
