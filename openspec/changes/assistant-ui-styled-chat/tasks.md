@@ -18,7 +18,7 @@
 
 ## 4. Upload
 
-- [ ] 4.1 Restyle `Upload.tsx` with the kit, keeping the labelled `<input type="file">` and the `role="status"` region; update `Upload.test.tsx`.
+- [x] 4.1 Restyle `Upload.tsx` with the kit, keeping the labelled `<input type="file">` and the `role="status"` region; update `Upload.test.tsx`.
 
 ## 5. Docs
 

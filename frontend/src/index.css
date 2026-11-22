@@ -73,7 +73,3 @@
   body { @apply bg-background text-foreground; }
 }
 body { margin: 0; }
-.upload { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.upload input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.upload-status { margin: 6px 0 0; min-height: 1.2em; font-size: 0.9em; }
-.upload-status.unsupported, .upload-status.unreadable, .upload-status.error { color: var(--destructive); }
