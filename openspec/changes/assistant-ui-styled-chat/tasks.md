@@ -1,6 +1,6 @@
 ## 1. Spike and decision record
 
-- [ ] 1.1 Spike on a throwaway branch: run the assistant-ui CLI against `frontend/` and record in `design.md` the exact install command, Tailwind version, `components.json`/`@/` alias needs, added packages, dark-mode mechanism, markdown/GFM support, and whether kit components render under `renderToStaticMarkup`; resolve every UNVERIFIED in D2-D7. No spike code is merged.
+- [x] 1.1 Spike on a throwaway branch: run the assistant-ui CLI against `frontend/` and record in `design.md` the exact install command, Tailwind version, `components.json`/`@/` alias needs, added packages, dark-mode mechanism, markdown/GFM support, and whether kit components render under `renderToStaticMarkup`; resolve every UNVERIFIED in D2-D7. No spike code is merged.
 - [ ] 1.2 Write `docs/adr/0003-styled-chat-kit.md` (Proposed) from D1-D3 and the spike findings; link it from `design.md`.
 
 ## 2. Styling foundation
