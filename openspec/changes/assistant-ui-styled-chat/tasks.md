@@ -5,8 +5,8 @@
 
 ## 2. Styling foundation
 
-- [ ] 2.1 Add the Tailwind + shadcn setup per the spike (deps, config, `@/` alias in `tsconfig.app.json` and `vite.config.ts` if required); `index.css` becomes the Tailwind entry with shadcn default tokens and the dark block bound to `prefers-color-scheme`. The existing UI still builds; `npm run lint` and `npm run build` pass.
-- [ ] 2.2 Rewrite `design-tokens.test.ts` for the new token format: no colour literals outside the token blocks, >= 4.5:1 for every text/background pair used, both themes. Fix any failing default token, with the measured ratio in a comment.
+- [x] 2.1 Add the Tailwind + shadcn setup per the spike (deps, `components.json`, `@/` alias in both tsconfigs and `vite.config.ts`, Tailwind plugin, the three `@import`s at the top of `index.css`). No token changes. The existing UI still builds; `npm run lint`, `npm run build` and `npm test` pass.
+- [ ] 2.2 Swap the tokens to the shadcn `neutral` set (light `:root`, dark under `prefers-color-scheme`) with the `@theme inline` mapping and `@layer base`, point the old class rules at the new token names, and rewrite `design-tokens.test.ts` for `oklch()`: no colour literals outside the token blocks, >= 4.5:1 for every text/background pair used, both themes. Fix any failing default token, with the measured ratio in a comment.
 
 ## 3. Chat thread
 
