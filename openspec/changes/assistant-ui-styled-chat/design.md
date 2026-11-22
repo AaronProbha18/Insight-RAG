@@ -59,6 +59,7 @@
 ### D6. Tests stay in Node without jsdom
 
 - **Choice**: Static-markup tests (`renderToStaticMarkup`) assert structure and accessible names for the empty state and suggestions, markdown output, citations, action-bar buttons, the composer and upload. The spike confirmed the kit's `Thread` renders this way with `useLocalRuntime(chatAdapter)`. Interactive behaviour the kit owns (stop, copy, regenerate, scroll) is checked by a manual keyboard and mouse pass recorded in `verification.md`.
+- **Finding (task 3.3)**: `useLocalRuntime(adapter, { initialMessages })` loads messages after the first render, so static markup of the whole thread shows none. Tests render one part with `TextMessagePartProvider` (exported by `@assistant-ui/react`) or our own components with plain props, not the populated thread.
 - **Alternatives**: Add jsdom and testing-library: contradicts guide §7.1; a separate decision if ever needed.
 - **Why**: Keeps the existing test approach.
 - **ADR**: none (local to this change).

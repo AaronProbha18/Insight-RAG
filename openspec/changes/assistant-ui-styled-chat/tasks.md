@@ -12,7 +12,7 @@
 
 - [x] 3.1 Vendor the kit thread components from the saved `registry/*.json` items into `frontend/src/components/` and trim `thread.aui.tsx` per D1, replace the primitive markup in `App.tsx`, and delete the superseded `index.css` rules; test: static markup shows the composer with an accessible name and the Send control.
 - [x] 3.2 Empty state: welcome text and synthetic, corpus-agnostic suggested questions; test: empty-thread markup contains the welcome and >= 1 suggestion with an accessible name.
-- [ ] 3.3 Markdown answers through the kit's markdown component (add `remark-gfm` if the spike says it is missing); test: list, code block and table render as elements, and `<script>` in text creates no element.
+- [x] 3.3 Markdown answers through the kit's markdown component (add `remark-gfm` if the spike says it is missing); test: list, code block and table render as elements, and `<script>` in text creates no element.
 - [ ] 3.4 Render `Citations` inside the generated assistant message from `metadata.custom.citations`, restyled with the kit; update `Citations.test.tsx`: sources render with title and locator in `<details>`, an empty list renders nothing.
 - [ ] 3.5 Action bar and running state: Copy and Regenerate on assistant messages, Stop while running, a scroll-to-bottom control; test: static markup exposes each control with an accessible name.
 
