@@ -99,4 +99,4 @@ none
 - Vendored code drifts from upstream; updating means re-fetching registry items and re-applying the trim.
 - Vendored code may raise oxlint findings; fix them, or disable narrowly per file with a reason.
 - `"use client"` directives in kit files are no-ops under Vite; left as vendored.
-- OPEN QUESTION: the wording of the suggested questions. Default: fixed, generic, corpus-agnostic examples; confirm during task 3.2.
+- RESOLVED (task 3.2): welcome suggestions are three fixed, corpus-agnostic examples ("Summarise", "Find", "Explain") supplied with `AuiConfig({ suggestions: Suggestions([...]) })` on `AssistantRuntimeProvider`; the static-markup test confirmed the kit reads that scope.
