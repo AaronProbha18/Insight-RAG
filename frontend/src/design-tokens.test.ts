@@ -5,14 +5,24 @@ import { fileURLToPath } from 'node:url'
 
 // Guards the styling rules in docs/guides/frontend-development-guide.md §6.
 const css = readFileSync(fileURLToPath(new URL('./index.css', import.meta.url)), 'utf-8')
-const COLOUR = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/
+const COLOUR = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(/
 
-/** Text-on-background pairs the stylesheet actually uses. */
+/**
+ * Text-on-background pairs the stylesheet and the kit components use.
+ * Semi-transparent backgrounds (e.g. `bg-muted/40`) are not measured: their
+ * contrast depends on what is painted behind them.
+ */
 const PAIRS: [text: string, background: string][] = [
-  ['--fg', '--bg'], // page text
-  ['--fg', '--muted'], // assistant messages
-  ['--on-accent', '--accent'], // user messages, Send button
-  ['--error', '--bg'], // upload errors
+  ['--foreground', '--background'], // page text
+  ['--foreground', '--muted'], // assistant messages, user bubble
+  ['--muted-foreground', '--background'], // secondary text
+  ['--muted-foreground', '--muted'], // secondary text on muted surfaces
+  ['--primary-foreground', '--primary'], // primary buttons
+  ['--secondary-foreground', '--secondary'], // secondary buttons
+  ['--accent-foreground', '--accent'], // hovered items
+  ['--popover-foreground', '--popover'], // menus
+  ['--background', '--foreground'], // tooltips
+  ['--destructive', '--background'], // errors
 ]
 
 function tokenBlocks(source: string): { light: string; dark: string; rest: string } {
@@ -22,19 +32,31 @@ function tokenBlocks(source: string): { light: string; dark: string; rest: strin
   return { light: light[1], dark: dark[1], rest: source.replace(light[0], '').replace(dark[0], '') }
 }
 
-function tokens(block: string): Record<string, string> {
-  return Object.fromEntries([...block.matchAll(/(--[\w-]+):\s*(#[0-9a-fA-F]{6})\b/g)].map((m) => [m[1], m[2]]))
+/** `--name: oklch(L C H)` -> [L, C, H]. Tokens with alpha are skipped: see PAIRS. */
+function tokens(block: string): Record<string, [number, number, number]> {
+  return Object.fromEntries(
+    [...block.matchAll(/(--[\w-]+):\s*oklch\(([\d.]+)\s+([\d.]+)\s+([\d.]+)\)/g)].map((m) => [
+      m[1],
+      [Number(m[2]), Number(m[3]), Number(m[4])],
+    ]),
+  )
 }
 
-function luminance(hex: string): number {
-  const [r, g, b] = [1, 3, 5].map((i) => {
-    const c = parseInt(hex.slice(i, i + 2), 16) / 255
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-  })
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+/** WCAG relative luminance of an OKLCH colour, via OKLab -> linear sRGB (Ottosson). */
+export function luminance([L, C, H]: [number, number, number]): number {
+  const a = C * Math.cos((H * Math.PI) / 180)
+  const b = C * Math.sin((H * Math.PI) / 180)
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
+  const clamp = (x: number) => Math.min(1, Math.max(0, x))
+  const r = clamp(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s)
+  const g = clamp(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s)
+  const bl = clamp(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s)
+  return 0.2126 * r + 0.7152 * g + 0.0722 * bl
 }
 
-export function contrast(a: string, b: string): number {
+export function contrast(a: [number, number, number], b: [number, number, number]): number {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x)
   return (hi + 0.05) / (lo + 0.05)
 }
@@ -60,7 +82,9 @@ describe('design tokens', () => {
   })
 
   it('computes contrast like the WCAG formula', () => {
-    expect(contrast('#000000', '#ffffff')).toBeCloseTo(21, 5)
-    expect(contrast('#c0392b', '#16181c')).toBeLessThan(4.5) // the dark-mode bug this guard exists for
+    expect(luminance([1, 0, 0])).toBeCloseTo(1, 5)
+    expect(contrast([0, 0, 0], [1, 0, 0])).toBeCloseTo(21, 5)
+    // the shadcn default this guard caught: light muted-foreground on muted
+    expect(contrast([0.556, 0, 0], [0.97, 0, 0])).toBeLessThan(4.5)
   })
 })
