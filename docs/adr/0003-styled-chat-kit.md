@@ -62,3 +62,10 @@ test approach.
   from a browser instead. The CLI path still works where the network allows.
 - The production bundle grows (Tailwind output, Base UI, icons); the change's
   verification records before and after sizes.
+- Accepted audit finding (2026-11-23): `npm audit` reports 4 moderate
+  issues from one chain, `shadcn` -> `ts-morph` -> `@ts-morph/common` ->
+  `minimatch` (GHSA-g3hv-75wg-m249). `shadcn` is a dev dependency used only
+  for `shadcn/tailwind.css` at build time and for its CLI; nothing in the
+  chain ships. `npm audit fix --force` would downgrade `shadcn` to 1.0.0, so
+  it is not used. Revisit when a `shadcn` release moves to a fixed
+  `ts-morph`.
