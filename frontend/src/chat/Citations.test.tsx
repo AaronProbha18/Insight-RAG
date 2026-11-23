@@ -22,10 +22,10 @@ describe('Citations', () => {
     )
 
     expect(html).toContain('aria-label="Sources"')
-    expect(html.match(/<li>/g)).toHaveLength(2)
-    expect(html).toContain('<summary>[c1] Returns Policy — p. 1</summary>')
-    expect(html).toContain('<details><summary>[c2] Employee Handbook — Leave &gt; Annual Leave</summary>')
-    expect(html).toContain('<blockquote>Most items can be returned within 14 days.</blockquote>')
+    expect(html.match(/<li[ >]/g)).toHaveLength(2)
+    expect(html).toMatch(/<details><summary[^>]*>\[c1\] Returns Policy — p\. 1<\/summary>/)
+    expect(html).toMatch(/<details><summary[^>]*>\[c2\] Employee Handbook — Leave &gt; Annual Leave<\/summary>/)
+    expect(html).toMatch(/<blockquote[^>]*>Most items can be returned within 14 days\.<\/blockquote>/)
   })
 
   it('renders nothing for an empty list', () => {

@@ -1,0 +1,29 @@
+## 1. Spike and decision record
+
+- [x] 1.1 Spike on a throwaway branch: run the assistant-ui CLI against `frontend/` and record in `design.md` the exact install command, Tailwind version, `components.json`/`@/` alias needs, added packages, dark-mode mechanism, markdown/GFM support, and whether kit components render under `renderToStaticMarkup`; resolve every UNVERIFIED in D2-D7. No spike code is merged.
+- [x] 1.2 Write `docs/adr/0003-styled-chat-kit.md` (Proposed) from D1-D3 and the spike findings; link it from `design.md`.
+
+## 2. Styling foundation
+
+- [x] 2.1 Add the Tailwind + shadcn setup per the spike (deps, `components.json`, `@/` alias in both tsconfigs and `vite.config.ts`, Tailwind plugin, the three `@import`s at the top of `index.css`). No token changes. The existing UI still builds; `npm run lint`, `npm run build` and `npm test` pass.
+- [x] 2.2 Swap the tokens to the shadcn `neutral` set (light `:root`, dark under `prefers-color-scheme`) with the `@theme inline` mapping and `@layer base`, point the old class rules at the new token names, and rewrite `design-tokens.test.ts` for `oklch()`: no colour literals outside the token blocks, >= 4.5:1 for every text/background pair used, both themes. Fix any failing default token, with the measured ratio in a comment.
+
+## 3. Chat thread
+
+- [x] 3.1 Vendor the kit thread components from the saved `registry/*.json` items into `frontend/src/components/` and trim `thread.aui.tsx` per D1, replace the primitive markup in `App.tsx`, and delete the superseded `index.css` rules; test: static markup shows the composer with an accessible name and the Send control.
+- [x] 3.2 Empty state: welcome text and synthetic, corpus-agnostic suggested questions; test: empty-thread markup contains the welcome and >= 1 suggestion with an accessible name.
+- [x] 3.3 Markdown answers through the kit's markdown component (add `remark-gfm` if the spike says it is missing); test: list, code block and table render as elements, and `<script>` in text creates no element.
+- [x] 3.4 Render `Citations` inside the generated assistant message from `metadata.custom.citations`, restyled with the kit; update `Citations.test.tsx`: sources render with title and locator in `<details>`, an empty list renders nothing.
+- [x] 3.5 Action bar and running state: Copy and Regenerate on assistant messages, Stop while running, a scroll-to-bottom control; test: static markup exposes each control with an accessible name.
+
+## 4. Upload
+
+- [x] 4.1 Restyle `Upload.tsx` with the kit, keeping the labelled `<input type="file">` and the `role="status"` region; update `Upload.test.tsx`.
+
+## 5. Docs
+
+- [x] 5.1 Update `docs/guides/frontend-development-guide.md` (§1 layout, §4.1 kit not primitives, §6 Tailwind + tokens, §7 test approach, §9 table), the `REVIEW.md` frontend checklist, and the frontend mentions in `docs/architecture/overview.md`.
+
+## 6. Manual check
+
+- [x] 6.1 Manual pass at 375px and desktop, light and dark OS theme, keyboard only: upload, suggestion, ask, stop, copy, regenerate, scroll-to-bottom, open a source; record the results and the before/after `npm run build` bundle size for `verification.md`.

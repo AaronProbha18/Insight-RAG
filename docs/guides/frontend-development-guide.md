@@ -25,13 +25,22 @@ backend side of the `/chat` contract is in the
 
 ```text
 src/
-  App.tsx              composes features; no logic
+  App.tsx              composes Upload + Thread, welcome suggestions; no logic
   chat/   sse.ts       SSE parser
           adapter.ts   assistant-ui adapter for POST /chat
           Citations.tsx
   upload/ api.ts       POST /documents -> user-facing outcome
           Upload.tsx
+  components/
+    assistant-ui/elements/  vendored kit: thread.aui.tsx, markdown-text.tsx,
+                            tooltip-icon-button.tsx (ADR 0003)
+    ui/                     vendored shadcn: button.tsx, tooltip.tsx
+  lib/utils.ts              vendored `cn` helper
+  hooks/                    vendored hooks (use-copy-to-clipboard.ts)
 ```
+
+Vendored files are imported through the `@/` alias (`@/components/...`),
+set in both tsconfigs and `vite.config.ts`.
 
 **1.2 File names must differ by more than case.** `upload.ts` next to
 `Upload.tsx` collides on Windows and macOS, whose filesystems ignore case,
@@ -81,6 +90,14 @@ network chunks:
     while ((end = buffer.indexOf('\n\n')) >= 0) {
 ```
 
+**2.6 Welcome suggestions are an `AuiConfig` scope** on the provider, not
+markup. They are generic so they fit any uploaded documents:
+
+```tsx
+// ✅ App.tsx
+    <AssistantRuntimeProvider runtime={runtime} config={config}>
+```
+
 ## 3. Calling the API
 
 **3.1 Relative paths only** (`/chat`, `/documents`). In Docker, FastAPI
@@ -104,9 +121,23 @@ Never show 5xx details:
 
 ## 4. Components
 
-**4.1 assistant-ui primitives, not a styled kit.** `ThreadPrimitive`,
-`MessagePrimitive` and `ComposerPrimitive` with our own CSS. A styled kit
-(shadcn copy-in) can come when the design needs it.
+**4.1 The assistant-ui styled kit, vendored and trimmed**
+([ADR 0003](../adr/0003-styled-chat-kit.md)). The kit is shadcn registry
+items (`base-nova` style on Base UI), copied into `src/components/`. The
+copies are ours: edit them directly. `thread.aui.tsx` is trimmed to what
+the `/chat` stream can produce, so there is no attachment, tool, reasoning,
+voice, branch or edit UI:
+
+```tsx
+// ✅ components/assistant-ui/elements/thread.aui.tsx
+// Vendored from the assistant-ui registry (base-nova `thread`) and trimmed to
+```
+
+To add a kit part, save its registry item (`npx assistant-ui@<version> add
+<item>`, or the JSON from `https://r.assistant-ui.com/...` in a browser
+where the CLI can't reach it), copy each file's `content` to the path the
+CLI would use, and trim it the same way. `components.json` records the
+shadcn config the CLI expects.
 
 **4.2 Native elements first.** `<details>` for expandable citations, and a
 real `<input type="file">` inside a `<label>`. Both are keyboard-operable
@@ -123,26 +154,41 @@ for an empty list, so abstentions show no sources without a special case:
 ## 5. Accessibility
 
 - **Every control has an accessible name:** the question box via
-  `aria-label`, the file input via its `<label>`, Send via its text, and
-  each source via its `<summary>`. *Checked by* `src/App.test.tsx`.
+  `aria-label` ("Ask a question about your documents"), the file input via
+  its `<label>`, icon buttons via `aria-label` or the hidden tooltip text
+  ("Send message", "Stop generating", "Copy", "Regenerate", "Scroll to
+  bottom"), suggestions via their text, and each source via its
+  `<summary>`. *Checked by* `src/App.test.tsx` and
+  `components/assistant-ui/elements/thread.aui.test.tsx`.
 - **Async results are announced:** the upload outcome lives in a
   `role="status"` / `aria-live="polite"` region.
-- **Focus is always visible:** each control has a `:focus-visible`
-  outline in `index.css`.
-- **Keyboard-only use works:** upload, ask and open a source without a
-  mouse. Check this by hand whenever you add a control.
+- **Focus is always visible:** controls use `focus-visible:` outline or
+  ring utilities (the kit's buttons have them built in).
+- **Keyboard-only use works:** upload, ask, stop, copy, regenerate and open
+  a source without a mouse. Check this by hand whenever you add a control.
 
 ## 6. Styling
 
-- Plain CSS in `src/index.css`. There's no CSS framework yet.
-- **Every colour is a token** on `:root` (`--bg`, `--fg`, `--muted`,
-  `--accent`, `--border`, `--on-accent`, `--error`), redefined under
-  `prefers-color-scheme: dark`. Rules use `var(--token)` only; there are
-  no colour literals outside the two token blocks.
+- **Tailwind CSS v4** (`@tailwindcss/vite`). `src/index.css` holds the
+  imports, the tokens, the `@theme inline` mapping and the base layer, not
+  component rules; components style themselves with utility classes.
+- **Every colour is a token**: shadcn's `neutral` set as `oklch()` values on
+  `:root`, redefined under `prefers-color-scheme: dark`. `@theme inline`
+  maps each to a utility (`--color-background: var(--background)`), so
+  components use `bg-background`, `text-muted-foreground`, `border-border`,
+  and never raw colours or palette classes like `amber-500`. There are no
+  colour literals outside the two token blocks.
+- **Dark mode follows the OS.** There is no `@custom-variant dark` line, so
+  Tailwind's `dark:` variant is `prefers-color-scheme`. Don't add a `.dark`
+  class toggle without an ADR.
 - **Each text/background pair meets WCAG AA (≥ 4.5:1) in both themes.**
-  The measured ratio sits in a comment next to the token. When you add or
-  change a token, measure both themes; a colour that passes in light mode
-  can fail in dark mode (white on the dark-mode accent measured 2.7:1).
+  An adjusted token carries its measured ratio in a comment. When you add
+  or change a token, measure both themes; a default can fail:
+
+```css
+/* ✅ index.css */
+  --muted-foreground: oklch(0.54 0 0); /* shadcn default 0.556 was 4.34:1 on --muted; this is 4.64:1 (5.06:1 on --background) */
+```
 
 ## 7. Testing
 
@@ -154,6 +200,19 @@ stateless enough to check as static markup with React's own
 // ✅ chat/Citations.test.tsx
     expect(renderToStaticMarkup(<Citations citations={[]} />)).toBe('')
 ```
+
+`useLocalRuntime(adapter, { initialMessages })` loads messages after the
+first render, so a static render of the thread shows none. Render a
+populated thread with `ReadonlyThreadProvider`, or one answer with
+`TextMessagePartProvider`:
+
+```tsx
+// ✅ components/assistant-ui/elements/markdown-text.test.tsx
+    <TextMessagePartProvider text={text} isRunning={false}>
+```
+
+A read-only thread can't run or cancel, so Stop, Copy (the clipboard),
+Regenerate and scrolling are checked by hand in a browser.
 
 **7.2 Network code is tested with a stubbed `fetch`** that returns real
 `Response` objects, so status codes and streaming bodies behave as they do
@@ -191,6 +250,7 @@ find the current suite".
 | Show generic text for 5xx | Show backend error details to users |
 | Use native `<details>`, `<label>`, `<input>` | Build custom widgets for the same thing |
 | Give every control a name and a visible focus | Rely on placeholder text as a label |
-| Use CSS tokens | Add new hard-coded colours |
+| Use token utilities (`bg-background`, `text-muted-foreground`) | Add colour literals or palette classes (`amber-500`) |
+| Keep vendored kit parts trimmed to what `/chat` sends | Add kit parts for features the backend lacks |
 | Test with `renderToStaticMarkup` and stubbed `fetch` | Add jsdom for markup checks |
 | Name files so they differ by more than case | Put `upload.ts` next to `Upload.tsx` |

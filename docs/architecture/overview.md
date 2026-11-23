@@ -4,8 +4,9 @@ insight-rag answers questions over documents you upload, citing where each
 answer came from or saying the documents don't cover it. Content enters
 through **connectors**, is chunked and embedded into **Postgres +
 pgvector**, and is answered by a small **LangGraph** graph that runs inside
-the **FastAPI** process. A React + **assistant-ui** chat is served from the
-same origin.
+the **FastAPI** process. A React + **assistant-ui** chat (the vendored
+styled kit on Tailwind, [ADR 0003](../adr/0003-styled-chat-kit.md)) is
+served from the same origin.
 
 ```mermaid
 flowchart LR
@@ -34,7 +35,7 @@ goes:
 | a file connector | its own package, registered under the `insight_rag.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/insight_rag/connectors/builtin/` |
 | an API route | `backend/src/insight_rag/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
-| a UI component | `frontend/src/chat/` or `frontend/src/upload/`, or a new folder per feature |
+| a UI component | `frontend/src/chat/` or `frontend/src/upload/`, or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
 
 ## Flows
