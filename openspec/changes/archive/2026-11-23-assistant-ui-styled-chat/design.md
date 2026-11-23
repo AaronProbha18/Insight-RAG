@@ -25,14 +25,14 @@
 - **Alternatives**: (a) keep primitives and hand-wire the missing features with our CSS: fewer deps, more bespoke code; the issue owner chose the kit in triage. (b) another chat UI library: would replace the runtime and adapter too. (c) take the full tree: 9 more registry items for features our backend never sends.
 - **Why**: Gets the empty state, suggestions, action bar, stop, scroll-to-bottom and markdown as maintained code. Trimming keeps only code paths our `/chat` stream can reach. The files are ours after vendoring either way.
 - **How the sources arrive**: the CLI cannot reach the registry from the dev laptop (spike). Tasks 2.1 and 3.1 write files from the saved `registry/*.json` items; on a machine with access, `npx assistant-ui@0.0.136 add <item>` produces the same files.
-- **ADR**: [0003](../../../docs/adr/0003-styled-chat-kit.md) (Proposed), overriding frontend guide §4.1 and §6.
+- **ADR**: [0003](../../../../docs/adr/0003-styled-chat-kit.md) (Proposed), overriding frontend guide §4.1 and §6.
 
 ### D2. Tailwind v4 + shadcn `base-nova` setup
 
 - **Choice**: `tailwindcss` + `@tailwindcss/vite`; `@/*` alias in both tsconfigs (no `baseUrl`) and `vite.config.ts` (use `import.meta.dirname`, not `__dirname`, which Vite warns about); `components.json` as written by `init`; the style-base packages listed in the spike findings, without `@fontsource-variable/geist`.
 - **Alternatives**: Port the kit's styles to plain CSS: defeats D1.
 - **Why**: The kit is Tailwind-class based, and `components.json` lets the CLI add items later on a machine that can reach the registry.
-- **ADR**: [0003](../../../docs/adr/0003-styled-chat-kit.md).
+- **ADR**: [0003](../../../../docs/adr/0003-styled-chat-kit.md).
 
 ### D3. shadcn default (`neutral`) theme, dark mode by OS
 
@@ -40,7 +40,7 @@
 - **Alternatives**: Map our existing palette onto the kit's tokens: rejected by the issue owner (wants defaults). A class-based `.dark` toggle: out of scope.
 - **Why**: Least custom theming.
 - **Contrast**: defaults are kept except where a pair the UI uses measures below 4.5:1. Known: light `--muted-foreground` on `--muted` ≈ 4.34:1. Task 2.2 darkens the light `--muted-foreground` to the nearest passing L and records the measured ratio in a comment (guide §6 rule kept).
-- **ADR**: [0003](../../../docs/adr/0003-styled-chat-kit.md).
+- **ADR**: [0003](../../../../docs/adr/0003-styled-chat-kit.md).
 
 ### D4. Citations stay in `metadata.custom`
 
