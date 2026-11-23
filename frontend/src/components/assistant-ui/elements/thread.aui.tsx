@@ -221,9 +221,13 @@ const MessageError: FC = () => {
   );
 };
 
+// One shared empty list: a selector that returns a fresh `[]` never compares
+// equal, so the store re-renders until React gives up (blank screen).
+const NO_CITATIONS: Citation[] = [];
+
 const AssistantMessage: FC = () => {
   const citations = useAuiState(
-    (s) => (s.message.metadata.custom?.citations as Citation[]) ?? [],
+    (s) => (s.message.metadata.custom?.citations as Citation[]) ?? NO_CITATIONS,
   );
 
   return (
