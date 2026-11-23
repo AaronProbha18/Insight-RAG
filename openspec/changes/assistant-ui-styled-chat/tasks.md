@@ -26,4 +26,4 @@
 
 ## 6. Manual check
 
-- [ ] 6.1 Manual pass at 375px and desktop, light and dark OS theme, keyboard only: upload, suggestion, ask, stop, copy, regenerate, scroll-to-bottom, open a source; record the results and the before/after `npm run build` bundle size for `verification.md`.
+- [x] 6.1 Manual pass at 375px and desktop, light and dark OS theme, keyboard only: upload, suggestion, ask, stop, copy, regenerate, scroll-to-bottom, open a source; record the results and the before/after `npm run build` bundle size for `verification.md`.
