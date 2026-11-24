@@ -62,10 +62,71 @@ def test_downgrade_removes_tables(migrate, database_url):
 
     tables = _query(
         database_url,
-        "SELECT to_regclass('documents'), to_regclass('chunks')",
+        "SELECT to_regclass('documents'), to_regclass('chunks'),"
+        " to_regclass('answers'), to_regclass('feedback')",
     )
-    assert tables == [(None, None)]
+    assert tables == [(None, None, None, None)]
     migrate()  # upgrades cleanly again
+
+
+def _answer(conn):
+    return conn.execute(
+        "INSERT INTO answers (public_id, question, answer, abstained, citations,"
+        " chat_model, embedding_model, abstain_threshold)"
+        " VALUES ('ans_x', 'q', 'a', false, '[]', 'm', 'e', 0.5) RETURNING id"
+    ).fetchone()[0]
+
+
+def test_feedback_is_unique_per_answer_and_cascades(migrate, database_url):
+    migrate()
+    with psycopg.connect(database_url) as conn:
+        answer_id = _answer(conn)
+        conn.execute(
+            "INSERT INTO feedback (answer_id, rating) VALUES (%s, 'up')", (answer_id,)
+        )
+        with pytest.raises(psycopg.errors.UniqueViolation):
+            conn.execute(
+                "INSERT INTO feedback (answer_id, rating) VALUES (%s, 'down')",
+                (answer_id,),
+            )
+        conn.rollback()
+
+    with psycopg.connect(database_url) as conn:
+        conn.execute("DELETE FROM answers WHERE id = %s", (answer_id,))
+        (count,) = conn.execute("SELECT count(*) FROM feedback").fetchone()
+    assert count == 0
+
+
+@pytest.mark.parametrize(
+    "rating, reason, comment",
+    [
+        ("up", "wrong", None),  # reason only allowed with down
+        ("down", "bogus", None),
+        ("sideways", None, None),
+        ("down", None, "x" * 2001),
+    ],
+)
+def test_feedback_checks_reject(migrate, database_url, rating, reason, comment):
+    migrate()
+    with psycopg.connect(database_url) as conn:
+        answer_id = _answer(conn)
+        with pytest.raises(psycopg.errors.CheckViolation):
+            conn.execute(
+                "INSERT INTO feedback (answer_id, rating, reason, comment)"
+                " VALUES (%s, %s, %s, %s)",
+                (answer_id, rating, reason, comment),
+            )
+
+
+def test_feedback_checks_accept_valid(migrate, database_url):
+    migrate()
+    with psycopg.connect(database_url) as conn:
+        answer_id = _answer(conn)
+        conn.execute(
+            "INSERT INTO feedback (answer_id, rating, reason, comment)"
+            " VALUES (%s, 'down', 'should_have_answered', %s)",
+            (answer_id, "x" * 2000),
+        )
 
 
 def test_missing_dim_fails_clearly(migrate, monkeypatch):

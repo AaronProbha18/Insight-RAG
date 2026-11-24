@@ -1,6 +1,6 @@
 ## 1. Backend: answers and the stream
 
-- [ ] 1.1 Migration `0002_answers_feedback.py` (tables, checks, downgrade). Test: `test_migrations.py` - upgrade/downgrade round trip; `CHECK`s reject a reason on `up` and an unknown reason.
+- [x] 1.1 Migration `0002_answers_feedback.py` (tables, checks, downgrade). Test: `test_migrations.py` - upgrade/downgrade round trip; `CHECK`s reject a reason on `up` and an unknown reason.
 - [ ] 1.2 `record_answer()` in `plumbline/feedback.py`; carry `filename` on retrieved chunks/citations internally if absent; `/chat` records answers and abstentions and sends `done` with `answer_id`; error path sends none. Test: `test_chat_api.py` - `done.answer_id` starts `ans_` and the row holds question, answer, citations (id, title, filename, locator), model ids, threshold; abstention recorded with `abstained=true`; error path has no `answer_id`; `filename` never appears in the `citations` event.
 
 ## 2. Backend: feedback API and export
