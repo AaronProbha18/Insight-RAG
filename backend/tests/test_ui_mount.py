@@ -14,11 +14,11 @@ def _client(monkeypatch, ui_dir=None):
 
 
 def test_serves_ui_when_dir_set(monkeypatch, tmp_path):
-    (tmp_path / "index.html").write_text("<title>insight-rag</title>")
+    (tmp_path / "index.html").write_text("<title>Plumbline</title>")
 
     client = _client(monkeypatch, tmp_path)
 
-    assert "<title>insight-rag</title>" in client.get("/").text
+    assert "<title>Plumbline</title>" in client.get("/").text
     assert client.get("/health").json() == {"status": "ok"}
 
 

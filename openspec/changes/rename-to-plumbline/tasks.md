@@ -15,7 +15,7 @@
 
 ## 4. Frontend, fixtures, docs
 
-- [ ] 4.1 Frontend title `Plumbline` (`frontend/index.html`, any test asserting it). Test: frontend checks pass.
+- [x] 4.1 Frontend title `Plumbline` (`frontend/index.html`, any test asserting it). Test: frontend checks pass.
 - [ ] 4.2 Fixture author "plumbline fixtures" in `evals/generate_corpus.py`; regenerate corpus. Test: connector suites and conformance pass.
 - [ ] 4.3 Docs: README, `AGENTS.md`, guides, architecture overview, `evals/README.md`, `.github/` templates, `.claude/launch.json`, `openspec/specs/`; mark ADR 0004 Accepted; write `docs/migration/plumbline.md` (env-var table, connector group, keeping the old DB). Test: `test_old_names.py` - repo search for old names returns only allowed paths.
 - [ ] 4.4 Brand assets: move `plumbline-brand/` to `docs/brand/`; add `frontend/public/` with `favicon.svg` (from `plumbline-icon-small.svg`), `favicon.ico`, `apple-touch-icon.png`; add the three icon links to `frontend/index.html`; add the README `<picture>` logo header. Test: a check that every icon link in `index.html` and every logo link in the README resolves to an existing file; `npm run build` output contains the three icons.
