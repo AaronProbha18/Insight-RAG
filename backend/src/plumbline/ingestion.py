@@ -45,6 +45,16 @@ def _existing(conn: psycopg.Connection, content_hash: str) -> IngestResult | Non
     return IngestResult(*row, created=False) if row else None
 
 
+def delete_document(conn: psycopg.Connection, document_id: str) -> bool:
+    """Delete by public id; chunks go via ON DELETE CASCADE. False if absent."""
+    return (
+        conn.execute(
+            "DELETE FROM documents WHERE public_id = %s", (document_id,)
+        ).rowcount
+        > 0
+    )
+
+
 def ingest(
     conn: psycopg.Connection,
     data: bytes,
