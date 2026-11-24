@@ -6,7 +6,7 @@ from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from insight_rag.retrieval import RetrievedChunk
+from plumbline.retrieval import RetrievedChunk
 
 ABSTAIN_MESSAGE = "I can't answer that from the indexed documents."
 NOT_IN_SOURCES = "NOT_IN_SOURCES"

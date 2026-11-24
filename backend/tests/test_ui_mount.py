@@ -2,7 +2,7 @@ import importlib
 
 from fastapi.testclient import TestClient
 
-import insight_rag.api.app as app_module
+import plumbline.api.app as app_module
 
 
 def _client(monkeypatch, ui_dir=None):

@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass, field
 
-from insight_rag.evals.golden import GoldenItem
-from insight_rag.evals.judge import judge_correctness, judge_faithfulness
+from plumbline.evals.golden import GoldenItem
+from plumbline.evals.judge import judge_correctness, judge_faithfulness
 
 GATE = 0.80
 GATED = ("correctness", "faithfulness", "abstention")

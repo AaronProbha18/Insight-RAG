@@ -4,8 +4,8 @@ import pytest
 from fastapi.testclient import TestClient
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 
-from insight_rag.api.app import app, get_llm, get_retriever
-from insight_rag.retrieval import RetrievedChunk
+from plumbline.api.app import app, get_llm, get_retriever
+from plumbline.retrieval import RetrievedChunk
 
 ANSWER = "Refunds take 14 days [c1]. Footwear gets 30 days [c2]."
 

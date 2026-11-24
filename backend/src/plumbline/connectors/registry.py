@@ -3,7 +3,7 @@
 import logging
 from importlib.metadata import entry_points
 
-from insight_rag.connectors.contract import CONTRACT_VERSION, FileConnector
+from plumbline.connectors.contract import CONTRACT_VERSION, FileConnector
 
 GROUP = "insight_rag.connectors"
 log = logging.getLogger(__name__)

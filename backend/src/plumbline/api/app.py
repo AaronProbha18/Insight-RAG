@@ -13,15 +13,15 @@ from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 
-from insight_rag import models
-from insight_rag.connectors import FileConnector, ParseError
-from insight_rag.connectors.registry import load_connectors
-from insight_rag.db import database_url
-from insight_rag.graph import DEFAULT_THRESHOLD, build_graph
-from insight_rag.ingestion import UnsupportedFileType, ingest
-from insight_rag.retrieval import retrieve
+from plumbline import models
+from plumbline.connectors import FileConnector, ParseError
+from plumbline.connectors.registry import load_connectors
+from plumbline.db import database_url
+from plumbline.graph import DEFAULT_THRESHOLD, build_graph
+from plumbline.ingestion import UnsupportedFileType, ingest
+from plumbline.retrieval import retrieve
 
-app = FastAPI(title="insight-rag")
+app = FastAPI(title="Plumbline")
 log = logging.getLogger(__name__)
 
 

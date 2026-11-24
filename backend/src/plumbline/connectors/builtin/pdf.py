@@ -7,7 +7,7 @@ from typing import ClassVar
 
 from pypdf import PdfReader
 
-from insight_rag.connectors.contract import (
+from plumbline.connectors.contract import (
     CONTRACT_VERSION,
     ParsedDocument,
     ParseError,

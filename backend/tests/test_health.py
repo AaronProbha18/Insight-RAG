@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from insight_rag.api.app import app
+from plumbline.api.app import app
 
 
 def test_health_ok():

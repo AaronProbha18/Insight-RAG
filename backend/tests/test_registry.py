@@ -1,7 +1,7 @@
 import logging
 from importlib.metadata import EntryPoint
 
-from insight_rag.connectors import registry
+from plumbline.connectors import registry
 
 
 def _install(monkeypatch, *classes):

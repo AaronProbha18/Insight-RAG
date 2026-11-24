@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from insight_rag.connectors.contract import ParsedDocument
+from plumbline.connectors.contract import ParsedDocument
 
 # Paragraph, line, sentence, word, then a hard character cut.
 SEPARATORS = ["\n\n", "\n", ". ", " ", ""]

@@ -11,7 +11,7 @@ from typing import ClassVar
 import docx
 from docx.table import Table
 
-from insight_rag.connectors.contract import (
+from plumbline.connectors.contract import (
     CONTRACT_VERSION,
     ParsedDocument,
     ParseError,

@@ -8,8 +8,8 @@ import pytest
 import yaml
 from fake_embeddings import FailingEmbeddings, FakeEmbeddings
 
-from insight_rag.connectors.builtin.pdf import PdfConnector
-from insight_rag.evals import runner
+from plumbline.connectors.builtin.pdf import PdfConnector
+from plumbline.evals import runner
 
 pytestmark = pytest.mark.db
 

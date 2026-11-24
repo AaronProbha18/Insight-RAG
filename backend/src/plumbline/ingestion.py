@@ -9,8 +9,8 @@ from pathlib import Path
 import psycopg
 from psycopg import errors
 
-from insight_rag.chunking import chunk
-from insight_rag.connectors.contract import FileConnector
+from plumbline.chunking import chunk
+from plumbline.connectors.contract import FileConnector
 
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 

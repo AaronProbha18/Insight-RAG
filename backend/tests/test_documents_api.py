@@ -6,7 +6,7 @@ import pytest
 from fake_embeddings import FailingEmbeddings, FakeEmbeddings
 from fastapi.testclient import TestClient
 
-from insight_rag.api.app import app, get_conn, get_embeddings
+from plumbline.api.app import app, get_conn, get_embeddings
 
 pytestmark = pytest.mark.db
 

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from insight_rag.evals.golden import Labelled
+from plumbline.evals.golden import Labelled
 
 MIN_AGREEMENT = 0.80
 

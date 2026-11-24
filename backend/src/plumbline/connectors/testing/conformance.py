@@ -6,7 +6,7 @@ in `fixtures_dir/corrupt/`. Only files with the connector's extensions are used.
 
 from pathlib import Path
 
-from insight_rag.connectors.contract import CONTRACT_VERSION, FileConnector, ParseError
+from plumbline.connectors.contract import CONTRACT_VERSION, FileConnector, ParseError
 
 
 def _files(directory: Path, extensions: tuple[str, ...]) -> list[Path]:

@@ -1,7 +1,7 @@
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 
-from insight_rag.graph import ABSTAIN_MESSAGE, build_graph
-from insight_rag.retrieval import RetrievedChunk
+from plumbline.graph import ABSTAIN_MESSAGE, build_graph
+from plumbline.retrieval import RetrievedChunk
 
 
 def _chunk(i: int, score: float) -> RetrievedChunk:

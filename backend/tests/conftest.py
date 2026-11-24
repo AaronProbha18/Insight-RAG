@@ -7,7 +7,7 @@ from alembic import command
 from alembic.config import Config
 from psycopg import sql
 
-from insight_rag import db
+from plumbline import db
 
 
 @pytest.fixture(scope="session")

@@ -1,4 +1,4 @@
-"""`insight-rag-eval`: per-connector trust gate over golden sets (design D9).
+"""`plumbline-eval`: per-connector trust gate over golden sets (design D9).
 
 Exit codes: 0 all connectors PASS, 1 any FAIL, 2 judge not validated (no gate result).
 """
@@ -19,15 +19,15 @@ from alembic import command
 from alembic.config import Config
 from psycopg import sql
 
-from insight_rag import models
-from insight_rag.connectors.registry import load_connectors
-from insight_rag.db import database_url
-from insight_rag.evals.golden import load_golden, load_labelled
-from insight_rag.evals.judge import JudgeNotValidated, validate_judge
-from insight_rag.evals.scoring import aggregate, gate, score_question
-from insight_rag.graph import DEFAULT_THRESHOLD, build_graph
-from insight_rag.ingestion import ingest
-from insight_rag.retrieval import retrieve
+from plumbline import models
+from plumbline.connectors.registry import load_connectors
+from plumbline.db import database_url
+from plumbline.evals.golden import load_golden, load_labelled
+from plumbline.evals.judge import JudgeNotValidated, validate_judge
+from plumbline.evals.scoring import aggregate, gate, score_question
+from plumbline.graph import DEFAULT_THRESHOLD, build_graph
+from plumbline.ingestion import ingest
+from plumbline.retrieval import retrieve
 
 BACKEND = Path(__file__).parents[3]
 EVALS_DIR = BACKEND.parent / "evals"
@@ -161,7 +161,7 @@ def run(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="insight-rag-eval", description=__doc__)
+    parser = argparse.ArgumentParser(prog="plumbline-eval", description=__doc__)
     parser.add_argument(
         "--connectors", help="comma-separated names (default: all with a golden set)"
     )

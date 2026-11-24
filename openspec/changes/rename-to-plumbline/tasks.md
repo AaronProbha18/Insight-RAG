@@ -4,14 +4,14 @@
 
 ## 2. Backend rename
 
-- [ ] 2.1 `git mv` package to `backend/src/plumbline`; rename imports, distribution `plumbline-rag`, script `plumbline-eval`, FastAPI title; regenerate `uv.lock`. Test: full backend suite passes; `uv build` produces `plumbline_rag-*`.
+- [x] 2.1 `git mv` package to `backend/src/plumbline`; rename imports, distribution `plumbline-rag`, script `plumbline-eval`, FastAPI title; regenerate `uv.lock`. Test: full backend suite passes; `uv build` produces `plumbline_rag-*`.
 - [ ] 2.2 Rename env vars to `PLUMBLINE_*` (models, app, migration `0001_initial.py`, tests, `.env.example`, Dockerfile). Test: existing tests pass with new names.
 - [ ] 2.3 Add `plumbline/config.py` `check_legacy_env()`, called at app startup, in `plumbline-eval` `main()` and in `migrations/env.py`. Test: `test_config.py` - each `INSIGHT_RAG_X` set -> error naming `PLUMBLINE_X`; none set -> no error.
 - [ ] 2.4 Registry group `plumbline.connectors` (pyproject + `registry.py`); warn per entry found under `insight_rag.connectors`, don't load it. Test: `test_registry.py` case with a fake old-group entry point -> skipped, warning names new group; conformance passes.
 
 ## 3. Infra and database defaults
 
-- [ ] 3.1 Default DB credentials `plumbline` in `db.py`, `docker-compose.yml`, CI; Docker service/image names. Test: backend suite against the renamed DB; `docker compose config` shows new names.
+- [ ] 3.1 Default DB credentials `plumbline` in `db.py`, `docker-compose.yml`, CI; Docker service/image names; temp DB prefixes `insight_rag_test_` / `insight_rag_eval_` (`conftest.py`, `test_database.py`, `runner.py`, `test_runner.py`). Test: backend suite against the renamed DB; `docker compose config` shows new names.
 
 ## 4. Frontend, fixtures, docs
 

@@ -6,7 +6,7 @@ import psycopg
 from alembic import context
 from sqlalchemy import create_engine
 
-from insight_rag.db import database_url
+from plumbline.db import database_url
 
 if context.config.config_file_name:
     fileConfig(context.config.config_file_name, disable_existing_loggers=False)

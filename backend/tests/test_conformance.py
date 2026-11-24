@@ -1,7 +1,7 @@
 import fake_connectors as fakes
 import pytest
 
-from insight_rag.connectors.testing import run_conformance
+from plumbline.connectors.testing import run_conformance
 
 
 @pytest.fixture

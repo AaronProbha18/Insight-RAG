@@ -4,7 +4,7 @@ import urllib.request
 import pytest
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 
-from insight_rag import models
+from plumbline import models
 
 
 class _StubEmbeddings:
