@@ -29,7 +29,8 @@ skill orchestrates; the work happens in `rag-plan`, `rag-execute`,
      and continue where the tasks left off.
    - Tell the user, then swap `status:ready-for-dev` for
      `status:in-progress` (`gh issue edit <N> --remove-label
-     status:ready-for-dev --add-label status:in-progress`).
+     status:ready-for-dev --add-label status:in-progress`), and
+     `bash scripts/board.sh <N> "In Progress"`.
    - The issue has `answer-quality`? Then this run must end with an eval
      result in `verification.md`. Say so now, so the model setup is ready.
 
