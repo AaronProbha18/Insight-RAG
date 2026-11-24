@@ -38,13 +38,13 @@ the new group and SHALL NOT load it.
 
 ### Requirement: Existing databases have an upgrade path
 
-The migration notes SHALL state exactly how to keep documents indexed in
+The README SHALL state exactly how to keep documents indexed in
 a database created with the old default names.
 
 #### Scenario: Upgrade with old database
 
 - **GIVEN** a local database created with the old default names
-- **WHEN** the user upgrades and follows the migration note
+- **WHEN** the user upgrades and follows the README note
 - **THEN** their indexed documents are still available
 
 ### Requirement: Rename does not change answers
@@ -60,7 +60,7 @@ the pre-rename baseline.
 
 ### Requirement: Old names only where allowed
 
-Outside ADR 0004, the migration notes, the legacy-name checks, and
+Outside the legacy-name checks, their tests, and
 `openspec/changes/**`, the repository SHALL contain no `insight-rag`,
 `insight_rag` or `INSIGHT_RAG`.
 
@@ -68,7 +68,7 @@ Outside ADR 0004, the migration notes, the legacy-name checks, and
 
 - **GIVEN** the repository
 - **WHEN** searched for `insight-rag`, `insight_rag` or `INSIGHT_RAG`
-- **THEN** matches appear only in ADR 0004, the migration notes, the legacy-name checks and `openspec/changes/**`
+- **THEN** matches appear only in the legacy-name checks, their tests and `openspec/changes/**`
 
 ### Requirement: Distribution name
 

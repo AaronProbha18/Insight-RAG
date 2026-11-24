@@ -19,7 +19,7 @@ or connector author sees must say so.
   `plumbline.connectors`. Connectors still registered under the old group
   are not loaded; the registry warns, naming the new group.
 - Default Postgres user/password/database `insight_rag` -> `plumbline`
-  (compose, CI, `db.py`), with a migration note for keeping an existing
+  (compose, CI, `db.py`), with a README note for keeping an existing
   volume.
 - UI title, FastAPI title, Docker service/image names, README, guides,
   architecture overview, `AGENTS.md`, `.github` templates, `.claude`
@@ -30,8 +30,6 @@ or connector author sees must say so.
   `frontend/public/` (favicons, Apple touch icon), UI head links and the
   README header logo (scope added during triage follow-up; the issue listed
   a logo as a non-goal).
-- New ADR 0004 recording the names, the no-fallback policy, the entry-point
-  rename and the distribution name.
 - GitHub repository renamed and its description replaced (scope added
   during triage; the issue listed it as a non-goal).
 

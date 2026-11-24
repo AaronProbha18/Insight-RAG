@@ -19,8 +19,9 @@
 - [x] 4.2 Fixture author "plumbline fixtures" in `evals/generate_corpus.py`; regenerate corpus. Test: connector suites and conformance pass.
 - [x] 4.3 Docs: README, `AGENTS.md`, guides, architecture overview, `evals/README.md`, `.github/` templates, `.claude/launch.json`, `openspec/specs/`; mark ADR 0004 Accepted; write `docs/migration/plumbline.md` (env-var table, connector group, keeping the old DB). Test: `test_old_names.py` - repo search for old names returns only allowed paths.
 - [ ] 4.4 Brand assets: move `plumbline-brand/` to `docs/brand/`; add `frontend/public/` with `favicon.svg` (from `plumbline-icon-small.svg`), `favicon.ico`, `apple-touch-icon.png`; add the three icon links to `frontend/index.html`; add the README `<picture>` logo header. Test: a check that every icon link in `index.html` and every logo link in the README resolves to an existing file; `npm run build` output contains the three icons.
+- [x] 4.5 Drop ADR 0004 and `docs/migration/plumbline.md` (product owner: not required); remove the pointers to them; add a short README note on keeping an existing database. Test: `test_old_names.py` and `check_links.py` pass.
 
 ## 5. Eval and repo
 
-- [ ] 5.1 Run `plumbline-eval --report evals/reports/post-rename.json`; compare to baseline per eval-plan; follow the migration note against a DB created on `main` and confirm its documents still list. Test: comparison recorded in `verification.md`.
+- [ ] 5.1 Run `plumbline-eval --report evals/reports/post-rename.json`; compare to baseline per eval-plan; follow the README upgrade note against a DB created on `main` and confirm its documents still list. Test: comparison recorded in `verification.md`.
 - [ ] 5.2 After merge, owner renames the GitHub repo to `Plumbline` and replaces its description (`gh repo rename`, `gh repo edit --description`); update the local remote; upload `docs/brand/social-preview.png` in Settings > General > Social preview (UNVERIFIED that no API exists; confirm). Test: `gh repo view` shows new name and description; `git fetch` works; the social preview is visible on the repo page.

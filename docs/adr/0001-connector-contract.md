@@ -19,7 +19,7 @@ access to the real source system.
   content, metadata, updated_at). Exact shape is
   defined in the first connector change's design.md.
 - **Discovery via Python entry points** (the `plumbline.connectors`
-  group, renamed by [ADR 0004](0004-rename-to-plumbline.md)). A third-party connector is a separate pip-installable package;
+  group). A third-party connector is a separate pip-installable package;
   core needs no change to load it. Built-in connectors register the same
   way, so there is one path.
 - **Contract versioning**: the protocol carries a version; core states

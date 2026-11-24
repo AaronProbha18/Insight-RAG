@@ -1,4 +1,4 @@
-"""The pre-rename names may live only where ADR 0004 allows them."""
+"""The pre-rename names may live only in the legacy checks, their tests and history."""
 
 import re
 import subprocess
@@ -7,8 +7,6 @@ from pathlib import Path
 ROOT = Path(__file__).parents[2]
 OLD_NAME = re.compile(r"insight[-_]rag", re.IGNORECASE)
 ALLOWED_FILES = {
-    "docs/adr/0004-rename-to-plumbline.md",
-    "docs/migration/plumbline.md",
     "backend/src/plumbline/config.py",  # the legacy env check
     "backend/src/plumbline/connectors/registry.py",  # the legacy group warning
     "backend/tests/test_config.py",

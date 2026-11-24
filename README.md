@@ -50,8 +50,9 @@ M1 running [Ollama](https://ollama.com) natively, so it uses the GPU.
    (`PLUMBLINE_UI_DIR` is set by the Docker image to serve the built UI;
    you don't set it.)
 
-   Upgrading from the previous name? See
-   [docs/migration/plumbline.md](docs/migration/plumbline.md).
+   Have a database from before the rename? Set `POSTGRES_USER`,
+   `POSTGRES_PASSWORD` and `POSTGRES_DB` (or `DATABASE_URL`) to the values it was
+   created with; the new defaults only apply to a fresh database.
 
 3. **Run:**
 

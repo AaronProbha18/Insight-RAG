@@ -6,7 +6,7 @@ import, `pyproject.toml` (distribution, entry-point group, script), seven
 `JUDGE_LLM`, `MODEL_BASE_URL`, `ABSTAIN_THRESHOLD`, `UI_DIR`), the
 migration `0001_initial.py`, default DB credentials (`db.py`, compose,
 CI), Docker, the frontend title, fixture metadata, docs and the GitHub
-repo. Decisions that outlive this change: [ADR 0004](../../../docs/adr/0004-rename-to-plumbline.md).
+repo.
 
 ## Decisions
 
@@ -17,7 +17,7 @@ repo. Decisions that outlive this change: [ADR 0004](../../../docs/adr/0004-rena
 - **Alternatives**: read old names with a deprecation warning.
 - **Why**: product owner chose a single set of names; the check satisfies
   the issue's "stop with a message naming each new variable" option.
-- **ADR**: docs/adr/0004-rename-to-plumbline.md
+- **ADR**: none
 
 ### Old connector group is skipped with a warning
 
@@ -26,7 +26,7 @@ repo. Decisions that outlive this change: [ADR 0004](../../../docs/adr/0004-rena
   naming the new group.
 - **Alternatives**: load old group for one release.
 - **Why**: same no-fallback policy.
-- **ADR**: docs/adr/0004-rename-to-plumbline.md
+- **ADR**: none
 
 ### Where the env check runs
 
@@ -77,8 +77,8 @@ CLI: `plumbline-eval` (same flags as `insight-rag-eval`).
 No schema migration. Default connection string becomes
 `postgresql://plumbline:plumbline@localhost:5432/plumbline`. Existing
 installs keep data by setting `POSTGRES_USER/PASSWORD/DB` (compose) or
-`DATABASE_URL` to the old values - documented in
-`docs/migration/plumbline.md`. The compose volume name is derived from the
+`DATABASE_URL` to the old values - documented in the
+README. The compose volume name is derived from the
 compose project, not from these defaults - UNVERIFIED - confirm by
 `docker volume ls` before and after `docker compose up` on the renamed
 branch.

@@ -1,4 +1,4 @@
-"""Rejects the pre-rename `INSIGHT_RAG_*` environment variables (ADR 0004)."""
+"""Rejects the pre-rename `INSIGHT_RAG_*` environment variables."""
 
 import os
 from collections.abc import Mapping
