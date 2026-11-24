@@ -1,4 +1,9 @@
-# Plumbline
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/plumbline-logo-dark.svg">
+    <img alt="Plumbline" src="docs/brand/plumbline-logo.svg" height="64">
+  </picture>
+</h1>
 
 Open-source retrieval-augmented generation: plug in a source through a
 connector, ask questions, and get answers that cite where they came from -

@@ -45,11 +45,12 @@ frontend/                  Vite + React + assistant-ui + Tailwind v4
   src/upload/              upload control
   src/components/          vendored assistant-ui kit + shadcn ui (trimmed, ADR 0003)
 evals/                     eval DATA only: corpus-src/, connectors/<name>/{corpus,golden.yaml},
-                           judge/labelled.yaml, reports/ (gitignored)
+                           judge/labelled.yaml, reports/ (gitignored; baselines are force-added)
 scripts/smoke.sh           full-stack smoke test
 docs/adr/                  architecture decision records - why things are the way they are
 docs/architecture/         overview.md: components, flows, boundary rules, data model
 docs/guides/               backend, frontend and connector development guides
+docs/brand/                Plumbline logos and icons (source files; README has usage)
 openspec/                  specs (living), changes (in flight), schemas (our workflow)
 .claude/                   Claude Code skills, commands, hooks; launch.json (dev servers for Desktop preview)
 Dockerfile                 one image: built UI + API
