@@ -102,3 +102,41 @@ def test_list_documents(client):
     assert all(
         set(d) == {"document_id", "title", "connector", "created_at"} for d in docs
     )
+
+
+def _chunk_count(database_url):
+    with psycopg.connect(database_url) as c:
+        return c.execute("SELECT count(*) FROM chunks").fetchone()[0]
+
+
+def test_delete_document_204_removes_document_and_chunks(client, database_url):
+    gone = _upload(client, "a.pdf", PDF).json()
+    kept = _upload(client, "b.docx", DOCX).json()
+
+    r = client.delete(f"/documents/{gone['document_id']}")
+
+    assert r.status_code == 204 and r.content == b""
+    assert [d["document_id"] for d in client.get("/documents").json()] == [
+        kept["document_id"]
+    ]
+    assert _chunk_count(database_url) == kept["chunks"]
+
+
+def test_delete_unknown_and_repeat_404(client):
+    missing = client.delete("/documents/doc_" + "0" * 26)
+    doc = _upload(client, "a.pdf", PDF).json()
+    assert client.delete(f"/documents/{doc['document_id']}").status_code == 204
+
+    again = client.delete(f"/documents/{doc['document_id']}")
+
+    assert missing.status_code == again.status_code == 404
+    assert missing.json() == again.json() == {"detail": "Document not found"}
+
+
+def test_reupload_after_delete_201(client):
+    doc = _upload(client, "a.pdf", PDF).json()
+    client.delete(f"/documents/{doc['document_id']}")
+
+    r = _upload(client, "a.pdf", PDF)
+
+    assert r.status_code == 201 and r.json()["created"] is True
