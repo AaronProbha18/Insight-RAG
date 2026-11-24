@@ -41,6 +41,7 @@ def test_answer_with_citations():
             "id": "c1",
             "document_id": "doc_1",
             "title": "Doc 1",
+            "filename": "",
             "locator": "p. 1",
             "text": "text 1",
         }

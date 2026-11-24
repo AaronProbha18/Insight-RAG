@@ -18,6 +18,7 @@ from plumbline.config import check_legacy_env
 from plumbline.connectors import FileConnector, ParseError
 from plumbline.connectors.registry import load_connectors
 from plumbline.db import database_url
+from plumbline.feedback import record_answer
 from plumbline.graph import DEFAULT_THRESHOLD, build_graph
 from plumbline.ingestion import UnsupportedFileType, delete_document, ingest
 from plumbline.retrieval import retrieve
@@ -78,6 +79,18 @@ Conn = Annotated[psycopg.Connection, Depends(get_conn)]
 
 def get_retriever(conn: Conn, embeddings: Annotated[object, Depends(get_embeddings)]):
     return lambda question, top_k: retrieve(conn, embeddings, question, top_k)
+
+
+def get_recorder(conn: Conn):
+    """Records an answer; model ids and threshold come from the environment."""
+    return lambda question, result, threshold: record_answer(
+        conn,
+        question,
+        result,
+        chat_model=os.environ.get("PLUMBLINE_LLM", ""),
+        embedding_model=os.environ.get("PLUMBLINE_EMBEDDINGS", ""),
+        threshold=threshold,
+    )
 
 
 @app.get("/health")
@@ -154,13 +167,15 @@ def chat(
     request: ChatRequest,
     retriever: Annotated[object, Depends(get_retriever)],
     llm: Annotated[object, Depends(get_llm)],
+    recorder: Annotated[object, Depends(get_recorder)],
 ) -> StreamingResponse:
     threshold = float(os.environ.get("PLUMBLINE_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD))
     # Option A (design D8): run to completion first, so only verified answers stream.
     try:
-        result = build_graph(retriever, llm, threshold).invoke(
-            {"question": request.messages[-1].content}
-        )
+        question = request.messages[-1].content
+        result = build_graph(retriever, llm, threshold).invoke({"question": question})
+        # An answer that can't be recorded can't be rated, so it is not streamed.
+        answer_id = recorder(question, result, threshold)
     except Exception:
         log.exception("answer generation failed")
         events = [_sse("error", {"message": "answer generation failed"})]
@@ -172,8 +187,12 @@ def chat(
                 _sse("delta", {"text": t})
                 for t in re.findall(r"\S+\s*", result["answer"])
             ]
-            events.append(_sse("citations", {"citations": result["citations"]}))
-        events.append(_sse("done", {}))
+            public = [
+                {k: v for k, v in c.items() if k != "filename"}
+                for c in result["citations"]
+            ]
+            events.append(_sse("citations", {"citations": public}))
+        events.append(_sse("done", {"answer_id": answer_id}))
     return StreamingResponse(iter(events), media_type="text/event-stream")
 
 

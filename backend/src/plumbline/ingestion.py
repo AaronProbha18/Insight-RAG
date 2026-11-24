@@ -28,11 +28,15 @@ class IngestResult:
     created: bool
 
 
-def new_document_id() -> str:
-    """`doc_` + ULID: 48-bit ms timestamp + 80 random bits, Crockford base32."""
+def new_public_id(prefix: str) -> str:
+    """`<prefix>_` + ULID: 48-bit ms timestamp + 80 random bits, Crockford base32."""
     value = (time.time_ns() // 1_000_000) << 80 | secrets.randbits(80)
     ulid = "".join(_CROCKFORD[(value >> shift) & 31] for shift in range(125, -1, -5))
-    return f"doc_{ulid}"
+    return f"{prefix}_{ulid}"
+
+
+def new_document_id() -> str:
+    return new_public_id("doc")
 
 
 def _existing(conn: psycopg.Connection, content_hash: str) -> IngestResult | None:
