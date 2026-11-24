@@ -37,8 +37,8 @@ status=$(curl -s -o /tmp/smoke_upload.json -w '%{http_code}' -F "file=@$SAMPLE" 
 case "$status" in
   201 | 200) pass "upload (HTTP $status) $(cat /tmp/smoke_upload.json)" ;;
   *)
-    fail "upload (HTTP $status): is a model configured? Check .env (INSIGHT_RAG_EMBEDDINGS," \
-      "INSIGHT_RAG_EMBEDDING_DIM; in Docker INSIGHT_RAG_MODEL_BASE_URL=http://host.docker.internal:11434)." \
+    fail "upload (HTTP $status): is a model configured? Check .env (PLUMBLINE_EMBEDDINGS," \
+      "PLUMBLINE_EMBEDDING_DIM; in Docker PLUMBLINE_MODEL_BASE_URL=http://host.docker.internal:11434)." \
       "A dimension error means: docker compose down -v, then retry."
     finish "${1:-}"
     ;;

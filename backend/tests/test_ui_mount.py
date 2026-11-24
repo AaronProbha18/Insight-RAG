@@ -7,9 +7,9 @@ import plumbline.api.app as app_module
 
 def _client(monkeypatch, ui_dir=None):
     if ui_dir:
-        monkeypatch.setenv("INSIGHT_RAG_UI_DIR", str(ui_dir))
+        monkeypatch.setenv("PLUMBLINE_UI_DIR", str(ui_dir))
     else:
-        monkeypatch.delenv("INSIGHT_RAG_UI_DIR", raising=False)
+        monkeypatch.delenv("PLUMBLINE_UI_DIR", raising=False)
     return TestClient(importlib.reload(app_module).app)
 
 

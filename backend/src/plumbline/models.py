@@ -15,18 +15,18 @@ def _env(name: str) -> str:
 
 def _options() -> dict:
     # e.g. http://host.docker.internal:11434 when Ollama runs outside the container.
-    base_url = os.environ.get("INSIGHT_RAG_MODEL_BASE_URL")
+    base_url = os.environ.get("PLUMBLINE_MODEL_BASE_URL")
     return {"base_url": base_url} if base_url else {}
 
 
 def chat_model():
-    return init_chat_model(_env("INSIGHT_RAG_LLM"), **_options())
+    return init_chat_model(_env("PLUMBLINE_LLM"), **_options())
 
 
 def embeddings():
-    return init_embeddings(_env("INSIGHT_RAG_EMBEDDINGS"), **_options())
+    return init_embeddings(_env("PLUMBLINE_EMBEDDINGS"), **_options())
 
 
 def judge_model():
-    """Eval judge. Deliberately separate from INSIGHT_RAG_LLM so it never drifts with it."""
-    return init_chat_model(_env("INSIGHT_RAG_JUDGE_LLM"), **_options())
+    """Eval judge. Deliberately separate from PLUMBLINE_LLM so it never drifts with it."""
+    return init_chat_model(_env("PLUMBLINE_JUDGE_LLM"), **_options())

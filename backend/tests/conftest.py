@@ -39,7 +39,7 @@ def database_url():
 def migrate(database_url, monkeypatch):
     """Run alembic on the isolated database (8-dim vectors); always ends at base."""
     monkeypatch.setenv("DATABASE_URL", database_url)
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDING_DIM", "8")
+    monkeypatch.setenv("PLUMBLINE_EMBEDDING_DIM", "8")
     cfg = Config(Path(__file__).parents[1] / "alembic.ini")
     yield lambda rev="head": command.upgrade(cfg, rev)
     command.downgrade(cfg, "base")

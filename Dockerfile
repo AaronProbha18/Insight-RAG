@@ -21,6 +21,6 @@ COPY --from=ui /frontend/dist /app/static
 
 RUN useradd --create-home app
 USER app
-ENV PATH="/app/backend/.venv/bin:$PATH" INSIGHT_RAG_UI_DIR=/app/static
+ENV PATH="/app/backend/.venv/bin:$PATH" PLUMBLINE_UI_DIR=/app/static
 EXPOSE 8000
 CMD ["sh", "-c", "alembic upgrade head && fastapi run src/plumbline/api/app.py --host 0.0.0.0 --port 8000"]

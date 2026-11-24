@@ -189,13 +189,13 @@ def main(argv: list[str] | None = None) -> int:
         judge=models.judge_model(),
         embeddings=models.embeddings(),
         model_ids={
-            "llm": os.environ["INSIGHT_RAG_LLM"],
-            "embeddings": os.environ["INSIGHT_RAG_EMBEDDINGS"],
-            "judge": os.environ["INSIGHT_RAG_JUDGE_LLM"],
+            "llm": os.environ["PLUMBLINE_LLM"],
+            "embeddings": os.environ["PLUMBLINE_EMBEDDINGS"],
+            "judge": os.environ["PLUMBLINE_JUDGE_LLM"],
         },
         report_path=args.report,
         sample=args.sample,
         threshold=float(
-            os.environ.get("INSIGHT_RAG_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD)
+            os.environ.get("PLUMBLINE_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD)
         ),
     )

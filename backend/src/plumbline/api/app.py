@@ -146,9 +146,7 @@ def chat(
     retriever: Annotated[object, Depends(get_retriever)],
     llm: Annotated[object, Depends(get_llm)],
 ) -> StreamingResponse:
-    threshold = float(
-        os.environ.get("INSIGHT_RAG_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD)
-    )
+    threshold = float(os.environ.get("PLUMBLINE_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD))
     # Option A (design D8): run to completion first, so only verified answers stream.
     try:
         result = build_graph(retriever, llm, threshold).invoke(
@@ -171,6 +169,6 @@ def chat(
 
 
 # Production image: serve the built UI on the same origin. Mounted last so API routes win.
-_ui_dir = os.environ.get("INSIGHT_RAG_UI_DIR")
+_ui_dir = os.environ.get("PLUMBLINE_UI_DIR")
 if _ui_dir and os.path.isdir(_ui_dir):
     app.mount("/", StaticFiles(directory=_ui_dir, html=True), name="ui")

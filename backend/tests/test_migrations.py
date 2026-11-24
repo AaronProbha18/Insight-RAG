@@ -67,7 +67,7 @@ def test_downgrade_removes_tables(migrate, database_url):
 
 
 def test_missing_dim_fails_clearly(migrate, monkeypatch):
-    monkeypatch.delenv("INSIGHT_RAG_EMBEDDING_DIM")
+    monkeypatch.delenv("PLUMBLINE_EMBEDDING_DIM")
 
-    with pytest.raises(RuntimeError, match="INSIGHT_RAG_EMBEDDING_DIM"):
+    with pytest.raises(RuntimeError, match="PLUMBLINE_EMBEDDING_DIM"):
         migrate()

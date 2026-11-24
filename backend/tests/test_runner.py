@@ -44,7 +44,7 @@ class YesJudge:
 def evals_dir(tmp_path, database_url, monkeypatch):
     """A copy of evals/ with reviewed labels, and DATABASE_URL on the test server."""
     monkeypatch.setenv("DATABASE_URL", database_url)
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDING_DIM", "8")
+    monkeypatch.setenv("PLUMBLINE_EMBEDDING_DIM", "8")
     root = tmp_path / "evals"
     shutil.copytree(EVALS / "connectors" / "pdf", root / "connectors" / "pdf")
     labelled = yaml.safe_load((EVALS / "judge" / "labelled.yaml").read_text())
@@ -137,9 +137,9 @@ def test_sample_keeps_ratio(evals_dir, tmp_path):
 def test_cli_parses_arguments(monkeypatch, tmp_path):
     seen = {}
     monkeypatch.setattr(runner, "run", lambda **kw: seen.update(kw) or 0)
-    monkeypatch.setenv("INSIGHT_RAG_LLM", IDS["llm"])
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDINGS", IDS["embeddings"])
-    monkeypatch.setenv("INSIGHT_RAG_JUDGE_LLM", IDS["judge"])
+    monkeypatch.setenv("PLUMBLINE_LLM", IDS["llm"])
+    monkeypatch.setenv("PLUMBLINE_EMBEDDINGS", IDS["embeddings"])
+    monkeypatch.setenv("PLUMBLINE_JUDGE_LLM", IDS["judge"])
     monkeypatch.setattr(runner.models, "chat_model", lambda: "llm")
     monkeypatch.setattr(runner.models, "judge_model", lambda: "judge")
     monkeypatch.setattr(runner.models, "embeddings", lambda: "emb")
