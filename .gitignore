@@ -21,6 +21,9 @@ dist/
 # Eval output
 evals/reports/
 
+# Exported feedback candidates hold real questions; review, never commit
+evals/feedback/
+
 # Claude Code local state
 .claude/settings.local.json
 .claude/worktrees/
