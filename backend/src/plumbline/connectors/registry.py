@@ -1,17 +1,26 @@
-"""Discovers connectors registered under the `insight_rag.connectors` entry-point group."""
+"""Discovers connectors registered under the `plumbline.connectors` entry-point group."""
 
 import logging
 from importlib.metadata import entry_points
 
 from plumbline.connectors.contract import CONTRACT_VERSION, FileConnector
 
-GROUP = "insight_rag.connectors"
+GROUP = "plumbline.connectors"
+LEGACY_GROUP = "insight_rag.connectors"  # only used to warn; never loaded
 log = logging.getLogger(__name__)
 
 
 def load_connectors() -> dict[str, FileConnector]:
     # ponytail: duplicate names - last loaded wins; reject duplicates if it bites.
     connectors: dict[str, FileConnector] = {}
+    for ep in entry_points(group=LEGACY_GROUP):
+        log.warning(
+            "connector %r is registered under the old group %r and was not loaded;"
+            " register it under %r",
+            ep.name,
+            LEGACY_GROUP,
+            GROUP,
+        )
     for ep in entry_points(group=GROUP):
         try:
             connector = ep.load()()

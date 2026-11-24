@@ -41,7 +41,7 @@ dev = [
     "ruff>=0.17.5",
 ]
 
-[project.entry-points."insight_rag.connectors"]
+[project.entry-points."plumbline.connectors"]
 pdf = "plumbline.connectors.builtin.pdf:PdfConnector"
 docx = "plumbline.connectors.builtin.docx:DocxConnector"
 
