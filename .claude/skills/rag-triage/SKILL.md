@@ -61,6 +61,7 @@ it back to the issue. Never edit code.
      `answer-quality` if the form said "Yes" or the route is
      `rag-standard`. If triage itself is stuck on a decision, add
      `status:blocked` and say what it's waiting for.
+   - Board: `bash scripts/board.sh <N> Ready`.
    - Commit the change's planning artifacts on a branch
      `triage/<N>-<slug>` with message `docs(openspec): plan #<N> <title>`.
      Don't push unless asked.
