@@ -79,3 +79,23 @@ The backend distribution SHALL be named `plumbline-rag`.
 - **GIVEN** the backend package
 - **WHEN** built
 - **THEN** the distribution name is `plumbline-rag`
+
+### Requirement: Brand assets ship with the product
+
+The repository SHALL keep the supplied Plumbline brand files under
+`docs/brand/`, the web app SHALL serve its favicon and Apple touch icon,
+and the README SHALL show the Plumbline logo, switching with the reader's
+light or dark theme.
+
+#### Scenario: Built UI carries the icons
+
+- **GIVEN** a built frontend
+- **WHEN** `index.html` is loaded
+- **THEN** each icon it links (`favicon.svg`, `favicon.ico`, `apple-touch-icon.png`) exists in the build output
+
+#### Scenario: README logo resolves
+
+- **GIVEN** the README header
+- **WHEN** its light and dark logo links are followed
+- **THEN** both files exist under `docs/brand/`
+

@@ -1,6 +1,6 @@
 ## 1. Baseline
 
-- [ ] 1.1 On the unrenamed code, run `insight-rag-eval` twice (`--report evals/reports/pre-rename-{a,b}.json`) and conformance; commit both reports. Test: reports exist and conformance passes.
+- [x] 1.1 On the unrenamed code, run `insight-rag-eval` once (`--report evals/reports/pre-rename-a.json`; judge `ollama:qwen2.5:7b`, chat `ollama:llama3.1:8b`, embeddings `ollama:nomic-embed-text`) and conformance; commit the report. Test: report exists and conformance passes.
 
 ## 2. Backend rename
 
@@ -18,8 +18,9 @@
 - [ ] 4.1 Frontend title `Plumbline` (`frontend/index.html`, any test asserting it). Test: frontend checks pass.
 - [ ] 4.2 Fixture author "plumbline fixtures" in `evals/generate_corpus.py`; regenerate corpus. Test: connector suites and conformance pass.
 - [ ] 4.3 Docs: README, `AGENTS.md`, guides, architecture overview, `evals/README.md`, `.github/` templates, `.claude/launch.json`, `openspec/specs/`; mark ADR 0004 Accepted; write `docs/migration/plumbline.md` (env-var table, connector group, keeping the old DB). Test: `test_old_names.py` - repo search for old names returns only allowed paths.
+- [ ] 4.4 Brand assets: move `plumbline-brand/` to `docs/brand/`; add `frontend/public/` with `favicon.svg` (from `plumbline-icon-small.svg`), `favicon.ico`, `apple-touch-icon.png`; add the three icon links to `frontend/index.html`; add the README `<picture>` logo header. Test: a check that every icon link in `index.html` and every logo link in the README resolves to an existing file; `npm run build` output contains the three icons.
 
 ## 5. Eval and repo
 
 - [ ] 5.1 Run `plumbline-eval --report evals/reports/post-rename.json`; compare to baseline per eval-plan; follow the migration note against a DB created on `main` and confirm its documents still list. Test: comparison recorded in `verification.md`.
-- [ ] 5.2 After merge, owner renames the GitHub repo to `Plumbline` and replaces its description (`gh repo rename`, `gh repo edit --description`); update the local remote. Test: `gh repo view` shows new name and description; `git fetch` works.
+- [ ] 5.2 After merge, owner renames the GitHub repo to `Plumbline` and replaces its description (`gh repo rename`, `gh repo edit --description`); update the local remote; upload `docs/brand/social-preview.png` in Settings > General > Social preview (UNVERIFIED that no API exists; confirm). Test: `gh repo view` shows new name and description; `git fetch` works; the social preview is visible on the repo page.

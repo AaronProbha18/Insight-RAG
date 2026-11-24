@@ -26,6 +26,10 @@ or connector author sees must say so.
   launch config.
 - Eval fixtures regenerated with author "plumbline fixtures"; metrics
   shown equal to a baseline captured before the rename.
+- Brand assets placed and wired in: `docs/brand/` (all supplied files),
+  `frontend/public/` (favicons, Apple touch icon), UI head links and the
+  README header logo (scope added during triage follow-up; the issue listed
+  a logo as a non-goal).
 - New ADR 0004 recording the names, the no-fallback policy, the entry-point
   rename and the distribution name.
 - GitHub repository renamed and its description replaced (scope added
@@ -36,7 +40,8 @@ or connector author sees must say so.
 - Changing behaviour, prompts, thresholds, chunking, or the `/chat` /
   `/documents` wire format.
 - Publishing to PyPI or a container registry.
-- A logo or visual identity.
+- Designing or changing the brand: the Plumbline assets are supplied
+  (`plumbline-brand/`) and only placed and wired in.
 - Rewriting history: `openspec/changes/**` (incl. `rag-foundation` and
   `archive/`) keeps the old names.
 
@@ -65,6 +70,6 @@ or connector author sees must say so.
 ## Impact
 
 `backend/` (package, `pyproject.toml`, `uv.lock`, migrations, tests),
-`frontend/index.html`, `Dockerfile`, `docker-compose.yml`, `.env.example`,
-`.github/`, `.claude/launch.json`, `evals/`, `docs/`, `README.md`,
+`frontend/index.html`, `frontend/public/`, `Dockerfile`, `docker-compose.yml`, `.env.example`,
+`.github/`, `.claude/launch.json`, `evals/`, `docs/` (incl. `docs/brand/`), `README.md`,
 `AGENTS.md`, `openspec/specs/`, GitHub repo settings.
