@@ -1,8 +1,10 @@
 """Recorded answers, so a rating can point at exactly what was said."""
 
 import json
+from typing import Literal
 
 import psycopg
+from pydantic import BaseModel, Field, model_validator
 
 from plumbline.ingestion import new_public_id
 
@@ -39,3 +41,31 @@ def record_answer(
         ),
     )
     return answer_id
+
+
+class FeedbackRequest(BaseModel):
+    answer_id: str
+    rating: Literal["up", "down"]
+    reason: (
+        Literal["wrong", "incomplete", "wrong_source", "should_have_answered", "other"]
+        | None
+    ) = None
+    comment: str | None = Field(None, max_length=2000)
+
+    @model_validator(mode="after")
+    def reason_only_with_down(self):
+        if self.reason is not None and self.rating != "down":
+            raise ValueError("reason is only allowed with a thumbs down")
+        return self
+
+
+def save_feedback(conn: psycopg.Connection, req: FeedbackRequest) -> bool:
+    """Store or replace the one feedback row for an answer; False if no such answer."""
+    cur = conn.execute(
+        "INSERT INTO feedback (answer_id, rating, reason, comment)"
+        " SELECT id, %s, %s, %s FROM answers WHERE public_id = %s"
+        " ON CONFLICT (answer_id) DO UPDATE SET rating = EXCLUDED.rating,"
+        " reason = EXCLUDED.reason, comment = EXCLUDED.comment, updated_at = now()",
+        (req.rating, req.reason, req.comment, req.answer_id),
+    )
+    return cur.rowcount == 1

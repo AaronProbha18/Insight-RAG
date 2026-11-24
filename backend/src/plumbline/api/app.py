@@ -18,7 +18,7 @@ from plumbline.config import check_legacy_env
 from plumbline.connectors import FileConnector, ParseError
 from plumbline.connectors.registry import load_connectors
 from plumbline.db import database_url
-from plumbline.feedback import record_answer
+from plumbline.feedback import FeedbackRequest, record_answer, save_feedback
 from plumbline.graph import DEFAULT_THRESHOLD, build_graph
 from plumbline.ingestion import UnsupportedFileType, delete_document, ingest
 from plumbline.retrieval import retrieve
@@ -194,6 +194,13 @@ def chat(
             events.append(_sse("citations", {"citations": public}))
         events.append(_sse("done", {"answer_id": answer_id}))
     return StreamingResponse(iter(events), media_type="text/event-stream")
+
+
+@app.post("/feedback", status_code=204)
+def post_feedback(request: FeedbackRequest, conn: Conn) -> Response:
+    if not save_feedback(conn, request):
+        raise HTTPException(404, "Answer not found")
+    return Response(status_code=204)
 
 
 # Production image: serve the built UI on the same origin. Mounted last so API routes win.
