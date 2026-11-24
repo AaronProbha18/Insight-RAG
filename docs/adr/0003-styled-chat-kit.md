@@ -62,6 +62,14 @@ test approach.
   from a browser instead. The CLI path still works where the network allows.
 - The production bundle grows (Tailwind output, Base UI, icons); the change's
   verification records before and after sizes.
+- Amendment (2026-11-24, #13): feedback is no longer excluded. The kit's
+  feedback primitives (`ActionBarPrimitive.FeedbackPositive/Negative`
+  with a runtime `adapters.feedback`) exist in `@assistant-ui/react`
+  0.15.37, but `FeedbackAdapter.submit` returns `void`, carries no reason,
+  and cannot report a failed save. The thumbs controls are therefore our
+  own component (`feedback/FeedbackControls.tsx`) built from the kit's
+  buttons and placed in the assistant action bar, posting to `POST
+  /feedback`. The other trimmed kit parts stay excluded.
 - Accepted audit finding (2026-11-23): `npm audit` reports 4 moderate
   issues from one chain, `shadcn` -> `ts-morph` -> `@ts-morph/common` ->
   `minimatch` (GHSA-g3hv-75wg-m249). `shadcn` is a dev dependency used only

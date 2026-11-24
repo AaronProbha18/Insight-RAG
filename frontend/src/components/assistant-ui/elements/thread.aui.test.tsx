@@ -24,7 +24,7 @@ function Live() {
 // load after the first render. A read-only thread cannot cancel, so Stop while
 // running is checked by hand (design D6).
 // Synthetic conversation. Cast: only the fields the thread reads are filled in.
-const conversation = (status: 'complete' | 'running') =>
+const conversation = (status: 'complete' | 'running', custom: object = {}) =>
   [
     {
       id: 'u1',
@@ -40,14 +40,14 @@ const conversation = (status: 'complete' | 'running') =>
       createdAt: new Date(0),
       content: [{ type: 'text', text: 'Items can be returned within 14 days.' }],
       status: status === 'complete' ? { type: 'complete', reason: 'stop' } : { type: 'running' },
-      metadata: { unstable_state: null, unstable_annotations: [], unstable_data: [], steps: [], custom: {} },
+      metadata: { unstable_state: null, unstable_annotations: [], unstable_data: [], steps: [], custom },
     },
   ] as unknown as ThreadMessage[]
 
-function Readonly({ status }: { status: 'complete' | 'running' }) {
+function Readonly({ status, custom }: { status: 'complete' | 'running'; custom?: object }) {
   return (
     <AssistantRuntimeProvider runtime={useLocalRuntime(chatAdapter)}>
-      <ReadonlyThreadProvider messages={conversation(status)}>
+      <ReadonlyThreadProvider messages={conversation(status, custom)}>
         <Thread />
       </ReadonlyThreadProvider>
     </AssistantRuntimeProvider>
@@ -69,5 +69,24 @@ describe('thread controls have accessible names', () => {
     expect(html).toContain('Items can be returned within 14 days.')
     expect(html).toMatch(button('Copy'))
     expect(html).toMatch(button('Regenerate'))
+  })
+
+  it('offers feedback on a recorded answer and on an abstention', () => {
+    for (const abstained of [false, true]) {
+      const html = renderToStaticMarkup(
+        <Readonly status="complete" custom={{ citations: [], abstained, answerId: 'ans_1' }} />,
+      )
+
+      expect(html).toContain('Good answer')
+      expect(html).toContain('Bad answer')
+    }
+  })
+
+  it('offers no feedback while running or without an answer id', () => {
+    const running = renderToStaticMarkup(<Readonly status="running" custom={{ answerId: 'ans_1' }} />)
+    const unrecorded = renderToStaticMarkup(<Readonly status="complete" />)
+
+    expect(running).not.toContain('Good answer')
+    expect(unrecorded).not.toContain('Good answer')
   })
 })
