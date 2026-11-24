@@ -48,6 +48,7 @@ docx = "plumbline.connectors.builtin.docx:DocxConnector"
 
 [project.scripts]
 plumbline-eval = "plumbline.evals.runner:main"
+plumbline-feedback-export = "plumbline.feedback:main"
 
 [project.optional-dependencies]
 ollama = [
