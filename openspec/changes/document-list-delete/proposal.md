@@ -43,7 +43,7 @@ database volume is wiped.
 
 | Area | Yes/No | Note |
 | --- | --- | --- |
-| Answer quality (retrieval, ranking, chunking, embeddings, prompts, graph) | Yes | Retrieval logic unchanged, but deleting removes sources from answers; a deleted document must never be cited again. |
+| Answer quality (retrieval, ranking, chunking, embeddings, prompts, graph) | No | Retrieval, ranking, chunking, embeddings, prompts and the graph are unchanged. Deleting removes a source, as uploading adds one. That a deleted document is never retrieved or cited is a correctness property, checked by a deterministic test (`eval-plan.md`), not by an eval run. |
 | Connector / ingestion | No | Ingestion unchanged; re-upload after delete works through the existing hash dedupe. |
 | Auth / document ACLs | No | No per-user permissions (non-goal); anyone with the UI can delete, as anyone can upload today. |
 | Public API or stream contract | Yes | New `DELETE /documents/{document_id}` endpoint. `/chat` unchanged. |
