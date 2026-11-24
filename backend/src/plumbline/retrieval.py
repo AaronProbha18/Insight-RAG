@@ -13,13 +13,14 @@ class RetrievedChunk:
     locator: str
     text: str
     score: float  # cosine similarity, higher is closer
+    filename: str = ""  # internal; recorded with answers, never sent to clients
 
 
 def retrieve(conn: psycopg.Connection, embeddings, question: str, top_k: int = 5):
     query = str(list(embeddings.embed_query(question)))
     rows = conn.execute(
         "SELECT c.id, d.public_id, d.title, c.locator, c.text,"
-        " 1 - (c.embedding <=> %s::vector) AS score"
+        " 1 - (c.embedding <=> %s::vector) AS score, d.filename"
         " FROM chunks c JOIN documents d ON d.id = c.document_id"
         " ORDER BY c.embedding <=> %s::vector, c.id LIMIT %s",
         (query, query, top_k),
