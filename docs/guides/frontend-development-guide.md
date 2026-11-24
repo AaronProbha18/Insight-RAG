@@ -79,7 +79,7 @@ than showing partial text:
 ```
 
 **2.4 The wire format changes in one PR with the backend.**
-`backend/src/insight_rag/api/app.py` produces it and `chat/adapter.ts`
+`backend/src/plumbline/api/app.py` produces it and `chat/adapter.ts`
 consumes it.
 
 **2.5 Parse only complete SSE blocks.** An event can arrive split across

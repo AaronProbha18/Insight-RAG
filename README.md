@@ -1,4 +1,4 @@
-# insight-rag
+# Plumbline
 
 Open-source retrieval-augmented generation: plug in a source through a
 connector, ask questions, and get answers that cite where they came from -
@@ -13,7 +13,7 @@ Ollama or any provider LangChain supports.
 
 Every answer cites the passages it relies on, with the document title and a
 page number or heading path, and you can open each one. When the retrieved
-passages don't support an answer, insight-rag says so rather than guess.
+passages don't support an answer, Plumbline says so rather than guess.
 Each connector is gated by an evaluation run: correctness, faithfulness and
 abstention on unanswerable questions must each reach 0.80, scored by an LLM
 judge that is itself checked against human labels first.
@@ -38,17 +38,20 @@ M1 running [Ollama](https://ollama.com) natively, so it uses the GPU.
 
    | Variable | Required | Example | Purpose |
    | --- | --- | --- | --- |
-   | `INSIGHT_RAG_LLM` | yes | `ollama:llama3.1:8b` | chat model, as `provider:model` |
-   | `INSIGHT_RAG_EMBEDDINGS` | yes | `ollama:nomic-embed-text` | embedding model |
-   | `INSIGHT_RAG_EMBEDDING_DIM` | yes | `768` | vector size of that embedding model; fixed at first start |
-   | `INSIGHT_RAG_MODEL_BASE_URL` | in Docker | `http://host.docker.internal:11434` | where the container reaches Ollama on your machine |
-   | `INSIGHT_RAG_JUDGE_LLM` | for evals | `ollama:llama3.1:8b` | eval judge; deliberately separate from the chat model |
-   | `INSIGHT_RAG_ABSTAIN_THRESHOLD` | no | `0.3` | minimum retrieval similarity before answering |
-   | `DATABASE_URL` | no | `postgresql://insight_rag:insight_rag@localhost:5432/insight_rag` | defaults to the compose `db` service on localhost; compose sets its own for the app |
-   | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | no | `insight_rag` | database credentials; the defaults are for local use only |
+   | `PLUMBLINE_LLM` | yes | `ollama:llama3.1:8b` | chat model, as `provider:model` |
+   | `PLUMBLINE_EMBEDDINGS` | yes | `ollama:nomic-embed-text` | embedding model |
+   | `PLUMBLINE_EMBEDDING_DIM` | yes | `768` | vector size of that embedding model; fixed at first start |
+   | `PLUMBLINE_MODEL_BASE_URL` | in Docker | `http://host.docker.internal:11434` | where the container reaches Ollama on your machine |
+   | `PLUMBLINE_JUDGE_LLM` | for evals | `ollama:llama3.1:8b` | eval judge; deliberately separate from the chat model |
+   | `PLUMBLINE_ABSTAIN_THRESHOLD` | no | `0.3` | minimum retrieval similarity before answering |
+   | `DATABASE_URL` | no | `postgresql://plumbline:plumbline@localhost:5432/plumbline` | defaults to the compose `db` service on localhost; compose sets its own for the app |
+   | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | no | `plumbline` | database credentials; the defaults are for local use only |
 
-   (`INSIGHT_RAG_UI_DIR` is set by the Docker image to serve the built UI;
+   (`PLUMBLINE_UI_DIR` is set by the Docker image to serve the built UI;
    you don't set it.)
+
+   Upgrading from the previous name? See
+   [docs/migration/plumbline.md](docs/migration/plumbline.md).
 
 3. **Run:**
 
@@ -61,7 +64,7 @@ M1 running [Ollama](https://ollama.com) natively, so it uses the GPU.
 
 > **Changing the embedding model** changes the vector size, and the
 > database column is fixed at first start. Run `docker compose down -v`
-> (this deletes indexed documents), update `INSIGHT_RAG_EMBEDDING_DIM`, and
+> (this deletes indexed documents), update `PLUMBLINE_EMBEDDING_DIM`, and
 > start again.
 
 Other providers: install their LangChain package by building with
@@ -75,8 +78,8 @@ docker compose up -d db                     # Postgres + pgvector only
 
 cd backend
 uv sync --extra ollama
-uv run alembic upgrade head                 # needs INSIGHT_RAG_EMBEDDING_DIM
-uv run fastapi dev src/insight_rag/api/app.py   # API on :8000
+uv run alembic upgrade head                 # needs PLUMBLINE_EMBEDDING_DIM
+uv run fastapi dev src/plumbline/api/app.py   # API on :8000
 
 cd frontend
 npm install
@@ -96,7 +99,7 @@ suite fails with "failed to find the current suite".
 
 ### Evaluations
 
-`uv run insight-rag-eval` scores every connector against its golden set and
+`uv run plumbline-eval` scores every connector against its golden set and
 exits 0 (pass), 1 (a connector is below 0.80) or 2 (judge not validated, so
 no result). See [evals/README.md](evals/README.md).
 

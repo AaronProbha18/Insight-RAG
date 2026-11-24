@@ -15,7 +15,7 @@ Closes #<!-- issue number -->
 - [ ] Backend: `uv run ruff check . && uv run ruff format --check . && uv run pytest`
 - [ ] Frontend: `npm run lint && npm run build && npm test`
 - [ ] `openspec validate --all` and `python scripts/check_links.py`
-- [ ] **Answer quality could change?** `insight-rag-eval` run, results vs baseline: <!-- paste or "n/a" -->
+- [ ] **Answer quality could change?** `plumbline-eval` run, results vs baseline: <!-- paste or "n/a" -->
 - [ ] UI changed? Seen in a browser in light **and** dark mode
 
 ## Checklist

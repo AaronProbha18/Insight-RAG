@@ -1,6 +1,6 @@
 # Architecture overview
 
-insight-rag answers questions over documents you upload, citing where each
+Plumbline answers questions over documents you upload, citing where each
 answer came from or saying the documents don't cover it. Content enters
 through **connectors**, is chunked and embedded into **Postgres +
 pgvector**, and is answered by a small **LangGraph** graph that runs inside
@@ -32,8 +32,8 @@ goes:
 
 | Adding… | Goes in |
 | --- | --- |
-| a file connector | its own package, registered under the `insight_rag.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/insight_rag/connectors/builtin/` |
-| an API route | `backend/src/insight_rag/api/app.py` (thin: validate, call a module, map errors to status codes) |
+| a file connector | its own package, registered under the `plumbline.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/plumbline/connectors/builtin/` |
+| an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
 | a UI component | `frontend/src/chat/` or `frontend/src/upload/`, or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
@@ -62,7 +62,7 @@ goes:
 2. `graph.build_graph` runs `retrieve` (`retrieval.retrieve`: exact cosine
    top-k).
 3. If there are no chunks, or the best score is below
-   `INSIGHT_RAG_ABSTAIN_THRESHOLD`, it goes to **abstain**, and the LLM is
+   `PLUMBLINE_ABSTAIN_THRESHOLD`, it goes to **abstain**, and the LLM is
    not called.
 4. Otherwise, **generate**: sources are numbered `[c1]…[cN]`, and the model
    must answer only from them and cite every claim. A reply of
@@ -73,7 +73,7 @@ goes:
    `abstain`, `done`; or `error` with a generic message. There is never a
    confidence score.
 
-### Evaluate: `insight-rag-eval`
+### Evaluate: `plumbline-eval`
 
 1. `evals.runner.run` checks the judge against human labels first
    (`evals.judge.validate_judge`). If they're unreviewed or agreement is
@@ -95,13 +95,13 @@ fails CI.
   a retriever function and an LLM injected. That's why it is tested with
   fakes and no Postgres.
 - **Built-in connectors use only the public contract**
-  (`insight_rag.connectors.contract`), the same surface a third-party
+  (`plumbline.connectors.contract`), the same surface a third-party
   connector gets. If a built-in needs more, the contract is missing
   something.
 - **Configuration is read in a few places only:** `models.py` (models),
   `db.py` (database location), and the composition roots `api/app.py` and
   `evals/runner.py` (thresholds), plus the migration (vector dimension).
-  `config.py` only rejects old `INSIGHT_RAG_*` names at startup.
+  `config.py` only rejects pre-rename variable names at startup.
   Everything else takes its inputs as arguments.
 - **Evals exercise production code**, never a copy of it. A metric that
   moves reflects a real behaviour change.
@@ -114,7 +114,7 @@ fails CI.
 | `chunks` | text + locator + `embedding vector(N)` | `ON DELETE CASCADE` from `documents`; unique `(document_id, ordinal)` |
 
 - Internal integer ids never leave the backend.
-- `N` comes from `INSIGHT_RAG_EMBEDDING_DIM` **when the migration runs**,
+- `N` comes from `PLUMBLINE_EMBEDDING_DIM` **when the migration runs**,
   and is then fixed. Changing the embedding model means a new migration and
   re-ingesting every document ([ADR 0002](../adr/0002-postgres-pgvector-default-store.md)).
 - Schema changes are **new** Alembic revisions with hand-written SQL in

@@ -1,6 +1,6 @@
 # evals
 
-Evaluation data. The code that runs evals lives in `backend/src/insight_rag/evals`.
+Evaluation data. The code that runs evals lives in `backend/src/plumbline/evals`.
 
 ## Fixture corpus
 
@@ -38,14 +38,14 @@ sets too.
 ## Running evals
 
 Requires Postgres (`docker compose up -d db`) and these environment
-variables: `INSIGHT_RAG_LLM`, `INSIGHT_RAG_EMBEDDINGS`,
-`INSIGHT_RAG_EMBEDDING_DIM`, `INSIGHT_RAG_JUDGE_LLM`, and optionally
-`INSIGHT_RAG_ABSTAIN_THRESHOLD` and `DATABASE_URL`.
+variables: `PLUMBLINE_LLM`, `PLUMBLINE_EMBEDDINGS`,
+`PLUMBLINE_EMBEDDING_DIM`, `PLUMBLINE_JUDGE_LLM`, and optionally
+`PLUMBLINE_ABSTAIN_THRESHOLD` and `DATABASE_URL`.
 
 ```bash
 cd backend
-uv run insight-rag-eval                       # every connector with a golden set
-uv run insight-rag-eval --connectors pdf --sample 8   # quick iteration, not a gate result
+uv run plumbline-eval                       # every connector with a golden set
+uv run plumbline-eval --connectors pdf --sample 8   # quick iteration, not a gate result
 ```
 
 Each connector runs in its own throwaway database, which is created,
@@ -57,7 +57,7 @@ human-reviewed (`reviewed: true`), the run stops with no gate result.
 | --- | --- |
 | 0 | every connector PASSes (correctness, faithfulness, abstention >= 0.80) |
 | 1 | at least one connector FAILs; the summary names the metric |
-| 2 | no PASS/FAIL is reported: judge not validated, or an old `INSIGHT_RAG_*` variable is set |
+| 2 | no PASS/FAIL is reported: judge not validated, or a pre-rename variable is set |
 
 The report (`reports/latest.json`, gitignored) records the model ids, the
 threshold, the golden-set version, every metric, latency, and each

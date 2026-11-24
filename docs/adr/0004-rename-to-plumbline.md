@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Introduced by the `rename-to-plumbline` change (issue #11).
+Accepted. Introduced by the `rename-to-plumbline` change (issue #11).
 
 ## Context
 
