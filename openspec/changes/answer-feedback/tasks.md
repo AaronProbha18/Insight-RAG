@@ -5,7 +5,7 @@
 
 ## 2. Backend: feedback API and export
 
-- [ ] 2.1 `POST /feedback` with `save_feedback()` upsert: 204, 422 (bad rating/reason, reason on `up`, comment > 2000), 404 "Answer not found". Test: `test_feedback_api.py` - each AC case incl. abstention + `should_have_answered`, change replaces (one row), no internal details, `test_no_confidence_field_anywhere` still passes.
+- [x] 2.1 `POST /feedback` with `save_feedback()` upsert: 204, 422 (bad rating/reason, reason on `up`, comment > 2000), 404 "Answer not found". Test: `test_feedback_api.py` - each AC case incl. abstention + `should_have_answered`, change replaces (one row), no internal details, `test_no_confidence_field_anywhere` still passes.
 - [ ] 2.2 `plumbline-feedback-export --out PATH` (console script, default `evals/feedback/candidates.yaml`, git-ignored). Test: `test_feedback_export.py` - the four mapping rows of the design table; `reference_answer` empty; output loads as YAML list in golden shape; golden files untouched; works after a cited document is deleted.
 
 ## 3. Frontend
