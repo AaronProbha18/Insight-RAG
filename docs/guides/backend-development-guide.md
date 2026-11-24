@@ -73,6 +73,8 @@ code marks this with a `ponytail:` comment.
 | --- | --- |
 | 201 | a new document was indexed |
 | 200 | the same bytes were already indexed (`created: false`), so uploads are idempotent |
+| 204 | `DELETE /documents/{document_id}` removed the document and its chunks |
+| 404 | `DELETE /documents/{document_id}` for an unknown or already-deleted id; the message is always "Document not found" |
 | 415 | no connector handles the file type; the message lists the supported types |
 | 422 | the connector can't read the file (`ParseError`), or the request body is invalid |
 | 500 | anything else; the client never sees internal details |
