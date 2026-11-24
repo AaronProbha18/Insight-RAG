@@ -62,3 +62,31 @@ human-reviewed (`reviewed: true`), the run stops with no gate result.
 The report (`reports/latest.json`, gitignored) records the model ids, the
 threshold, the golden-set version, every metric, latency, and each
 question's result.
+
+## Feedback candidates
+
+People rate answers in the UI. `plumbline-feedback-export` turns every
+rating into a candidate golden question for review:
+
+```bash
+cd backend
+uv run plumbline-feedback-export            # writes evals/feedback/candidates.yaml
+uv run plumbline-feedback-export --out PATH
+```
+
+| Feedback | `answerable` | `supporting` |
+| --- | --- | --- |
+| thumbs up on an answer | `true` | the cited file name (no extension) and locator |
+| thumbs up on an abstention | `false` | none |
+| thumbs down, reason "should have answered" | `true` | none (a reviewer adds it) |
+| thumbs down, any other reason or none | `null`: the reviewer decides | the cited file name and locator |
+
+Review flow: open the file, and for each entry you keep, write the
+`reference_answer` and `key_fact`, decide `answerable` where it is `null`,
+check `supporting`, delete the `feedback:` block, and paste the entry into
+the right connector's `golden.yaml`. Nothing is added to a golden set
+automatically, and the golden-set validator rejects an entry until it is
+complete.
+
+The file holds real questions and answers typed by users. It is
+git-ignored: review it, don't commit it.

@@ -10,7 +10,7 @@ served from the same origin.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE; POST /feedback| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
   ING --> C[connectors via entry points]
@@ -36,6 +36,7 @@ goes:
 | an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
 | a UI component | `frontend/src/chat/` or `frontend/src/upload/`, or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
+| answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
 
 ## Flows
@@ -79,10 +80,28 @@ goes:
    must answer only from them and cite every claim. A reply of
    `NOT_IN_SOURCES`, or one with no valid citation, becomes an
    abstention.
-5. The whole result is computed **before** the response starts (D8,
+5. The result is recorded as one `answers` row (`feedback.record_answer`).
+6. The whole result is computed **before** the response starts (D8,
    option A), then streamed as SSE: `delta…`, `citations`, `done`; or
-   `abstain`, `done`; or `error` with a generic message. There is never a
-   confidence score.
+   `abstain`, `done`; each `done` carries the answer's public `answer_id`.
+   If anything fails, including recording, the stream is a single `error`
+   with a generic message and no `answer_id`. There is never a confidence
+   score.
+
+### Rate an answer: `POST /feedback`
+
+1. The UI shows thumbs up and down on a recorded answer (answers and
+   abstentions alike); thumbs down can add a reason and comment.
+2. `feedback.save_feedback` upserts the one `feedback` row for that answer,
+   so a change replaces the earlier rating: **204**. An unknown `answer_id`
+   is **404**, an invalid body **422**.
+
+### Review feedback: `plumbline-feedback-export`
+
+`feedback.export_candidates` turns every feedback row into a candidate in
+the `golden.yaml` shape and writes it to `evals/feedback/candidates.yaml`
+(git-ignored). A maintainer reviews it and copies entries into a golden set
+by hand; nothing is added automatically ([evals README](../../evals/README.md#feedback-candidates)).
 
 ### Evaluate: `plumbline-eval`
 
@@ -123,6 +142,12 @@ fails CI.
 | --- | --- | --- |
 | `documents` | one row per unique file | `content_hash` (SHA-256) is unique: the idempotency key. `public_id` is `doc_<ULID>`, the only id clients ever see. |
 | `chunks` | text + locator + `embedding vector(N)` | `ON DELETE CASCADE` from `documents`; unique `(document_id, ordinal)` |
+| `answers` | one row per answer or abstention `/chat` returned | `public_id` is `ans_<ULID>`. Holds the question, answer text, `abstained`, model ids and abstain threshold, and `citations` as JSONB (`document_id`, `title`, `filename`, `locator`) **copied** so a later document delete doesn't lose it. |
+| `feedback` | at most one row per answer | `answer_id` is unique; `ON DELETE CASCADE` from `answers`. `rating` up or down, optional `reason` (down only) and `comment` (max 2000), enforced by `CHECK`s. |
+
+**Stored locally:** every question asked and every answer is kept, with no
+retention limit, so nobody should type real personal data into the chat.
+The exported candidates file holds the same text.
 
 - Internal integer ids never leave the backend.
 - `N` comes from `PLUMBLINE_EMBEDDING_DIM` **when the migration runs**,
