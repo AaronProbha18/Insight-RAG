@@ -1,7 +1,7 @@
 ## 1. Backend
 
 - [x] 1.1 `delete_document(conn, document_id) -> bool` and `DELETE /documents/{document_id}` (204 / 404 "Document not found"). Test: `test_documents_api.py` - delete returns 204 and the document and its chunks are gone; unknown id and second delete return 404 with the fixed message; re-upload of the same bytes after delete returns 201.
-- [ ] 1.2 Deleted documents are never used: integration test - ingest two documents, ask a question only one answers (answers with a citation), delete it, ask again -> abstains, no citation, retrieval returns no chunk from it. Test: the eval-plan command passes.
+- [x] 1.2 Deleted documents are never used: integration test - ingest two documents, ask a question only one answers (answers with a citation), delete it, ask again -> abstains, no citation, retrieval returns no chunk from it. Test: the eval-plan command passes.
 
 ## 2. Frontend
 
