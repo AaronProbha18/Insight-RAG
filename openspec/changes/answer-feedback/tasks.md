@@ -15,4 +15,4 @@
 
 ## 4. Docs
 
-- [ ] 4.1 Backend guide (status codes, D8 `done` payload), frontend guide (feedback controls, manual checks), architecture overview (answers/feedback tables, what is stored locally), `evals/README.md` (export command and review flow). Test: `python scripts/check_links.py` passes.
+- [x] 4.1 Backend guide (status codes, D8 `done` payload), frontend guide (feedback controls, manual checks), architecture overview (answers/feedback tables, what is stored locally), `evals/README.md` (export command and review flow). Test: `python scripts/check_links.py` passes.

@@ -75,12 +75,17 @@ code marks this with a `ponytail:` comment.
 | 200 | the same bytes were already indexed (`created: false`), so uploads are idempotent |
 | 204 | `DELETE /documents/{document_id}` removed the document and its chunks |
 | 404 | `DELETE /documents/{document_id}` for an unknown or already-deleted id; the message is always "Document not found" |
+| 204 | (also) `POST /feedback` stored the rating, or replaced the earlier one for that answer |
+| 404 | (also) `POST /feedback` for an unknown `answer_id`; the message is always "Answer not found" |
 | 415 | no connector handles the file type; the message lists the supported types |
-| 422 | the connector can't read the file (`ParseError`), or the request body is invalid |
+| 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters) |
 | 500 | anything else; the client never sees internal details |
 
-**2.2 Public ids only.** Clients see `document_id` (`doc_<ULID>`). Internal
-integer ids, and `RetrievedChunk.chunk_id`, never leave the backend.
+**2.2 Public ids only.** Clients see `document_id` (`doc_<ULID>`) and
+`answer_id` (`ans_<ULID>`). Internal integer ids, `RetrievedChunk.chunk_id`
+and a source file's `filename` (kept on the recorded answer for the
+feedback export) never leave the backend: `/chat` strips `filename` from the
+`citations` event.
 
 **2.3 No confidence numbers.** Responses never carry a model-reported
 confidence or a retrieval score. Trust comes from citations and evals.
@@ -89,7 +94,10 @@ confidence or a retrieval score. Trust comes from citations and evals.
 **2.4 `/chat` is a contract.** Its SSE events (`delta`, `citations`,
 `abstain`, `error`, `done`) are fixed in design D8, and
 `frontend/src/chat/adapter.ts` consumes them. Changing one means changing
-the other **in the same PR**.
+the other **in the same PR**. `done` carries `{"answer_id": "ans_<ULID>"}`
+for answers and abstentions, and is absent on the error path. An answer is
+recorded (`feedback.record_answer`) before it streams; if recording fails
+the client gets `error`, never an answer it cannot rate.
 
 ## 3. Errors
 
@@ -211,6 +219,10 @@ hard-code a URL anywhere else.
 the real thing: `tests/fake_embeddings.py` (`FakeEmbeddings`,
 `FailingEmbeddings`, `FixedEmbeddings`), `tests/fake_connectors.py`, and
 recording or scripted LLMs that keep the prompts they receive.
+
+**8.1a `/chat` tests inject a fake recorder** through the `get_recorder`
+dependency (`FakeRecorder` in `tests/test_chat_api.py`), so they need no
+database; `tests/test_feedback.py` checks the stored row against real tables.
 
 **8.2 Database tests are marked `db`** and use the `database_url` and
 `migrate` fixtures from `tests/conftest.py`. Each run gets its own

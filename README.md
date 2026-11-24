@@ -116,7 +116,8 @@ form. A maintainer triages it into a planned change (`/rag-triage`), then
 it's built task by task into a draft PR (`/rag-quick`). The issue is the
 source of truth throughout. The loops, labels and rules are in
 [AGENTS.md](AGENTS.md#workflow); review uses [REVIEW.md](REVIEW.md).
-Use synthetic data only, never real documents or personal data.
+Use synthetic data only, never real documents or personal data: the
+app stores every question and answer locally, with no retention limit.
 
 ## Learn more
 
