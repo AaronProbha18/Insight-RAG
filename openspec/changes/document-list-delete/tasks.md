@@ -11,4 +11,4 @@
 
 ## 3. Docs
 
-- [ ] 3.1 Backend guide §2.1 table gains 204 and 404 rows; frontend guide notes the documents dialog and its manual checks; architecture overview lists the new endpoint. Test: `python scripts/check_links.py` passes.
+- [x] 3.1 Backend guide §2.1 table gains 204 and 404 rows; frontend guide notes the documents dialog and its manual checks; architecture overview lists the new endpoint. Test: `python scripts/check_links.py` passes.

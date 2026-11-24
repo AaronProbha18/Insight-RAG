@@ -10,7 +10,7 @@ served from the same origin.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST /documents, POST /chat SSE| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
   ING --> C[connectors via entry points]
@@ -54,6 +54,17 @@ goes:
    its section's locator.
 6. **Embed before writing anything**, so a provider failure stores nothing.
 7. Insert the document and all chunks in **one transaction** → **201**.
+
+### Delete: `DELETE /documents/{document_id}`
+
+1. `api/app.py` `remove_document` calls `ingestion.delete_document`: one
+   `DELETE` by `public_id`. The chunks go with it through
+   `ON DELETE CASCADE`.
+2. Deleted → **204**. Unknown or already deleted → **404**
+   ("Document not found").
+3. Retrieval reads only `chunks`, so a deleted document can't be
+   retrieved or cited. Uploading the same bytes again indexes them again
+   (**201**).
 
 ### Ask: `POST /chat`
 
