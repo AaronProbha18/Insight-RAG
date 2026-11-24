@@ -6,7 +6,7 @@
 ## 2. Frontend
 
 - [x] 2.1 `frontend/src/documents/api.ts`: `listDocuments()` and `deleteDocument(id)`. Test: `api.test.ts` with stubbed `fetch` - list parse, 204 -> deleted, 404 -> not-found, 500 and network error throw.
-- [ ] 2.2 `DocumentList` component: rows (title, type, date), newest first as returned, delete button with `aria-label`, empty state pointing to upload. Test: `DocumentList.test.tsx` static markup - two rows in order with all fields; empty state text; accessible names present; title is HTML-escaped.
+- [x] 2.2 `DocumentList` component: rows (title, type, date), newest first as returned, delete button with `aria-label`, empty state pointing to upload. Test: `DocumentList.test.tsx` static markup - two rows in order with all fields; empty state text; accessible names present; title is HTML-escaped.
 - [ ] 2.3 "Documents (n)" button in the upload bar opening a `Dialog` with `DocumentList`; delete via `AlertDialog` confirm; refetch on open and after a successful upload. Test: static markup of the button with its count and accessible name; `npm run lint && npm run build && npm test`; keyboard/focus/confirm and both themes checked by hand in a browser.
 
 ## 3. Docs
