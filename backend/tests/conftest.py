@@ -21,7 +21,7 @@ def database_url():
             f"Postgres unreachable at DATABASE_URL ({exc}); run `docker compose up -d db`"
         )
 
-    name = f"insight_rag_test_{secrets.token_hex(4)}"
+    name = f"plumbline_test_{secrets.token_hex(4)}"
     admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
     url = psycopg.conninfo.make_conninfo(admin_url, dbname=name)
     try:

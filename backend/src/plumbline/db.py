@@ -3,7 +3,7 @@
 import os
 
 # Matches the docker-compose `db` service defaults; local development only.
-DEFAULT_DATABASE_URL = "postgresql://insight_rag:insight_rag@localhost:5432/insight_rag"
+DEFAULT_DATABASE_URL = "postgresql://plumbline:plumbline@localhost:5432/plumbline"
 
 
 def database_url() -> str:

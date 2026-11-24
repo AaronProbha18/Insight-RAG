@@ -39,7 +39,7 @@ EVALS_DIR = BACKEND.parent / "evals"
 def _isolated_db(name: str):
     """A migrated throwaway database for one connector; always dropped."""
     admin_url = database_url()
-    db = f"insight_rag_eval_{name}_{secrets.token_hex(4)}"
+    db = f"plumbline_eval_{name}_{secrets.token_hex(4)}"
     with psycopg.connect(admin_url, autocommit=True, connect_timeout=5) as admin:
         admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db)))
         try:

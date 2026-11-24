@@ -11,7 +11,7 @@
 
 ## 3. Infra and database defaults
 
-- [ ] 3.1 Default DB credentials `plumbline` in `db.py`, `docker-compose.yml`, CI; Docker service/image names; temp DB prefixes `insight_rag_test_` / `insight_rag_eval_` (`conftest.py`, `test_database.py`, `runner.py`, `test_runner.py`). Test: backend suite against the renamed DB; `docker compose config` shows new names.
+- [x] 3.1 Default DB credentials `plumbline` in `db.py`, `docker-compose.yml`, CI; Docker service/image names; temp DB prefixes `insight_rag_test_` / `insight_rag_eval_` (`conftest.py`, `test_database.py`, `runner.py`, `test_runner.py`). Test: backend suite against the renamed DB; `docker compose config` shows new names.
 
 ## 4. Frontend, fixtures, docs
 

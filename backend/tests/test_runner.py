@@ -75,7 +75,7 @@ def _run(evals_dir, tmp_path, llm=None, embeddings=None, sample=None):
 def _eval_databases(database_url):
     with psycopg.connect(database_url) as conn:
         rows = conn.execute(
-            "SELECT datname FROM pg_database WHERE datname LIKE 'insight_rag_eval_%'"
+            "SELECT datname FROM pg_database WHERE datname LIKE 'plumbline_eval_%'"
         ).fetchall()
     return rows
 
