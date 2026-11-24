@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 
 from plumbline import models
+from plumbline.config import check_legacy_env
 from plumbline.connectors import FileConnector, ParseError
 from plumbline.connectors.registry import load_connectors
 from plumbline.db import database_url
@@ -21,6 +22,7 @@ from plumbline.graph import DEFAULT_THRESHOLD, build_graph
 from plumbline.ingestion import UnsupportedFileType, ingest
 from plumbline.retrieval import retrieve
 
+check_legacy_env()
 app = FastAPI(title="Plumbline")
 log = logging.getLogger(__name__)
 

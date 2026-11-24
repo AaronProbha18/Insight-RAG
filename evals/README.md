@@ -57,7 +57,7 @@ human-reviewed (`reviewed: true`), the run stops with no gate result.
 | --- | --- |
 | 0 | every connector PASSes (correctness, faithfulness, abstention >= 0.80) |
 | 1 | at least one connector FAILs; the summary names the metric |
-| 2 | judge not validated: no PASS/FAIL is reported |
+| 2 | no PASS/FAIL is reported: judge not validated, or an old `INSIGHT_RAG_*` variable is set |
 
 The report (`reports/latest.json`, gitignored) records the model ids, the
 threshold, the golden-set version, every metric, latency, and each

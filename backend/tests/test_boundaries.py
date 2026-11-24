@@ -6,6 +6,7 @@ from pathlib import Path
 BACKEND = Path(__file__).parents[1]
 PKG = BACKEND / "src" / "plumbline"
 CONFIG_READERS = {
+    "config.py",
     "models.py",
     "db.py",
     "api/app.py",

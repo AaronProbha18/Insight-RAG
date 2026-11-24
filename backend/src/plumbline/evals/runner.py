@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import secrets
+import sys
 import time
 from contextlib import contextmanager
 from dataclasses import asdict
@@ -20,6 +21,7 @@ from alembic.config import Config
 from psycopg import sql
 
 from plumbline import models
+from plumbline.config import LegacyConfigError, check_legacy_env
 from plumbline.connectors.registry import load_connectors
 from plumbline.db import database_url
 from plumbline.evals.golden import load_golden, load_labelled
@@ -161,6 +163,11 @@ def run(
 
 
 def main(argv: list[str] | None = None) -> int:
+    try:
+        check_legacy_env()
+    except LegacyConfigError as exc:
+        print(f"NO GATE RESULT: {exc}", file=sys.stderr)
+        return 2
     parser = argparse.ArgumentParser(prog="plumbline-eval", description=__doc__)
     parser.add_argument(
         "--connectors", help="comma-separated names (default: all with a golden set)"

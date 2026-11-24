@@ -55,7 +55,8 @@ import psycopg
 *Enforced by* `tests/test_boundaries.py`.
 
 **1.4 Configuration has owners.** Environment variables are read only in
-`models.py`, `db.py` and the two composition roots. *Enforced by*
+`models.py`, `db.py`, `config.py` (the legacy-variable check) and the two
+composition roots. *Enforced by*
 `tests/test_boundaries.py`.
 
 **1.5 Sync routes, one connection per request.** Routes are plain `def`,

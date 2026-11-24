@@ -101,6 +101,7 @@ fails CI.
 - **Configuration is read in a few places only:** `models.py` (models),
   `db.py` (database location), and the composition roots `api/app.py` and
   `evals/runner.py` (thresholds), plus the migration (vector dimension).
+  `config.py` only rejects old `INSIGHT_RAG_*` names at startup.
   Everything else takes its inputs as arguments.
 - **Evals exercise production code**, never a copy of it. A metric that
   moves reflects a real behaviour change.

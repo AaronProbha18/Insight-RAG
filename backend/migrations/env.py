@@ -6,11 +6,13 @@ import psycopg
 from alembic import context
 from sqlalchemy import create_engine
 
+from plumbline.config import check_legacy_env
 from plumbline.db import database_url
 
 if context.config.config_file_name:
     fileConfig(context.config.config_file_name, disable_existing_loggers=False)
 
+check_legacy_env()
 url = database_url()
 
 # psycopg parses DATABASE_URL itself, so both URL and key=value forms work.
