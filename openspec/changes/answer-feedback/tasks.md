@@ -11,7 +11,7 @@
 ## 3. Frontend
 
 - [x] 3.1 `adapter.ts` reads `answer_id` from `done` into `metadata.custom.answerId`; `feedback/api.ts` `sendFeedback()`. Test: `adapter.test.ts` - `answerId` set for answers and abstentions, absent on error; `api.test.ts` stubbed `fetch` - 204 saved, 404 not-found, 422/500/network throw.
-- [ ] 3.2 Amend ADR 0003; vendor the kit feedback part into the assistant action bar (or plain buttons in kit styling if the UNVERIFIED API is missing); thumbs-down reason form; recorded state shown; hidden while running or on error. Test: static markup with `ReadonlyThreadProvider` - controls with accessible names on a finished answer and an abstention, none on a running message; `npm run lint && npm run build && npm test`; keyboard, focus, form and both themes checked by hand.
+- [x] 3.2 Amend ADR 0003; vendor the kit feedback part into the assistant action bar (or plain buttons in kit styling if the UNVERIFIED API is missing); thumbs-down reason form; recorded state shown; hidden while running or on error. Test: static markup with `ReadonlyThreadProvider` - controls with accessible names on a finished answer and an abstention, none on a running message; `npm run lint && npm run build && npm test`; keyboard, focus, form and both themes checked by hand.
 
 ## 4. Docs
 
