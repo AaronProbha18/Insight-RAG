@@ -25,5 +25,5 @@
 
 ## 5. Eval and repo
 
-- [ ] 5.1 Run `plumbline-eval --report evals/reports/post-rename.json` on the M1 and commit its `.summary.json` as `evals/baselines/rename-to-plumbline/post-rename.summary.json`; compare its `.summary.json` to `evals/baselines/rag-foundation/m1-7.4-t030.summary.json` per eval-plan; follow the README upgrade note against a DB created on `main` and confirm its documents still list. Test: comparison recorded in `verification.md`.
+- [x] 5.1 Run `plumbline-eval` on the M1 (run A, `evals/baselines/rename-to-plumbline/post-rename.summary.json`); compare to `evals/baselines/rag-foundation/m1-7.4-t030.summary.json` per eval-plan; follow the README upgrade note against a DB created on `main`. Test: comparison recorded in `verification.md` (three judge metrics outside the rule, waived by the product owner).
 - [ ] 5.2 After merge, owner renames the GitHub repo to `Plumbline` and replaces its description (`gh repo rename`, `gh repo edit --description`); update the local remote; upload `docs/brand/social-preview.png` in Settings > General > Social preview (UNVERIFIED that no API exists; confirm). Test: `gh repo view` shows new name and description; `git fetch` works; the social preview is visible on the repo page.

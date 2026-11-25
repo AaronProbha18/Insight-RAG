@@ -37,6 +37,10 @@ comparison baseline. Its `golden_version` hashes differ from the M1 ones only
 because the Windows checkout has CRLF line endings; the golden files are
 identical in git.
 
+## Result
+
+Run A (`evals/baselines/rename-to-plumbline/post-rename.summary.json`): retrieval metrics and settings equal the baseline; docx correctness, pdf correctness and pdf faithfulness are outside +/-0.05 (see `verification.md`). The product owner waived those three as sampling noise (`models.py` sets no temperature or seed); no second run was made.
+
 ## Pass Rule
 
 Any retrieval metric differs from baseline, or any judge metric moves more
