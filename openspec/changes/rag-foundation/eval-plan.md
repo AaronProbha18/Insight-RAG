@@ -18,14 +18,17 @@ for every metric.
 
 ## Metrics
 
+Baseline = task 7.4 run A (threshold 0.3), docx / pdf. See
+[Baseline run](#baseline-run-task-74) below.
+
 | Metric | Baseline | Target / Threshold |
 | --- | --- | --- |
-| Answer correctness | none yet - this run establishes it | >= 0.80 per connector (gate) |
-| Faithfulness | none yet | >= 0.80 per connector (gate) |
-| Abstention on unanswerable | none yet | >= 0.80 per connector (gate) |
-| Retrieval hit-rate@k (k = graph top_k) | none yet | tracked; recorded as baseline |
-| Judge agreement with human labels | none yet | >= 0.80 or no gate result |
-| Latency p95 per answer | none yet | tracked only |
+| Answer correctness | **0.767 / 0.700** (FAIL) | >= 0.80 per connector (gate) |
+| Faithfulness | 0.897 / 0.875 | >= 0.80 per connector (gate) |
+| Abstention on unanswerable | 1.000 / 1.000 | >= 0.80 per connector (gate) |
+| Retrieval hit-rate@k (k = graph top_k) | 0.967 / 1.000 (k = 5) | tracked; recorded as baseline |
+| Judge agreement with human labels | correctness 1.0, faithfulness 0.9 | >= 0.80 or no gate result |
+| Latency p95 per answer | 61.0 s / 58.0 s (M1, Ollama native) | tracked only |
 
 ## Pass Rule
 
@@ -41,3 +44,50 @@ changing pipeline parameters, never by editing golden answers.
 docker compose up -d db
 cd backend && uv run insight-rag-eval --connectors pdf,docx --report ../evals/reports/latest.json
 ```
+
+## Baseline run (task 7.4)
+
+Run on the reference M1 (arm64, Ollama native) on 2026-11-25 at commit
+`476445a`, 40 golden questions per connector. Models:
+`ollama:llama3.1:8b` (chat), `ollama:nomic-embed-text` (embeddings),
+`ollama:qwen2.5:7b` (judge). Evidence:
+[`evals/baselines/rag-foundation/`](../../../evals/baselines/rag-foundation/)
+(shareable summaries and the smoke output).
+
+| Run | Threshold | Correctness docx / pdf | Faithfulness | Abstention | Hit-rate | Duration |
+| --- | --- | --- | --- | --- | --- | --- |
+| A (baseline) | 0.3 | 0.767 / 0.700 | 0.897 / 0.875 | 1.0 / 1.0 | 0.967 / 1.0 | 61 min |
+| B (tuned once) | 0.2 | 0.800 / 0.667 | 0.897 / 0.870 | 1.0 / 1.0 | 0.967 / 1.0 | 42 min |
+
+**Threshold decision: keep 0.3.** The one allowed tuning did not move
+correctness: the mean is 0.733 at both thresholds. Failures per run, out
+of 30 answerable questions per connector:
+
+| Cause | A docx | A pdf | B docx | B pdf |
+| --- | --- | --- | --- | --- |
+| Abstained although the right source was retrieved (`hit=True`) | 0 | 6 | 0 | 7 |
+| Abstained, retrieval missed (`hit=False`) | 1 (q21) | 0 | 1 (q21) | 0 |
+| Citation-only reply, no answer text (`"[c1]"`, `"[40] [c1]"`) | 4 | 1 | 3 | 0 |
+| Answered with wrong or unsupported content | 2 | 2 | 2 | 3 |
+| **Correct** | **23** | **21** | **24** | **20** |
+
+So the threshold is not the lever. Retrieval works (hit-rate 0.97 to 1.0);
+the losses are in answer generation. Either the model says
+`NOT_IN_SOURCES` or omits a valid citation, so the graph discards an
+answer it had the source for (PDF), or it emits only citation markers
+(DOCX). Different questions fail in A and B, including failures a
+threshold change cannot cause (abstentions with the source retrieved,
+citation-only replies), which points to **run-to-run variation in the
+model's output**. Its size is not measured yet: repeat a run at fixed
+settings before treating differences of a few hundredths as real.
+
+**Verdict: the pass rule is not met.** The judge validates, faithfulness,
+abstention and retrieval pass, but correctness is below 0.80 on both
+connectors in run A (and on pdf in run B). Per the pass rule this is not
+fixed by further threshold tuning or by editing golden answers; the fix
+belongs to answer generation (prompt and output format, deterministic
+sampling) in a follow-up `answer-quality` change, measured against this
+baseline.
+
+Smoke test (task 9.2) on the same M1, via Docker: health, upload (201,
+3 chunks), and a cited answer all PASS.

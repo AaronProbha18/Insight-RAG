@@ -133,7 +133,9 @@ start small - every component is the simplest one that meets the trust bar.
   ```
   `generate` is prompted to answer only from the retrieved chunks, cite them
   by id, and say it cannot answer when they are insufficient. The abstain
-  threshold is calibrated from the first eval run, not guessed.
+  threshold is calibrated from the first eval run, not guessed. Calibrated
+  in task 7.4: 0.3 kept; lowering it to 0.2 did not raise correctness, whose
+  losses are in generation, not retrieval (see eval-plan.md "Baseline run").
 - **Alternatives**: query rewriting, grading/retry loops, reranker.
 - **Why**: smallest graph that implements cited answers and abstention;
   additions must earn their place by moving eval metrics.
