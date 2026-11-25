@@ -62,3 +62,11 @@ human-reviewed (`reviewed: true`), the run stops with no gate result.
 The report (`reports/latest.json`, gitignored) records the model ids, the
 threshold, the golden-set version, every metric, latency, and each
 question's result.
+
+Next to it, `reports/latest.summary.json` is the **shareable** result: models,
+threshold, judge agreement, PASS/FAIL and the four metrics per connector,
+latency, total duration, git commit and host. It has no per-question text,
+and it is written even when the judge gate stops the run (exit 2). In an
+interactive terminal a progress bar shows judge validation, then ingest and
+questions per connector with an ETA; `--no-progress` turns it off (it is off
+automatically when output is piped).
