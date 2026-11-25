@@ -1,0 +1,53 @@
+{
+  "started_at": "2026-11-25T09:00:00+00:00",
+  "git_commit": "abc1234",
+  "host": {
+    "platform": "test-host",
+    "machine": "x",
+    "cpus": 1,
+    "python": "3"
+  },
+  "models": {
+    "llm": "fake:chat",
+    "embeddings": "fake:embed",
+    "judge": "fake:judge"
+  },
+  "threshold": 0.3,
+  "top_k": 5,
+  "sample": null,
+  "result": "FAIL",
+  "exit_code": 1,
+  "judge_agreement": 0.9,
+  "connectors": {
+    "pdf": {
+      "result": "PASS",
+      "failed": [],
+      "metrics": {
+        "correctness": 0.9,
+        "faithfulness": 0.88,
+        "abstention": 0.95,
+        "extra_metric": 0.5
+      },
+      "latency_ms": 10,
+      "questions": 3,
+      "golden_version": "v1"
+    },
+    "docx": {
+      "result": "FAIL",
+      "failed": [
+        "faithfulness"
+      ],
+      "metrics": {
+        "correctness": 0.9,
+        "faithfulness": 0.7,
+        "abstention": 0.95,
+        "extra_metric": 0.5
+      },
+      "latency_ms": 10,
+      "questions": 3,
+      "golden_version": "v1"
+    }
+  },
+  "duration_s": 5,
+  "report": "/secret/path/report.json"
+}

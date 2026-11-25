@@ -4,7 +4,7 @@
 
 ## 1. Backend
 
-- [ ] 1.1 `plumbline/quality.py` `load_quality(path, running)` with fixture summaries under `backend/tests/fixtures/quality/` (both pass, docx fails faithfulness, exit 2, sampled, missing field, malformed). Test: `test_quality.py` - state, result, per-connector `failed`, three gated metrics only, `config_matches` and `config_differences` for chat / embeddings / threshold, judge not compared; no `host`, `git_commit`, `report` or path-like value in any output.
+- [x] 1.1 `plumbline/quality.py` `load_quality(path, running)` with fixture summaries under `backend/tests/fixtures/quality/` (both pass, docx fails faithfulness, exit 2, sampled, missing field, malformed). Test: `test_quality.py` - state, result, per-connector `failed`, three gated metrics only, `config_matches` and `config_differences` for chat / embeddings / threshold, judge not compared; no `host`, `git_commit`, `report` or path-like value in any output.
 - [ ] 1.2 `GET /quality` reading `PLUMBLINE_EVAL_SUMMARY` (default `evals/reports/latest.summary.json`); add it to `.env.example`. Test: `test_quality_api.py` - missing file -> `not_measured` with `eval_command`; fixture -> allowlisted fields only; `test_no_confidence_field_anywhere` and existing `/chat` tests unchanged.
 
 ## 2. Frontend

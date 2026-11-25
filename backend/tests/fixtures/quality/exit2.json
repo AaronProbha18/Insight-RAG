@@ -1,0 +1,24 @@
+{
+  "started_at": "2026-11-25T09:00:00+00:00",
+  "git_commit": "abc1234",
+  "host": {
+    "platform": "test-host",
+    "machine": "x",
+    "cpus": 1,
+    "python": "3"
+  },
+  "models": {
+    "llm": "fake:chat",
+    "embeddings": "fake:embed",
+    "judge": "fake:judge"
+  },
+  "threshold": 0.3,
+  "top_k": 5,
+  "sample": null,
+  "result": "NO_GATE_RESULT",
+  "exit_code": 2,
+  "judge_agreement": 0.9,
+  "duration_s": 5,
+  "report": "/secret/path/report.json",
+  "reason": "judge not validated"
+}
