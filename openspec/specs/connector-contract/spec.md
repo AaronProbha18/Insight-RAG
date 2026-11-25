@@ -8,13 +8,13 @@ The protocol, discovery and conformance kit for ingestion connectors. Introduced
 
 ### Requirement: Connector discovery via entry points
 
-The system SHALL load ingestion connectors from the `insight_rag.connectors`
+The system SHALL load ingestion connectors from the `plumbline.connectors`
 Python entry-point group, including built-in connectors, so that an
 installed third-party package is available without changes to core.
 
 #### Scenario: Third-party connector is discovered
 
-- **GIVEN** a package registering a connector under `insight_rag.connectors` is installed
+- **GIVEN** a package registering a connector under `plumbline.connectors` is installed
 - **WHEN** the backend starts
 - **THEN** the connector appears in the registry and its file types are accepted for upload
 
