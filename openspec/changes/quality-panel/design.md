@@ -1,6 +1,6 @@
 ## Context
 
-PR #19 (on `main`, not yet in this stack) makes the eval runner write
+PR #19 (merged to `main`, now in this branch) makes the eval runner write
 `<report>.summary.json` next to the report. Its fields: `started_at`,
 `git_commit`, `host`, `models` (`llm`, `embeddings`, `judge`),
 `threshold`, `top_k`, `sample`, `result` (`PASS` / `FAIL` /

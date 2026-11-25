@@ -1,6 +1,6 @@
 ## 0. Prerequisite
 
-- [ ] 0.1 Bring PR #19 into this branch: rebase the stack onto `main` once #15/#17/#18 are merged (or rebase this branch onto `main` with #19), resolving `evals/runner.py` to the Plumbline names. Test: backend suite passes; a sampled `plumbline-eval` run writes `<report>.summary.json`.
+- [x] 0.1 Bring PR #19 into this branch: rebase the stack onto `main` once #15/#17/#18 are merged (or rebase this branch onto `main` with #19), resolving `backend/src/plumbline/evals/runner.py` to the Plumbline names. Test: backend suite passes; a sampled `plumbline-eval` run writes `<report>.summary.json`.
 
 ## 1. Backend
 
