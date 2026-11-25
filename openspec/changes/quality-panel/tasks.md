@@ -9,7 +9,7 @@
 
 ## 2. Frontend
 
-- [ ] 2.1 `frontend/src/quality/api.ts` `getQuality()`. Test: `api.test.ts` stubbed `fetch` - measured and not-measured parse; 500 and network throw.
+- [x] 2.1 `frontend/src/quality/api.ts` `getQuality()`. Test: `api.test.ts` stubbed `fetch` - measured and not-measured parse; 500 and network throw.
 - [ ] 2.2 `QualityPanel` component: per connector PASS/FAIL as text and icon, three metrics, failed metrics named "below 0.80", run date and model ids, mismatch warning, not-measured state with the command. Test: `QualityPanel.test.tsx` static markup - each AC case; PASS/FAIL words present (not colour alone); no numbers when not measured.
 - [ ] 2.3 "Quality: <state>" button in the upload bar opening a `Dialog` with `QualityPanel`; fetch on open and once on load for the button label. Test: static markup of the button with its state and accessible name; `npm run lint && npm run build && npm test`; keyboard and both themes checked by hand.
 
