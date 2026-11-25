@@ -1,4 +1,4 @@
-"""The pre-rename names may live only in the legacy checks, their tests and history."""
+"""The pre-rename names may live only in the legacy checks, their tests, the product-naming spec and history."""
 
 import re
 import subprocess
@@ -12,8 +12,9 @@ ALLOWED_FILES = {
     "backend/tests/test_config.py",
     "backend/tests/test_migrations.py",
     "backend/tests/test_old_names.py",
+    "openspec/specs/product-naming/spec.md",  # the spec names what it rejects
 }
-ALLOWED_PREFIXES = ("openspec/changes/", "evals/reports/")  # history and baselines
+ALLOWED_PREFIXES = ("openspec/changes/",)  # history
 
 
 def test_old_names_only_in_allowed_places():

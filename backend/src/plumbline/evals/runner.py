@@ -1,13 +1,16 @@
 """`plumbline-eval`: per-connector trust gate over golden sets (design D9).
 
 Exit codes: 0 all connectors PASS, 1 any FAIL, 2 judge not validated (no gate result).
+Writes the full report and, next to it, a small shareable `<report>.summary.json`.
 """
 
 import argparse
 import hashlib
 import json
 import os
+import platform
 import secrets
+import subprocess
 import sys
 import time
 from contextlib import contextmanager
@@ -74,23 +77,39 @@ def _percentile(values: list[float], q: float) -> float:
 
 
 def _eval_connector(
-    name, connector, llm, judge, embeddings, evals_dir, sample, threshold, top_k
+    name,
+    connector,
+    llm,
+    judge,
+    embeddings,
+    evals_dir,
+    sample,
+    threshold,
+    top_k,
+    progress=None,
 ):
     golden_path = evals_dir / "connectors" / name / "golden.yaml"
     items = _sample(load_golden(golden_path), sample)
     corpus = evals_dir / "connectors" / name / "corpus"
+    # top level only: corrupt/ is not corpus
+    files = [
+        f
+        for f in sorted(corpus.iterdir())
+        if f.is_file() and f.suffix.lower() in connector.extensions
+    ]
     scores, questions, latencies = [], [], []
     with _isolated_db(name) as conn:
         doc_stems = {}
-        for f in sorted(corpus.iterdir()):  # top level only: corrupt/ is not corpus
-            if f.is_file() and f.suffix.lower() in connector.extensions:
-                result = ingest(
-                    conn, f.read_bytes(), f.name, {name: connector}, embeddings
-                )
-                doc_stems[result.document_id] = f.stem
+        step = progress and progress.add_task(f"{name}: ingest", total=len(files))
+        for f in files:
+            result = ingest(conn, f.read_bytes(), f.name, {name: connector}, embeddings)
+            doc_stems[result.document_id] = f.stem
+            if progress:
+                progress.advance(step)
         graph = build_graph(
             lambda q, k: retrieve(conn, embeddings, q, k), llm, threshold, top_k
         )
+        step = progress and progress.add_task(f"{name}: questions", total=len(items))
         for item in items:
             start = time.perf_counter()
             result = graph.invoke({"question": item.question})
@@ -98,6 +117,8 @@ def _eval_connector(
             score = score_question(item, result, judge, doc_stems)
             scores.append(score)
             questions.append({**asdict(score), "latency_ms": round(latencies[-1], 1)})
+            if progress:
+                progress.advance(step)
     metrics = aggregate(scores)
     failed = gate(metrics)
     return {
@@ -113,6 +134,27 @@ def _eval_connector(
     }
 
 
+def _git_commit() -> str:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=BACKEND,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+
+
+def _write_summary(report_path: Path, summary: dict) -> Path:
+    """Small, shareable result: no per-question text, just what decides PASS/FAIL."""
+    path = report_path.with_name(report_path.stem + ".summary.json")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
+    return path
+
+
 def run(
     connectors: dict,
     llm,
@@ -124,7 +166,25 @@ def run(
     sample: int | None = None,
     threshold: float = DEFAULT_THRESHOLD,
     top_k: int = 5,
+    progress=None,
 ) -> int:
+    started = datetime.now(UTC)
+    summary = {
+        "started_at": started.isoformat(),
+        "git_commit": _git_commit(),
+        "host": {
+            "platform": platform.platform(),
+            "machine": platform.machine(),
+            "cpus": os.cpu_count(),
+            "python": platform.python_version(),
+        },
+        "models": model_ids,
+        "threshold": threshold,
+        "top_k": top_k,
+        "sample": sample,
+    }
+
+    step = progress and progress.add_task("judge validation", total=1)
     try:
         validation = validate_judge(
             judge,
@@ -133,16 +193,30 @@ def run(
         )
     except JudgeNotValidated as exc:
         print(f"NO GATE RESULT: {exc}")
+        summary.update(result="NO_GATE_RESULT", reason=str(exc), exit_code=2)
+        summary["duration_s"] = round((datetime.now(UTC) - started).total_seconds())
+        print(f"summary: {_write_summary(report_path, summary)}")
         return 2
+    if progress:
+        progress.advance(step)
 
     results = {
         name: _eval_connector(
-            name, c, llm, judge, embeddings, evals_dir, sample, threshold, top_k
+            name,
+            c,
+            llm,
+            judge,
+            embeddings,
+            evals_dir,
+            sample,
+            threshold,
+            top_k,
+            progress,
         )
         for name, c in connectors.items()
     }
     report = {
-        "started_at": datetime.now(UTC).isoformat(),
+        "started_at": started.isoformat(),
         "models": model_ids,
         "threshold": threshold,
         "top_k": top_k,
@@ -153,13 +227,35 @@ def run(
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
 
+    exit_code = 1 if any(r["failed"] for r in results.values()) else 0
+    summary.update(
+        result="FAIL" if exit_code else "PASS",
+        exit_code=exit_code,
+        judge_agreement=validation.agreement,
+        connectors={
+            name: {
+                "result": r["result"],
+                "failed": r["failed"],
+                "metrics": {k: round(v, 3) for k, v in r["metrics"].items()},
+                "latency_ms": r["latency_ms"],
+                "questions": len(r["questions"]),
+                "golden_version": r["golden_version"],
+            }
+            for name, r in results.items()
+        },
+        report=str(report_path),
+    )
+    summary["duration_s"] = round((datetime.now(UTC) - started).total_seconds())
+    summary_path = _write_summary(report_path, summary)
+
     for name, r in results.items():
         detail = f" (below 0.80: {', '.join(r['failed'])})" if r["failed"] else ""
         print(f"{name}: {r['result']}{detail} {r['metrics']}")
     if sample:
         print(f"SAMPLE of {sample} questions: not a gate result")
     print(f"report: {report_path}")
-    return 1 if any(r["failed"] for r in results.values()) else 0
+    print(f"summary (share this): {summary_path}")
+    return exit_code
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -178,6 +274,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--sample", type=int, help="ask only N questions, keeping the ratio"
     )
+    parser.add_argument(
+        "--no-progress",
+        action="store_true",
+        help="no progress bar (auto off when piped)",
+    )
     args = parser.parse_args(argv)
 
     available = {
@@ -190,19 +291,43 @@ def main(argv: list[str] | None = None) -> int:
     if unknown:
         parser.error(f"no connector with a golden set: {', '.join(unknown)}")
 
-    return run(
-        connectors={n: available[n] for n in wanted},
-        llm=models.chat_model(),
-        judge=models.judge_model(),
-        embeddings=models.embeddings(),
-        model_ids={
+    kwargs = {
+        "connectors": {n: available[n] for n in wanted},
+        "llm": models.chat_model(),
+        "judge": models.judge_model(),
+        "embeddings": models.embeddings(),
+        "model_ids": {
             "llm": os.environ["PLUMBLINE_LLM"],
             "embeddings": os.environ["PLUMBLINE_EMBEDDINGS"],
             "judge": os.environ["PLUMBLINE_JUDGE_LLM"],
         },
-        report_path=args.report,
-        sample=args.sample,
-        threshold=float(
+        "report_path": args.report,
+        "sample": args.sample,
+        "threshold": float(
             os.environ.get("PLUMBLINE_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD)
         ),
+    }
+    if args.no_progress or not sys.stdout.isatty():
+        return run(**kwargs)
+
+    from rich.progress import (
+        BarColumn,
+        MofNCompleteColumn,
+        Progress,
+        SpinnerColumn,
+        TextColumn,
+        TimeElapsedColumn,
+        TimeRemainingColumn,
     )
+
+    columns = (
+        SpinnerColumn(),
+        TextColumn("{task.description:<20}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
+        TextColumn("eta"),
+        TimeRemainingColumn(),
+    )
+    with Progress(*columns) as progress:
+        return run(**kwargs, progress=progress)

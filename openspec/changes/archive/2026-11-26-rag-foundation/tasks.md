@@ -41,7 +41,7 @@
 - [x] 7.2 Judge: prompts for correctness and faithfulness, judge-validation step against labelled cases with the 0.80 agreement stop
 - [x] 7.3a Scoring: per-question scoring and the four metrics (correctness, faithfulness, abstention, hit-rate@k) plus the 0.80 gates as pure functions over golden item + graph result + judge; record metric definitions in design.md D9; tests with fake judge
 - [x] 7.3b Runner `insight_rag.evals` exposed as console script `insight-rag-eval`, reading data from top-level `evals/`: isolated DB per connector, ingest corpus, judge validation first, ask through the real graph, score with 7.3a, write report, exit code; `--connectors`, `--report`, `--sample`; tests with fake LLM/judge
-- [ ] 7.4 Baseline run with real models: tune abstain threshold once, record threshold and results in the report and in eval-plan.md Baseline column
+- [x] 7.4 Baseline run with real models: tune abstain threshold once, record threshold and results in the report and in eval-plan.md Baseline column
 
 ## 8. Chat UI
 
@@ -52,7 +52,7 @@
 ## 9. Packaging
 
 - [x] 9.1 Root multi-stage `Dockerfile` (frontend build + backend), FastAPI serves the built UI; `app` service in compose with `.env`, db health wait, migrations on start
-- [x] 9.2 Smoke test against the running stack: `docker compose up --build`, then `/health`, one upload, one chat (`scripts/smoke.sh`; health verified here, full upload + chat pass pending M1 with a model)
+- [x] 9.2 Smoke test against the running stack: `docker compose up --build`, then `/health`, one upload, one chat (`scripts/smoke.sh`; full pass on the reference M1 via Docker: health, upload 201, cited answer; evidence in `evals/baselines/rag-foundation/m1-smoke.txt`)
 
 ## 10. Documentation
 
