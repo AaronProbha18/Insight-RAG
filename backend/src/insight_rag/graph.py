@@ -10,7 +10,8 @@ from insight_rag.retrieval import RetrievedChunk
 
 ABSTAIN_MESSAGE = "I can't answer that from the indexed documents."
 NOT_IN_SOURCES = "NOT_IN_SOURCES"
-# ponytail: placeholder; calibrated once on the golden sets in the 7.4 baseline.
+# Calibrated in rag-foundation task 7.4 (M1 baseline): 0.2 did not raise correctness,
+# so 0.3 stays. Changing it is an answer-quality change: re-run the evals.
 DEFAULT_THRESHOLD = 0.3
 
 PROMPT = """Answer the question using ONLY the sources below.

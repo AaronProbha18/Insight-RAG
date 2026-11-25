@@ -59,6 +59,9 @@ human-reviewed (`reviewed: true`), the run stops with no gate result.
 | 1 | at least one connector FAILs; the summary names the metric |
 | 2 | judge not validated: no PASS/FAIL is reported |
 
+Committed evidence for a recorded baseline lives in `baselines/<change>/`
+(summaries and smoke output only); `reports/` is scratch and gitignored.
+
 The report (`reports/latest.json`, gitignored) records the model ids, the
 threshold, the golden-set version, every metric, latency, and each
 question's result.

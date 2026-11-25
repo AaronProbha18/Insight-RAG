@@ -1,0 +1,62 @@
+{
+  "started_at": "2026-11-25T17:19:28.374907+00:00",
+  "git_commit": "476445a",
+  "host": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "cpus": 8,
+    "python": "3.13.14"
+  },
+  "models": {
+    "llm": "ollama:llama3.1:8b",
+    "embeddings": "ollama:nomic-embed-text",
+    "judge": "ollama:qwen2.5:7b"
+  },
+  "threshold": 0.2,
+  "top_k": 5,
+  "sample": null,
+  "result": "FAIL",
+  "exit_code": 1,
+  "judge_agreement": {
+    "correctness": 1.0,
+    "faithfulness": 0.9
+  },
+  "connectors": {
+    "docx": {
+      "result": "PASS",
+      "failed": [],
+      "metrics": {
+        "correctness": 0.8,
+        "faithfulness": 0.897,
+        "abstention": 1.0,
+        "hit_rate": 0.967
+      },
+      "latency_ms": {
+        "p50": 18167.6,
+        "p95": 36327.2
+      },
+      "questions": 40,
+      "golden_version": "978d5dd9dbf9"
+    },
+    "pdf": {
+      "result": "FAIL",
+      "failed": [
+        "correctness"
+      ],
+      "metrics": {
+        "correctness": 0.667,
+        "faithfulness": 0.87,
+        "abstention": 1.0,
+        "hit_rate": 1.0
+      },
+      "latency_ms": {
+        "p50": 26792.0,
+        "p95": 43470.0
+      },
+      "questions": 40,
+      "golden_version": "0fe95e6a5d59"
+    }
+  },
+  "report": "../evals/reports/m1-7.4-t020.json",
+  "duration_s": 2537
+}
