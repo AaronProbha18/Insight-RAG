@@ -77,6 +77,7 @@ code marks this with a `ponytail:` comment.
 | 404 | `DELETE /documents/{document_id}` for an unknown or already-deleted id; the message is always "Document not found" |
 | 204 | (also) `POST /feedback` stored the rating, or replaced the earlier one for that answer |
 | 404 | (also) `POST /feedback` for an unknown `answer_id`; the message is always "Answer not found" |
+| 200 | `GET /quality` always; no usable summary is `state: "not_measured"`, never an error |
 | 415 | no connector handles the file type; the message lists the supported types |
 | 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters) |
 | 500 | anything else; the client never sees internal details |
@@ -98,6 +99,17 @@ the other **in the same PR**. `done` carries `{"answer_id": "ans_<ULID>"}`
 for answers and abstentions, and is absent on the error path. An answer is
 recorded (`feedback.record_answer`) before it streams; if recording fails
 the client gets `error`, never an answer it cannot rate.
+
+**2.5 `/quality` is an allowlist.** `quality.load_quality` reads the eval
+runner's summary file (`PLUMBLINE_EVAL_SUMMARY`, default
+`evals/reports/latest.summary.json`) and builds the response from named
+fields only: the three gated metrics, PASS/FAIL and `failed` as the runner
+wrote them, the run date, model ids, threshold and a `config_matches` check
+of chat model, embedding model and threshold. `host`, `git_commit`, `report`,
+`reason`, latency and every other summary field are never returned. A missing,
+malformed, sampled or exit-2 summary is `not_measured`. *Enforced by*
+`test_no_internal_fields_leak` in `tests/test_quality.py` and
+`tests/test_quality_api.py`.
 
 ## 3. Errors
 

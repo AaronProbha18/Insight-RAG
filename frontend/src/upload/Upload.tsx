@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Documents } from '../documents/Documents'
+import { Quality } from '../quality/Quality'
 import { type UploadOutcome, uploadDocument } from './api'
 
 const FAILED: UploadOutcome['kind'][] = ['unsupported', 'unreadable', 'error']
@@ -37,7 +38,10 @@ export function Upload() {
               className="rounded-md text-sm text-muted-foreground file:me-3 file:rounded-md file:border file:border-border file:bg-background file:px-3 file:py-1 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50"
             />
           </label>
-          <Documents refreshKey={refreshKey} />
+          <div className="flex items-center gap-2">
+            <Quality />
+            <Documents refreshKey={refreshKey} />
+          </div>
         </div>
         <p
           role="status"

@@ -34,6 +34,9 @@ src/
   documents/ api.ts    GET /documents, DELETE /documents/{id}
           DocumentList.tsx   rows: title, type, date, delete button
           Documents.tsx      "Documents (n)" button, dialog, delete confirm
+  quality/ api.ts      GET /quality
+          QualityPanel.tsx   per-connector PASS/FAIL, metrics, mismatch warning
+          Quality.tsx        "Quality: <state>" button and dialog
   components/
     assistant-ui/elements/  vendored kit: thread.aui.tsx, markdown-text.tsx,
                             tooltip-icon-button.tsx (ADR 0003)
@@ -173,6 +176,7 @@ for an empty list, so abstentions show no sources without a special case:
   `<summary>`. *Checked by* `src/App.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
 - **The documents dialog:** the button's text ("Documents (n)") is its name, each delete button is named `Delete <title>`, deleting asks for confirmation in an alert dialog, and load/delete failures appear in a `role="status"` region. *Checked by* `documents/DocumentList.test.tsx` and `documents/Documents.test.tsx`.
+- **The quality dialog:** the button's text ("Quality", "Quality: PASS", "Quality: FAIL" or "Quality: Not measured") is its name; PASS and FAIL are words next to an `aria-hidden` icon, never colour alone; a configuration mismatch is a `role="status"` warning. *Checked by* `quality/QualityPanel.test.tsx` and `quality/Quality.test.tsx`.
 - **Feedback controls:** "Good answer" and "Bad answer" are named buttons
   with `aria-pressed`; the thumbs-down form is a native `<fieldset>` with a
   `<legend>`, radio inputs and a labelled textarea; the outcome
@@ -236,7 +240,9 @@ feedback form (Tab order through Copy, Regenerate, Good, Bad; Enter and
 Space; arrow keys across the reasons; Cancel and Send return focus to the
 Bad button; focus rings; light and dark themes) and the
 documents dialog (open and close, Tab order, focus ring and focus return,
-confirm and cancel, light and dark themes).
+confirm and cancel, light and dark themes) and the quality dialog (open with
+Enter or Space, Tab to Close, Esc closes, focus returns to the Quality
+button, focus ring, light and dark themes).
 
 **7.2 Network code is tested with a stubbed `fetch`** that returns real
 `Response` objects, so status codes and streaming bodies behave as they do

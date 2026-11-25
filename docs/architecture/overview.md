@@ -10,7 +10,7 @@ served from the same origin.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE; POST /feedback| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE; POST /feedback; GET /quality| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
   ING --> C[connectors via entry points]
@@ -36,6 +36,7 @@ goes:
 | an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
 | a UI component | `frontend/src/chat/` or `frontend/src/upload/`, or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
+| the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`) |
 | answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
 
@@ -102,6 +103,20 @@ goes:
 the `golden.yaml` shape and writes it to `evals/feedback/candidates.yaml`
 (git-ignored). A maintainer reviews it and copies entries into a golden set
 by hand; nothing is added automatically ([evals README](../../evals/README.md#feedback-candidates)).
+
+### Show the last eval: `GET /quality`
+
+1. The route reads the runner's summary file on every request:
+   `PLUMBLINE_EVAL_SUMMARY`, default `evals/reports/latest.summary.json`.
+   It uses no database and no model.
+2. `quality.load_quality` returns `not_measured` (with the eval command) when
+   the file is missing or invalid, the run stopped at the judge gate (exit 2)
+   or was sampled. Otherwise it returns allowlisted fields only: PASS/FAIL per
+   connector as the runner wrote it, the three gated metrics, run date, model
+   ids and threshold.
+3. `config_matches` compares the evaluated chat model, embedding model and
+   abstain threshold with the running ones; the judge is not compared. The
+   route always answers **200**.
 
 ### Evaluate: `plumbline-eval`
 

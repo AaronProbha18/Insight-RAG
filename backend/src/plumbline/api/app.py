@@ -5,6 +5,7 @@ import re
 from collections.abc import Iterator
 from dataclasses import asdict
 from functools import cache
+from pathlib import Path
 from typing import Annotated
 
 import psycopg
@@ -21,6 +22,7 @@ from plumbline.db import database_url
 from plumbline.feedback import FeedbackRequest, record_answer, save_feedback
 from plumbline.graph import DEFAULT_THRESHOLD, build_graph
 from plumbline.ingestion import UnsupportedFileType, delete_document, ingest
+from plumbline.quality import load_quality
 from plumbline.retrieval import retrieve
 
 check_legacy_env()
@@ -96,6 +98,22 @@ def get_recorder(conn: Conn):
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/quality")
+def quality() -> dict:
+    default = Path(__file__).parents[3].parent / "evals/reports/latest.summary.json"
+    path = os.environ.get("PLUMBLINE_EVAL_SUMMARY", default)
+    return load_quality(
+        Path(path),
+        {
+            "llm": os.environ.get("PLUMBLINE_LLM", ""),
+            "embeddings": os.environ.get("PLUMBLINE_EMBEDDINGS", ""),
+            "threshold": os.environ.get(
+                "PLUMBLINE_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD
+            ),
+        },
+    )
 
 
 @app.post("/documents", status_code=201)
