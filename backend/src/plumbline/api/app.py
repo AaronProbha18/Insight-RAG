@@ -19,7 +19,7 @@ from plumbline.connectors import FileConnector, ParseError
 from plumbline.connectors.registry import load_connectors
 from plumbline.db import database_url
 from plumbline.graph import DEFAULT_THRESHOLD, build_graph
-from plumbline.ingestion import UnsupportedFileType, ingest
+from plumbline.ingestion import UnsupportedFileType, delete_document, ingest
 from plumbline.retrieval import retrieve
 
 check_legacy_env()
@@ -116,6 +116,13 @@ def list_documents(conn: Conn) -> list[dict]:
         {"document_id": r[0], "title": r[1], "connector": r[2], "created_at": r[3]}
         for r in rows
     ]
+
+
+@app.delete("/documents/{document_id}", status_code=204)
+def remove_document(document_id: str, conn: Conn) -> Response:
+    if not delete_document(conn, document_id):
+        raise HTTPException(404, "Document not found")
+    return Response(status_code=204)
 
 
 class Message(BaseModel):

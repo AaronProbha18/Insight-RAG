@@ -31,6 +31,9 @@ src/
           Citations.tsx
   upload/ api.ts       POST /documents -> user-facing outcome
           Upload.tsx
+  documents/ api.ts    GET /documents, DELETE /documents/{id}
+          DocumentList.tsx   rows: title, type, date, delete button
+          Documents.tsx      "Documents (n)" button, dialog, delete confirm
   components/
     assistant-ui/elements/  vendored kit: thread.aui.tsx, markdown-text.tsx,
                             tooltip-icon-button.tsx (ADR 0003)
@@ -160,6 +163,7 @@ for an empty list, so abstentions show no sources without a special case:
   bottom"), suggestions via their text, and each source via its
   `<summary>`. *Checked by* `src/App.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
+- **The documents dialog:** the button's text ("Documents (n)") is its name, each delete button is named `Delete <title>`, deleting asks for confirmation in an alert dialog, and load/delete failures appear in a `role="status"` region. *Checked by* `documents/DocumentList.test.tsx` and `documents/Documents.test.tsx`.
 - **Async results are announced:** the upload outcome lives in a
   `role="status"` / `aria-live="polite"` region.
 - **Focus is always visible:** controls use `focus-visible:` outline or
@@ -212,7 +216,9 @@ populated thread with `ReadonlyThreadProvider`, or one answer with
 ```
 
 A read-only thread can't run or cancel, so Stop, Copy (the clipboard),
-Regenerate and scrolling are checked by hand in a browser.
+Regenerate and scrolling are checked by hand in a browser, and so is the
+documents dialog (open and close, Tab order, focus ring and focus return,
+confirm and cancel, light and dark themes).
 
 **7.2 Network code is tested with a stubbed `fetch`** that returns real
 `Response` objects, so status codes and streaming bodies behave as they do

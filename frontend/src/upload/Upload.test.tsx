@@ -9,5 +9,6 @@ describe('Upload', () => {
     expect(html).toMatch(/<label[^>]*>Upload a PDF or Word document <input type="file" accept=".pdf,.docx"/)
     expect(html).toContain('role="status"')
     expect(html).toContain('aria-live="polite"')
+    expect(html).toContain('Documents (0)')
   })
 })
