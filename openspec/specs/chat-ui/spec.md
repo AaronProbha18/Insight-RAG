@@ -115,3 +115,31 @@ The chat SHALL give every control an accessible name and a visible focus indicat
 - **GIVEN** a keyboard-only user
 - **WHEN** they upload a file, ask a question, stop, copy, regenerate and open a source
 - **THEN** every step is reachable with a visible focus indicator
+
+### Requirement: Chat with streamed answers
+
+The frontend SHALL provide a chat built on assistant-ui that sends the
+conversation to the backend chat endpoint and renders the answer as it
+streams.
+
+#### Scenario: Ask a question
+
+- **WHEN** the user types a question and submits it
+- **THEN** the answer appears incrementally in the thread
+
+### Requirement: Upload documents from the UI
+
+The frontend SHALL let the user upload PDF and DOCX files and SHALL show
+the outcome: indexed, already indexed, unsupported type, or unreadable
+file.
+
+#### Scenario: Duplicate upload feedback
+
+- **GIVEN** a file was already indexed
+- **WHEN** the user uploads it again
+- **THEN** the UI says the document is already indexed
+
+#### Scenario: Unsupported file feedback
+
+- **WHEN** the user uploads a `.png`
+- **THEN** the UI shows an error listing the supported types

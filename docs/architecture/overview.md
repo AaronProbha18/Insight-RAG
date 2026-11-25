@@ -22,7 +22,7 @@ flowchart LR
 ```
 
 Design decisions and their reasons live in
-[design.md](../../openspec/changes/rag-foundation/design.md) (D1–D10) and
+[design.md](../../openspec/changes/archive/2026-11-26-rag-foundation/design.md) (D1–D10) and
 [docs/adr/](../adr/). This page is the map; those are the why.
 
 ## Where things live
@@ -152,4 +152,4 @@ provider's package (a `pyproject.toml` extra), never a code change.
   the question.
 - **Measurement:** the eval gates above, per connector, with a judge that
   is itself validated first. Details are in the
-  [eval plan](../../openspec/changes/rag-foundation/eval-plan.md).
+  [eval plan](../../openspec/changes/archive/2026-11-26-rag-foundation/eval-plan.md).

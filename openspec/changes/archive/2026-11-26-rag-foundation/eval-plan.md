@@ -51,7 +51,7 @@ Run on the reference M1 (arm64, Ollama native) on 2026-11-25 at commit
 `476445a`, 40 golden questions per connector. Models:
 `ollama:llama3.1:8b` (chat), `ollama:nomic-embed-text` (embeddings),
 `ollama:qwen2.5:7b` (judge). Evidence:
-[`evals/baselines/rag-foundation/`](../../../evals/baselines/rag-foundation/)
+[`evals/baselines/rag-foundation/`](../../../../evals/baselines/rag-foundation/)
 (shareable summaries and the smoke output).
 
 | Run | Threshold | Correctness docx / pdf | Faithfulness | Abstention | Hit-rate | Duration |
