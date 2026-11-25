@@ -16,7 +16,7 @@
     {
       "name": "backend",
       "runtimeExecutable": "uv",
-      "runtimeArgs": ["run", "fastapi", "dev", "src/insight_rag/api/app.py", "--port", "8000"],
+      "runtimeArgs": ["run", "fastapi", "dev", "src/plumbline/api/app.py", "--port", "8000"],
       "cwd": "backend",
       // The Vite dev proxy expects the API on exactly :8000.
       "port": 8000,

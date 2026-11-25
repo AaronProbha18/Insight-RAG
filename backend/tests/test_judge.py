@@ -2,8 +2,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from insight_rag.evals.golden import Labelled, LabelledCase
-from insight_rag.evals.judge import (
+from plumbline.evals.golden import Labelled, LabelledCase
+from plumbline.evals.judge import (
     JudgeNotValidated,
     judge_correctness,
     judge_faithfulness,

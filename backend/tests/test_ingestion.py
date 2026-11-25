@@ -6,10 +6,10 @@ import psycopg
 import pytest
 from fake_embeddings import FailingEmbeddings, FakeEmbeddings
 
-from insight_rag.connectors import ParseError
-from insight_rag.connectors.builtin.docx import DocxConnector
-from insight_rag.connectors.builtin.pdf import PdfConnector
-from insight_rag.ingestion import UnsupportedFileType, ingest, new_document_id
+from plumbline.connectors import ParseError
+from plumbline.connectors.builtin.docx import DocxConnector
+from plumbline.connectors.builtin.pdf import PdfConnector
+from plumbline.ingestion import UnsupportedFileType, ingest, new_document_id
 
 EVALS = Path(__file__).parents[2] / "evals" / "connectors"
 PDF = (EVALS / "pdf" / "corpus" / "returns-policy.pdf").read_bytes()

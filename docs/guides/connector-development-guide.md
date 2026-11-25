@@ -1,9 +1,9 @@
 # Write a connector
 
-A connector turns one kind of file into text sections that insight-rag can
+A connector turns one kind of file into text sections that Plumbline can
 chunk, embed and cite. PDF and DOCX ship built in; anything else (Markdown,
 HTML, EPUB, …) can be a separate Python package that you install next to
-insight-rag. Core never needs to change.
+Plumbline. Core never needs to change.
 
 This guide covers **file connectors**: they parse uploaded bytes. Query
 connectors for live sources such as SQL databases are planned, under a later
@@ -11,7 +11,7 @@ contract version.
 
 ## 1. The contract
 
-Everything you need is importable from `insight_rag.connectors`:
+Everything you need is importable from `plumbline.connectors`:
 
 ```python
 CONTRACT_VERSION = 1
@@ -56,7 +56,7 @@ A plain-text connector with one section per paragraph:
 # my_connectors/text.py
 from typing import ClassVar
 
-from insight_rag.connectors import (
+from plumbline.connectors import (
     CONTRACT_VERSION,
     ParsedDocument,
     ParseError,
@@ -86,16 +86,16 @@ class TextConnector:
 
 ## 3. Register it
 
-insight-rag discovers connectors through the `insight_rag.connectors`
+Plumbline discovers connectors through the `plumbline.connectors`
 entry-point group, which is the same mechanism its built-in PDF and DOCX
 connectors use. In your package's `pyproject.toml`:
 
 ```toml
-[project.entry-points."insight_rag.connectors"]
+[project.entry-points."plumbline.connectors"]
 text = "my_connectors.text:TextConnector"
 ```
 
-Install your package into the same environment as insight-rag
+Install your package into the same environment as Plumbline
 (`uv pip install -e .` during development) and restart the backend. Its
 extensions are accepted by `POST /documents` from then on.
 
@@ -109,7 +109,7 @@ startup carries on. So does a connector that fails to import.
 # tests/test_text_connector.py
 from pathlib import Path
 
-from insight_rag.connectors.testing import run_conformance
+from plumbline.connectors.testing import run_conformance
 from my_connectors.text import TextConnector
 
 
@@ -142,6 +142,6 @@ listed as **supported**, it must also show its answers can be trusted:
 2. Add `evals/connectors/<name>/golden.yaml`: at least 30 questions, at
    least 20% of them unanswerable from the corpus. Copy the shape from
    `evals/connectors/pdf/golden.yaml`.
-3. Run `uv run insight-rag-eval --connectors <name>` (see
+3. Run `uv run plumbline-eval --connectors <name>` (see
    [evals/README.md](../../evals/README.md)). Correctness, faithfulness and
    abstention must each reach **0.80**.

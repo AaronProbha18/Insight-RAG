@@ -85,7 +85,7 @@ def to_pdf(md: str, out: Path) -> None:
         elif kind == "pagebreak":
             story.append(PageBreak())
     title = md.splitlines()[0].lstrip("# ")
-    SimpleDocTemplate(str(out), title=title, author="insight-rag fixtures").build(story)
+    SimpleDocTemplate(str(out), title=title, author="plumbline fixtures").build(story)
 
 
 def to_docx(md: str, out: Path) -> None:
@@ -107,9 +107,9 @@ def to_docx(md: str, out: Path) -> None:
             d.add_page_break()
     props = d.core_properties
     props.title = md.splitlines()[0].lstrip("# ")
-    props.author = "insight-rag fixtures"
+    props.author = "plumbline fixtures"
     props.created = props.modified = FIXED_DATE
-    props.last_modified_by = "insight-rag fixtures"
+    props.last_modified_by = "plumbline fixtures"
     props.revision = 1
     buf = io.BytesIO()
     d.save(buf)

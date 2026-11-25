@@ -4,7 +4,7 @@ import psycopg
 import pytest
 from fake_embeddings import FixedEmbeddings
 
-from insight_rag.retrieval import retrieve
+from plumbline.retrieval import retrieve
 
 pytestmark = pytest.mark.db
 

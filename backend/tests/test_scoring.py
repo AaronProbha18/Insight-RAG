@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 
-from insight_rag.evals.golden import GoldenItem
-from insight_rag.evals.scoring import QuestionScore, aggregate, gate, score_question
-from insight_rag.retrieval import RetrievedChunk
+from plumbline.evals.golden import GoldenItem
+from plumbline.evals.scoring import QuestionScore, aggregate, gate, score_question
+from plumbline.retrieval import RetrievedChunk
 
 
 class ScriptedJudge:

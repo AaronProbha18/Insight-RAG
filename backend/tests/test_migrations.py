@@ -5,6 +5,8 @@ import pytest
 from alembic import command
 from alembic.config import Config
 
+from plumbline.config import LegacyConfigError
+
 pytestmark = pytest.mark.db
 
 INI = Path(__file__).parents[1] / "alembic.ini"
@@ -67,7 +69,16 @@ def test_downgrade_removes_tables(migrate, database_url):
 
 
 def test_missing_dim_fails_clearly(migrate, monkeypatch):
-    monkeypatch.delenv("INSIGHT_RAG_EMBEDDING_DIM")
+    monkeypatch.delenv("PLUMBLINE_EMBEDDING_DIM")
 
-    with pytest.raises(RuntimeError, match="INSIGHT_RAG_EMBEDDING_DIM"):
+    with pytest.raises(RuntimeError, match="PLUMBLINE_EMBEDDING_DIM"):
         migrate()
+
+
+def test_legacy_variable_fails_before_the_dimension_is_read(migrate, monkeypatch):
+    monkeypatch.setenv("INSIGHT_RAG_EMBEDDING_DIM", "8")
+
+    with pytest.raises(LegacyConfigError, match="PLUMBLINE_EMBEDDING_DIM"):
+        migrate()
+
+    monkeypatch.delenv("INSIGHT_RAG_EMBEDDING_DIM")  # the fixture downgrades on exit

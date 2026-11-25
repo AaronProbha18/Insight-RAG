@@ -1,0 +1,62 @@
+{
+  "started_at": "2026-11-24T11:27:54.571784+00:00",
+  "git_commit": "ec82bc3",
+  "host": {
+    "platform": "Windows 11, CPU only (Intel i5-1335U, 15.6 GB RAM)",
+    "python": "3.13"
+  },
+  "models": {
+    "llm": "ollama:llama3.1:8b",
+    "embeddings": "ollama:nomic-embed-text",
+    "judge": "ollama:qwen2.5:7b"
+  },
+  "threshold": 0.3,
+  "top_k": 5,
+  "sample": null,
+  "result": "FAIL",
+  "exit_code": 1,
+  "judge_agreement": {
+    "correctness": 1.0,
+    "faithfulness": 0.9
+  },
+  "connectors": {
+    "docx": {
+      "result": "FAIL",
+      "failed": [
+        "correctness"
+      ],
+      "metrics": {
+        "correctness": 0.6666666666666666,
+        "faithfulness": 0.8214285714285714,
+        "abstention": 1.0,
+        "hit_rate": 0.9666666666666667
+      },
+      "latency_ms": {
+        "p50": 53555.6,
+        "p95": 115665.6
+      },
+      "questions": 40,
+      "golden_version": "d89ebe1e128d"
+    },
+    "pdf": {
+      "result": "FAIL",
+      "failed": [
+        "correctness"
+      ],
+      "metrics": {
+        "correctness": 0.7333333333333333,
+        "faithfulness": 0.8846153846153846,
+        "abstention": 1.0,
+        "hit_rate": 1.0
+      },
+      "latency_ms": {
+        "p50": 76058.9,
+        "p95": 180868.5
+      },
+      "questions": 40,
+      "golden_version": "196d6d5ac2f3"
+    }
+  },
+  "duration_s": 9248,
+  "note": "Supplementary pre-rename run on unrenamed code. golden_version differs from the M1 baseline only because the Windows checkout has CRLF line endings; the golden files are identical in git."
+}

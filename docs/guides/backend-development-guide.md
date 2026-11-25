@@ -1,6 +1,6 @@
 # Backend development guide
 
-Rules for writing backend code in insight-rag, for people and AI agents
+Rules for writing backend code in Plumbline, for people and AI agents
 alike. Every rule describes how the code already works; where a rule is
 enforced by a test, the test is named. For the system's shape, read
 [the architecture overview](../architecture/overview.md) first. For coding
@@ -55,7 +55,8 @@ import psycopg
 *Enforced by* `tests/test_boundaries.py`.
 
 **1.4 Configuration has owners.** Environment variables are read only in
-`models.py`, `db.py` and the two composition roots. *Enforced by*
+`models.py`, `db.py`, `config.py` (the legacy-variable check) and the two
+composition roots. *Enforced by*
 `tests/test_boundaries.py`.
 
 **1.5 Sync routes, one connection per request.** Routes are plain `def`,
@@ -155,7 +156,7 @@ threshold (the LLM isn't called), or a model reply that is
 
 **5.3 Prompt and threshold changes are answer-quality changes.** Editing
 `PROMPT`, `DEFAULT_THRESHOLD`, `top_k` or chunk sizes changes behaviour.
-Run `insight-rag-eval`, compare with the baseline, and record the result
+Run `plumbline-eval`, compare with the baseline, and record the result
 (AGENTS.md workflow rule 4). Tuning stops at the eval plan's pass rule:
 change parameters, never golden answers.
 
@@ -165,8 +166,8 @@ shown.
 
 ## 6. Models
 
-**6.1 Models come from `provider:model` strings** in `INSIGHT_RAG_LLM`,
-`INSIGHT_RAG_EMBEDDINGS` and `INSIGHT_RAG_JUDGE_LLM`, created by
+**6.1 Models come from `provider:model` strings** in `PLUMBLINE_LLM`,
+`PLUMBLINE_EMBEDDINGS` and `PLUMBLINE_JUDGE_LLM`, created by
 LangChain's `init_chat_model` / `init_embeddings` in `models.py`. Never
 import a provider class directly.
 
@@ -177,12 +178,12 @@ core stays provider-free. The Docker image picks it with
 **6.3 The judge is separate on purpose.** Changing the chat model must not
 silently change the judge that grades it.
 
-**6.4 Remote endpoints use `INSIGHT_RAG_MODEL_BASE_URL`**, forwarded as
+**6.4 Remote endpoints use `PLUMBLINE_MODEL_BASE_URL`**, forwarded as
 `base_url`:
 
 ```python
 # ✅ models.py
-    base_url = os.environ.get("INSIGHT_RAG_MODEL_BASE_URL")
+    base_url = os.environ.get("PLUMBLINE_MODEL_BASE_URL")
     return {"base_url": base_url} if base_url else {}
 ```
 
@@ -196,7 +197,7 @@ autogenerate.
 one.
 
 **7.3 The vector dimension is fixed at migration time** from
-`INSIGHT_RAG_EMBEDDING_DIM`, with no default. A different embedding model
+`PLUMBLINE_EMBEDDING_DIM`, with no default. A different embedding model
 means a new migration and re-ingestion (ADR 0002).
 
 **7.4 One default database location:** `db.database_url()`. Don't

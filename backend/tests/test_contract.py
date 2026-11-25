@@ -3,7 +3,7 @@ from typing import ClassVar
 import pytest
 from pydantic import ValidationError
 
-from insight_rag.connectors import (
+from plumbline.connectors import (
     CONTRACT_VERSION,
     FileConnector,
     ParsedDocument,

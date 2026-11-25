@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Write a connector
-    url: https://github.com/AaronProbha18/Insight-RAG/blob/main/docs/guides/connector-development-guide.md
+    url: https://github.com/AaronProbha18/Plumbline/blob/main/docs/guides/connector-development-guide.md
     about: Building a connector for a new file type? Start with the guide.

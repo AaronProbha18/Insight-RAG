@@ -4,8 +4,9 @@ import ast
 from pathlib import Path
 
 BACKEND = Path(__file__).parents[1]
-PKG = BACKEND / "src" / "insight_rag"
+PKG = BACKEND / "src" / "plumbline"
 CONFIG_READERS = {
+    "config.py",
     "models.py",
     "db.py",
     "api/app.py",
@@ -31,8 +32,8 @@ def test_graph_knows_nothing_about_http_or_db():
 
 def test_builtin_connectors_use_only_the_public_contract():
     for path in (PKG / "connectors" / "builtin").glob("*.py"):
-        internal = {m for m in _imports(path) if m.startswith("insight_rag")}
-        assert internal <= {"insight_rag.connectors.contract"}, path.name
+        internal = {m for m in _imports(path) if m.startswith("plumbline")}
+        assert internal <= {"plumbline.connectors.contract"}, path.name
 
 
 def test_only_config_owners_read_the_environment():

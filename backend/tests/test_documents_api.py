@@ -6,7 +6,7 @@ import pytest
 from fake_embeddings import FailingEmbeddings, FakeEmbeddings
 from fastapi.testclient import TestClient
 
-from insight_rag.api.app import app, get_conn, get_embeddings
+from plumbline.api.app import app, get_conn, get_embeddings
 
 pytestmark = pytest.mark.db
 
@@ -78,7 +78,7 @@ def test_png_415_names_types(client):
 
 def test_rejections_work_without_a_model_configured(client, monkeypatch):
     del app.dependency_overrides[get_embeddings]
-    monkeypatch.delenv("INSIGHT_RAG_EMBEDDINGS", raising=False)
+    monkeypatch.delenv("PLUMBLINE_EMBEDDINGS", raising=False)
 
     assert _upload(client, "photo.png", b"\x89PNG").status_code == 415
     assert _upload(client, "bad.pdf", b"not a pdf").status_code == 422

@@ -4,8 +4,8 @@ import pytest
 from fastapi.testclient import TestClient
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 
-from insight_rag.api.app import app, get_llm, get_retriever
-from insight_rag.retrieval import RetrievedChunk
+from plumbline.api.app import app, get_llm, get_retriever
+from plumbline.retrieval import RetrievedChunk
 
 ANSWER = "Refunds take 14 days [c1]. Footwear gets 30 days [c2]."
 
@@ -33,7 +33,7 @@ class RecordingLLM:
 
 @pytest.fixture
 def chat(monkeypatch):
-    monkeypatch.delenv("INSIGHT_RAG_ABSTAIN_THRESHOLD", raising=False)
+    monkeypatch.delenv("PLUMBLINE_ABSTAIN_THRESHOLD", raising=False)
 
     def run(chunks, llm=None, question="What is the refund window?"):
         llm = llm or RecordingLLM()
@@ -105,10 +105,10 @@ def test_empty_index_abstains_without_llm(chat):
 
 
 def test_threshold_from_env(chat, monkeypatch):
-    monkeypatch.setenv("INSIGHT_RAG_ABSTAIN_THRESHOLD", "0.6")
+    monkeypatch.setenv("PLUMBLINE_ABSTAIN_THRESHOLD", "0.6")
     assert chat([_chunk(1, 0.5)])[0][0][0] == "abstain"
 
-    monkeypatch.setenv("INSIGHT_RAG_ABSTAIN_THRESHOLD", "0.4")
+    monkeypatch.setenv("PLUMBLINE_ABSTAIN_THRESHOLD", "0.4")
     assert chat([_chunk(1, 0.5)], RecordingLLM("Yes [c1]."))[0][0][0] == "delta"
 
 

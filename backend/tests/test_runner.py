@@ -8,8 +8,8 @@ import pytest
 import yaml
 from fake_embeddings import FailingEmbeddings, FakeEmbeddings
 
-from insight_rag.connectors.builtin.pdf import PdfConnector
-from insight_rag.evals import runner
+from plumbline.connectors.builtin.pdf import PdfConnector
+from plumbline.evals import runner
 
 pytestmark = pytest.mark.db
 
@@ -44,7 +44,7 @@ class YesJudge:
 def evals_dir(tmp_path, database_url, monkeypatch):
     """A copy of evals/ with reviewed labels, and DATABASE_URL on the test server."""
     monkeypatch.setenv("DATABASE_URL", database_url)
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDING_DIM", "8")
+    monkeypatch.setenv("PLUMBLINE_EMBEDDING_DIM", "8")
     root = tmp_path / "evals"
     shutil.copytree(EVALS / "connectors" / "pdf", root / "connectors" / "pdf")
     labelled = yaml.safe_load((EVALS / "judge" / "labelled.yaml").read_text())
@@ -94,7 +94,7 @@ def _summary(report):
 def _eval_databases(database_url):
     with psycopg.connect(database_url) as conn:
         rows = conn.execute(
-            "SELECT datname FROM pg_database WHERE datname LIKE 'insight_rag_eval_%'"
+            "SELECT datname FROM pg_database WHERE datname LIKE 'plumbline_eval_%'"
         ).fetchall()
     return rows
 
@@ -156,9 +156,9 @@ def test_sample_keeps_ratio(evals_dir, tmp_path):
 def test_cli_parses_arguments(monkeypatch, tmp_path):
     seen = {}
     monkeypatch.setattr(runner, "run", lambda **kw: seen.update(kw) or 0)
-    monkeypatch.setenv("INSIGHT_RAG_LLM", IDS["llm"])
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDINGS", IDS["embeddings"])
-    monkeypatch.setenv("INSIGHT_RAG_JUDGE_LLM", IDS["judge"])
+    monkeypatch.setenv("PLUMBLINE_LLM", IDS["llm"])
+    monkeypatch.setenv("PLUMBLINE_EMBEDDINGS", IDS["embeddings"])
+    monkeypatch.setenv("PLUMBLINE_JUDGE_LLM", IDS["judge"])
     monkeypatch.setattr(runner.models, "chat_model", lambda: "llm")
     monkeypatch.setattr(runner.models, "judge_model", lambda: "judge")
     monkeypatch.setattr(runner.models, "embeddings", lambda: "emb")

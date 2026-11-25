@@ -4,10 +4,10 @@ from pathlib import Path
 import docx
 import pytest
 
-from insight_rag.connectors import ParseError
-from insight_rag.connectors.builtin.docx import DocxConnector
-from insight_rag.connectors.registry import load_connectors
-from insight_rag.connectors.testing import run_conformance
+from plumbline.connectors import ParseError
+from plumbline.connectors.builtin.docx import DocxConnector
+from plumbline.connectors.registry import load_connectors
+from plumbline.connectors.testing import run_conformance
 
 CORPUS = Path(__file__).parents[2] / "evals" / "connectors" / "docx" / "corpus"
 

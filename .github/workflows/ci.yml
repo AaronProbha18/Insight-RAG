@@ -22,19 +22,19 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg18
         env:
-          POSTGRES_USER: insight_rag
-          POSTGRES_PASSWORD: insight_rag
-          POSTGRES_DB: insight_rag
+          POSTGRES_USER: plumbline
+          POSTGRES_PASSWORD: plumbline
+          POSTGRES_DB: plumbline
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U insight_rag -d insight_rag"
+          --health-cmd "pg_isready -U plumbline -d plumbline"
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
     env:
       # Throwaway CI credentials for the service container above.
-      DATABASE_URL: postgresql://insight_rag:insight_rag@localhost:5432/insight_rag
+      DATABASE_URL: postgresql://plumbline:plumbline@localhost:5432/plumbline
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7

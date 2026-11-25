@@ -4,7 +4,7 @@ import urllib.request
 import pytest
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 
-from insight_rag import models
+from plumbline import models
 
 
 class _StubEmbeddings:
@@ -13,9 +13,9 @@ class _StubEmbeddings:
 
 
 def test_chat_model_uses_env_string(monkeypatch):
-    monkeypatch.delenv("INSIGHT_RAG_MODEL_BASE_URL", raising=False)
+    monkeypatch.delenv("PLUMBLINE_MODEL_BASE_URL", raising=False)
     seen = []
-    monkeypatch.setenv("INSIGHT_RAG_LLM", "fake:x")
+    monkeypatch.setenv("PLUMBLINE_LLM", "fake:x")
     monkeypatch.setattr(
         models,
         "init_chat_model",
@@ -27,9 +27,9 @@ def test_chat_model_uses_env_string(monkeypatch):
 
 
 def test_embeddings_uses_env_string(monkeypatch):
-    monkeypatch.delenv("INSIGHT_RAG_MODEL_BASE_URL", raising=False)
+    monkeypatch.delenv("PLUMBLINE_MODEL_BASE_URL", raising=False)
     seen = []
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDINGS", "fake:y")
+    monkeypatch.setenv("PLUMBLINE_EMBEDDINGS", "fake:y")
     monkeypatch.setattr(
         models,
         "init_embeddings",
@@ -43,9 +43,9 @@ def test_embeddings_uses_env_string(monkeypatch):
 @pytest.mark.parametrize(
     ("factory", "var"),
     [
-        (models.chat_model, "INSIGHT_RAG_LLM"),
-        (models.embeddings, "INSIGHT_RAG_EMBEDDINGS"),
-        (models.judge_model, "INSIGHT_RAG_JUDGE_LLM"),
+        (models.chat_model, "PLUMBLINE_LLM"),
+        (models.embeddings, "PLUMBLINE_EMBEDDINGS"),
+        (models.judge_model, "PLUMBLINE_JUDGE_LLM"),
     ],
 )
 def test_missing_env_raises_named_error(monkeypatch, factory, var):
@@ -65,8 +65,8 @@ def _ollama_up() -> bool:
 
 @pytest.mark.llm
 @pytest.mark.skipif(
-    not (_ollama_up() and os.environ.get("INSIGHT_RAG_LLM", "").startswith("ollama:")),
-    reason="needs Ollama on localhost:11434 and INSIGHT_RAG_LLM/EMBEDDINGS=ollama:*",
+    not (_ollama_up() and os.environ.get("PLUMBLINE_LLM", "").startswith("ollama:")),
+    reason="needs Ollama on localhost:11434 and PLUMBLINE_LLM/EMBEDDINGS=ollama:*",
 )
 def test_ollama_roundtrip():
     assert models.chat_model().invoke("Reply with one word: ok").content
@@ -75,11 +75,9 @@ def test_ollama_roundtrip():
 
 def test_base_url_is_forwarded_when_set(monkeypatch):
     seen = {}
-    monkeypatch.setenv("INSIGHT_RAG_LLM", "ollama:m")
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDINGS", "ollama:e")
-    monkeypatch.setenv(
-        "INSIGHT_RAG_MODEL_BASE_URL", "http://host.docker.internal:11434"
-    )
+    monkeypatch.setenv("PLUMBLINE_LLM", "ollama:m")
+    monkeypatch.setenv("PLUMBLINE_EMBEDDINGS", "ollama:e")
+    monkeypatch.setenv("PLUMBLINE_MODEL_BASE_URL", "http://host.docker.internal:11434")
     monkeypatch.setattr(models, "init_chat_model", lambda s, **kw: seen.update(chat=kw))
     monkeypatch.setattr(models, "init_embeddings", lambda s, **kw: seen.update(emb=kw))
 
