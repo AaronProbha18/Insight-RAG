@@ -1330,6 +1330,7 @@ dependencies = [
     { name = "pypdf" },
     { name = "python-docx" },
     { name = "pyyaml" },
+    { name = "rich" },
 ]
 
 [package.optional-dependencies]
@@ -1357,6 +1358,7 @@ requires-dist = [
     { name = "pypdf", specifier = ">=7.1.0" },
     { name = "python-docx", specifier = ">=1.2.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "rich", specifier = ">=15" },
 ]
 provides-extras = ["ollama"]
 

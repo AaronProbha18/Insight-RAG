@@ -1,0 +1,5 @@
+PASS  health
+PASS  upload (HTTP 201) {"document_id":"doc_01M89YD8E2QKMVAVSQ4BD92WEM","title":"Lumen Ridge Outfitters Returns Policy","connector":"pdf","chunks":3,"created":true}
+PASS  chat answered: Most items can be returned within 14 days of the delivery date for a full refund [c1].
+      sources: "title": "Lumen Ridge Outfitters Returns Policy", "locator": "p. 1" 
+smoke: all steps passed
