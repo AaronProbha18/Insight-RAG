@@ -74,6 +74,13 @@ interactive terminal a progress bar shows judge validation, then ingest and
 questions per connector with an ETA; `--no-progress` turns it off (it is off
 automatically when output is piped).
 
+The chat UI's Quality button reads this summary through `GET /quality`. Set
+`PLUMBLINE_EVAL_SUMMARY` to read a different file (default:
+`reports/latest.summary.json`). A sampled run (`--sample`) or a run that stops
+at the judge gate (exit 2) shows "Not measured yet", so only full runs count.
+In Docker the image does not contain `evals/`: mount the summary file into the
+container and set `PLUMBLINE_EVAL_SUMMARY` to its path inside the container.
+
 ## Feedback candidates
 
 People rate answers in the UI. `plumbline-feedback-export` turns every

@@ -15,4 +15,4 @@
 
 ## 3. Docs
 
-- [ ] 3.1 Backend guide (endpoint, allowlist), frontend guide (quality dialog, manual checks), architecture overview (`GET /quality`, summary file), `evals/README.md` (`PLUMBLINE_EVAL_SUMMARY`, sampled runs don't count, Docker mount). Test: `python scripts/check_links.py` passes.
+- [x] 3.1 Backend guide (endpoint, allowlist), frontend guide (quality dialog, manual checks), architecture overview (`GET /quality`, summary file), `evals/README.md` (`PLUMBLINE_EVAL_SUMMARY`, sampled runs don't count, Docker mount). Test: `python scripts/check_links.py` passes.
