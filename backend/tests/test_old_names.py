@@ -13,7 +13,7 @@ ALLOWED_FILES = {
     "backend/tests/test_migrations.py",
     "backend/tests/test_old_names.py",
 }
-ALLOWED_PREFIXES = ("openspec/changes/", "evals/reports/")  # history and baselines
+ALLOWED_PREFIXES = ("openspec/changes/",)  # history
 
 
 def test_old_names_only_in_allowed_places():

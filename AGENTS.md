@@ -45,7 +45,8 @@ frontend/                  Vite + React + assistant-ui + Tailwind v4
   src/upload/              upload control
   src/components/          vendored assistant-ui kit + shadcn ui (trimmed, ADR 0003)
 evals/                     eval DATA only: corpus-src/, connectors/<name>/{corpus,golden.yaml},
-                           judge/labelled.yaml, reports/ (gitignored; baselines are force-added)
+                           judge/labelled.yaml, reports/ (gitignored scratch),
+                           baselines/<change>/ (committed eval summaries)
 scripts/smoke.sh           full-stack smoke test
 docs/adr/                  architecture decision records - why things are the way they are
 docs/architecture/         overview.md: components, flows, boundary rules, data model

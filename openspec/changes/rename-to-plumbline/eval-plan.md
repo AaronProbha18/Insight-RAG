@@ -30,7 +30,7 @@ The baseline itself is below the 0.80 correctness gate on both connectors
 (docx 0.77, pdf 0.70). This change is judged against the baseline, not
 against 0.80; `verification.md` states the gate result separately.
 
-Supplementary only: `evals/reports/pre-rename-a.json`, a CPU run on Windows
+Supplementary only: `evals/baselines/rename-to-plumbline/windows-cpu.summary.json`, a CPU run on Windows
 with the same models. Its judge metrics differ from the M1 baseline by up to
 0.10 (docx correctness) on equivalent code, which is why it is not the
 comparison baseline. Its `golden_version` hashes differ from the M1 ones only
