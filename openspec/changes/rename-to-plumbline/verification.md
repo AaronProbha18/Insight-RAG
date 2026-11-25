@@ -53,7 +53,7 @@ No second run was made to measure the run-to-run spread.
 ## Deviations
 
 - **Waiver (product owner, 2026-11-26):** the three judge metrics above break the +/-0.05 rule and are waived as sampling noise, on the evidence above. This is a waiver, not a pass.
-- Scenarios with no automated test: Build, Upgrade with old database, and the walkthrough part of Fresh clone quickstart. Evidence is manual and recorded above. These are not waived.
+- **Accepted as manually verified (product owner, 2026-11-26):** the three scenarios with no automated test: Build, Upgrade with old database, and the walkthrough part of Fresh clone quickstart. The evidence is manual and recorded above; no automated test was added for them.
 - The ADR 0004 and a separate migration note were dropped during implementation (product owner); the README carries a short upgrade note and the spec, design and tasks were updated to match.
 - The comparison baseline was switched from the Windows CPU run to the rag-foundation M1 run (Windows judge metrics differ from the M1 by up to 0.10 on equivalent code); the Windows run is kept as `evals/baselines/rename-to-plumbline/windows-cpu.summary.json`.
 - Brand assets (task 4.4) and the repo-wide old-names guard were added to scope after triage; the issue was updated.
@@ -61,4 +61,4 @@ No second run was made to measure the run-to-run spread.
 
 ## Verdict
 
-**FAIL** under the verdict rules: three eval metrics break the pass rule, and three scenarios lack an automated test. The three eval metrics are waived by the product owner (above). The three uncovered scenarios are listed under Deviations and still need an explicit decision before merge.
+**FAIL** under the verdict rules, for two reasons: three eval metrics break the pass rule, and three scenarios have no automated test. Both are resolved by recorded product-owner decisions of 2026-11-26: the three judge metrics are **waived** as sampling noise, and the three scenarios are **accepted as manually verified**. Nothing was re-run or re-labelled to change the result; the merge proceeds on those decisions, not on a PASS.
