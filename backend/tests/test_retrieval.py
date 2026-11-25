@@ -51,6 +51,7 @@ def test_returns_nearest_first(conn):
         "Manual",
         "p. 2",
     )
+    assert results[0].filename == "m.pdf"
 
 
 def test_score_is_cosine_similarity(conn):

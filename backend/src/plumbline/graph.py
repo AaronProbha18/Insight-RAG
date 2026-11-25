@@ -72,6 +72,7 @@ def build_graph(
                 "id": f"c{i}",
                 "document_id": chunks[i - 1].document_id,
                 "title": chunks[i - 1].title,
+                "filename": chunks[i - 1].filename,
                 "locator": chunks[i - 1].locator,
                 "text": chunks[i - 1].text,
             }
