@@ -1,6 +1,6 @@
 ## 1. Backend
 
-- [ ] 1.1 SPA fallback: `GET /app/{path:path}` serves `index.html` when `PLUMBLINE_UI_DIR` is set; tests in `test_ui_mount.py` that `/app/documents` returns the HTML while `GET /documents` and an unknown path outside `/app/` do not
+- [x] 1.1 SPA fallback: `GET /app/{path:path}` serves `index.html` when `PLUMBLINE_UI_DIR` is set; tests in `test_ui_mount.py` that `/app/documents` returns the HTML while `GET /documents` and an unknown path outside `/app/` do not
 
 ## 2. Routing and data
 
