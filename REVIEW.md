@@ -74,7 +74,7 @@ Rules: [frontend guide](docs/guides/frontend-development-guide.md).
 
 Rules: [connector guide](docs/guides/connector-development-guide.md).
 
-- [ ] Uses only `insight_rag.connectors.contract` *(CI for built-ins)*.
+- [ ] Uses only `plumbline.connectors.contract` *(CI for built-ins)*.
 - [ ] Unreadable input raises `ParseError`, never another exception, and
       `run_conformance` passes on its fixtures plus a `corrupt/` folder.
 - [ ] Locators are something a person can follow back to the source.

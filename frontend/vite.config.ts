@@ -9,5 +9,5 @@ const backend = process.env.VITE_BACKEND ?? 'http://localhost:8000'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: { alias: { '@': path.join(import.meta.dirname, 'src') } },
-  server: { proxy: { '/chat': backend, '/documents': backend, '/health': backend } },
+  server: { proxy: { '/chat': backend, '/documents': backend, '/feedback': backend, '/health': backend, '/quality': backend } },
 })

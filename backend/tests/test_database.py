@@ -18,4 +18,4 @@ def test_isolated_database_has_pgvector(database_url):
 def test_isolated_database_is_not_the_main_one(database_url):
     dbname = psycopg.conninfo.conninfo_to_dict(database_url)["dbname"]
 
-    assert dbname.startswith("insight_rag_test_")
+    assert dbname.startswith("plumbline_test_")

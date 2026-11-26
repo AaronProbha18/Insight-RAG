@@ -22,6 +22,7 @@ export const chatAdapter: ChatModelAdapter = {
     let text = ''
     let citations: Citation[] = []
     let abstained = false
+    let answerId: string | undefined
     for await (const { event, data } of parseSse(response.body)) {
       if (event === 'delta') text += data.text
       else if (event === 'citations') citations = data.citations
@@ -29,8 +30,13 @@ export const chatAdapter: ChatModelAdapter = {
         text = data.message
         abstained = true
       } else if (event === 'error') throw new Error(data.message)
-      else if (event === 'done') break
+      else if (event === 'done') {
+        answerId = data.answer_id
+        break
+      }
       yield { content: [{ type: 'text', text }], metadata: { custom: { citations, abstained } } }
     }
+    // Last update carries the id the feedback controls need; error paths never reach it.
+    yield { content: [{ type: 'text', text }], metadata: { custom: { citations, abstained, answerId } } }
   },
 }

@@ -5,7 +5,7 @@ repo. Tool-specific notes live elsewhere (`CLAUDE.md` for Claude Code).
 
 ## Purpose
 
-insight-rag-v2 is a retrieval-augmented generation (RAG) application. Content
+Plumbline is a retrieval-augmented generation (RAG) application. Content
 enters through **connectors**, is indexed, and is answered over by a
 LangGraph agent, behind a chat UI.
 
@@ -26,8 +26,8 @@ Versions are not pinned here; check the lockfiles.
 ## Layout
 
 ```text
-backend/                   Python package `insight_rag` (uv project)
-  src/insight_rag/
+backend/                   Python package `plumbline` (uv project)
+  src/plumbline/
     api/app.py             FastAPI routes (/health, /documents, /chat); serves the built UI in Docker
     connectors/            contract.py (v1), registry.py (entry points),
                            builtin/ (pdf, docx), testing/ (conformance kit)
@@ -37,7 +37,7 @@ backend/                   Python package `insight_rag` (uv project)
     graph.py               LangGraph answer graph: retrieve -> generate | abstain
     models.py              chat / embedding / judge models from env
     db.py                  DATABASE_URL with the local default
-    evals/                 golden + label loaders, judge, scoring, runner (insight-rag-eval)
+    evals/                 golden + label loaders, judge, scoring, runner (plumbline-eval)
   migrations/              Alembic, hand-written SQL
   tests/                   pytest; `db` marker needs Postgres, `llm` needs Ollama
 frontend/                  Vite + React + assistant-ui + Tailwind v4
@@ -45,12 +45,14 @@ frontend/                  Vite + React + assistant-ui + Tailwind v4
   src/upload/              upload control
   src/components/          vendored assistant-ui kit + shadcn ui (trimmed, ADR 0003)
 evals/                     eval DATA only: corpus-src/, connectors/<name>/{corpus,golden.yaml},
-                           judge/labelled.yaml, reports/ (gitignored)
+                           judge/labelled.yaml, reports/ (gitignored scratch),
+                           baselines/<change>/ (committed eval summaries)
 datamodel/                 YAML data model toolkit, own uv project; not Plumbline's schema (ADR 0004)
 scripts/smoke.sh           full-stack smoke test
 docs/adr/                  architecture decision records - why things are the way they are
 docs/architecture/         overview.md: components, flows, boundary rules, data model
 docs/guides/               backend, frontend and connector development guides
+docs/brand/                Plumbline logos and icons (source files; README has usage)
 openspec/                  specs (living), changes (in flight), schemas (our workflow)
 .claude/                   Claude Code skills, commands, hooks; launch.json (dev servers for Desktop preview)
 Dockerfile                 one image: built UI + API
@@ -143,7 +145,7 @@ sh scripts/smoke.sh                # health, one upload, one chat
 sh scripts/sync_labels.sh          # create/update GitHub labels from .github/labels.yml
 
 # evals (from backend/; needs model env vars, see README)
-uv run insight-rag-eval [--connectors pdf] [--sample N]
+uv run plumbline-eval [--connectors pdf] [--sample N]
 
 # fixture corpus (from repo root, after editing evals/corpus-src/)
 uv run --no-project --with reportlab --with python-docx python evals/generate_corpus.py

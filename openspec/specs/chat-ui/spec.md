@@ -115,3 +115,51 @@ The chat SHALL give every control an accessible name and a visible focus indicat
 - **GIVEN** a keyboard-only user
 - **WHEN** they upload a file, ask a question, stop, copy, regenerate and open a source
 - **THEN** every step is reachable with a visible focus indicator
+
+### Requirement: Chat with streamed answers
+
+The frontend SHALL provide a chat built on assistant-ui that sends the
+conversation to the backend chat endpoint and renders the answer as it
+streams.
+
+#### Scenario: Ask a question
+
+- **WHEN** the user types a question and submits it
+- **THEN** the answer appears incrementally in the thread
+
+### Requirement: Upload documents from the UI
+
+The frontend SHALL let the user upload PDF and DOCX files and SHALL show
+the outcome: indexed, already indexed, unsupported type, or unreadable
+file.
+
+#### Scenario: Duplicate upload feedback
+
+- **GIVEN** a file was already indexed
+- **WHEN** the user uploads it again
+- **THEN** the UI says the document is already indexed
+
+#### Scenario: Unsupported file feedback
+
+- **WHEN** the user uploads a `.png`
+- **THEN** the UI shows an error listing the supported types
+
+### Requirement: Feedback controls on answers
+
+Each completed assistant message, abstentions included, SHALL offer
+thumbs up and thumbs down; thumbs down SHALL offer an optional reason and
+comment; the control SHALL show the recorded value. The controls SHALL be
+keyboard-usable with accessible names, visible focus rings, and text
+meeting 4.5:1 contrast in both themes.
+
+#### Scenario: Keyboard only
+
+- **GIVEN** the feedback controls
+- **WHEN** used by keyboard only
+- **THEN** they have accessible names and visible focus rings, and text meets 4.5:1 contrast in both themes
+
+#### Scenario: No controls while streaming or on errors
+
+- **GIVEN** an assistant message that is still running or ended with an error
+- **WHEN** it is shown
+- **THEN** no feedback controls are shown for it

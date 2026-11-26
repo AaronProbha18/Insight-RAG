@@ -1,7 +1,7 @@
 from itertools import count
 from typing import ClassVar
 
-from insight_rag.connectors import ParsedDocument, ParseError, Section
+from plumbline.connectors import ParsedDocument, ParseError, Section
 
 
 class GoodConnector:

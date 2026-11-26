@@ -2,7 +2,7 @@ schema: rag-standard
 
 # Shown to the AI when creating any artifact. Full rules: AGENTS.md.
 context: |
-  Product: insight-rag-v2 - a RAG application. Content enters through
+  Product: Plumbline - a RAG application. Content enters through
     pluggable connectors, is indexed, and is answered over by a LangGraph
     agent behind an assistant-ui chat frontend.
   Backend: Python, LangGraph, FastAPI. Frontend: React + Vite, assistant-ui.

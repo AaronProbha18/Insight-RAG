@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from insight_rag.connectors.builtin.docx import DocxConnector
-from insight_rag.connectors.builtin.pdf import PdfConnector
-from insight_rag.evals.golden import load_golden, load_labelled
+from plumbline.connectors.builtin.docx import DocxConnector
+from plumbline.connectors.builtin.pdf import PdfConnector
+from plumbline.evals.golden import load_golden, load_labelled
 
 EVALS = Path(__file__).parents[2] / "evals"
 CONNECTORS = {"pdf": PdfConnector(), "docx": DocxConnector()}

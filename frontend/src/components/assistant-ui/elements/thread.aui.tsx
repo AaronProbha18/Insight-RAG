@@ -1,7 +1,8 @@
 // Vendored from the assistant-ui registry (base-nova `thread`) and trimmed to
 // what the /chat stream can produce: see ADR 0003. Removed: attachments,
 // files, images, reasoning, tool calls, voice, branches, message editing,
-// feedback, export, load-earlier and history loading.
+// export, load-earlier and history loading. Feedback is our own component
+// (feedback/FeedbackControls), not the kit part: see ADR 0003 amendment.
 
 import { MarkdownText } from "@/components/assistant-ui/elements/markdown-text";
 import { TooltipIconButton } from "@/components/assistant-ui/elements/tooltip-icon-button";
@@ -29,6 +30,7 @@ import {
 import type { FC } from "react";
 import { type Citation } from "@/chat/adapter";
 import { Citations } from "@/chat/Citations";
+import { FeedbackControls } from "@/feedback/FeedbackControls";
 
 const isNewChatView = (s: AssistantState) => s.thread.messages.length === 0;
 
@@ -256,6 +258,10 @@ const AssistantMessage: FC = () => {
 };
 
 const AssistantActionBar: FC = () => {
+  // Only recorded answers have an id; the error path never gets one.
+  const answerId = useAuiState(
+    (s) => s.message.metadata.custom?.answerId as string | undefined,
+  );
   return (
     <ActionBarPrimitive.Root
       hideWhenRunning
@@ -277,6 +283,7 @@ const AssistantActionBar: FC = () => {
           <RefreshCwIcon />
         </TooltipIconButton>
       </ActionBarPrimitive.Reload>
+      {answerId && <FeedbackControls answerId={answerId} />}
     </ActionBarPrimitive.Root>
   );
 };

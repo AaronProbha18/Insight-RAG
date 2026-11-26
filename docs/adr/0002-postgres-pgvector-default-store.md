@@ -19,7 +19,7 @@ embeddings, and must run with one `docker compose up`.
 - A document and all of its chunks are written in **one transaction**.
   Deleting a document cascades to its chunks.
 - The embedding column is typed `vector(N)`. N comes from
-  `INSIGHT_RAG_EMBEDDING_DIM` when the migration runs, and has no default:
+  `PLUMBLINE_EMBEDDING_DIM` when the migration runs, and has no default:
   it must match the configured embedding model.
 - Retrieval uses an **exact cosine scan** in v1. An HNSW index is added in a
   later migration once corpus size makes exact scan slow. Exact scan has

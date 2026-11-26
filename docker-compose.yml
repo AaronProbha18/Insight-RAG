@@ -3,9 +3,9 @@ services:
     image: pgvector/pgvector:pg18
     environment:
       # Local-only defaults; override in .env for any real deployment.
-      POSTGRES_USER: ${POSTGRES_USER:-insight_rag}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-insight_rag}
-      POSTGRES_DB: ${POSTGRES_DB:-insight_rag}
+      POSTGRES_USER: ${POSTGRES_USER:-plumbline}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plumbline}
+      POSTGRES_DB: ${POSTGRES_DB:-plumbline}
     ports:
       - "5432:5432"
     volumes:
@@ -25,7 +25,7 @@ services:
         required: false
     environment:
       # Inside compose the database is the `db` service, not localhost.
-      DATABASE_URL: postgresql://${POSTGRES_USER:-insight_rag}:${POSTGRES_PASSWORD:-insight_rag}@db:5432/${POSTGRES_DB:-insight_rag}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-plumbline}:${POSTGRES_PASSWORD:-plumbline}@db:5432/${POSTGRES_DB:-plumbline}
     extra_hosts:
       - "host.docker.internal:host-gateway" # reach Ollama running on the host
     depends_on:

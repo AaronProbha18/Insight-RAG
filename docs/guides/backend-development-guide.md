@@ -1,6 +1,6 @@
 # Backend development guide
 
-Rules for writing backend code in insight-rag, for people and AI agents
+Rules for writing backend code in Plumbline, for people and AI agents
 alike. Every rule describes how the code already works; where a rule is
 enforced by a test, the test is named. For the system's shape, read
 [the architecture overview](../architecture/overview.md) first. For coding
@@ -55,7 +55,8 @@ import psycopg
 *Enforced by* `tests/test_boundaries.py`.
 
 **1.4 Configuration has owners.** Environment variables are read only in
-`models.py`, `db.py` and the two composition roots. *Enforced by*
+`models.py`, `db.py`, `config.py` (the legacy-variable check) and the two
+composition roots. *Enforced by*
 `tests/test_boundaries.py`.
 
 **1.5 Sync routes, one connection per request.** Routes are plain `def`,
@@ -72,12 +73,20 @@ code marks this with a `ponytail:` comment.
 | --- | --- |
 | 201 | a new document was indexed |
 | 200 | the same bytes were already indexed (`created: false`), so uploads are idempotent |
+| 204 | `DELETE /documents/{document_id}` removed the document and its chunks |
+| 404 | `DELETE /documents/{document_id}` for an unknown or already-deleted id; the message is always "Document not found" |
+| 204 | (also) `POST /feedback` stored the rating, or replaced the earlier one for that answer |
+| 404 | (also) `POST /feedback` for an unknown `answer_id`; the message is always "Answer not found" |
+| 200 | `GET /quality` always; no usable summary is `state: "not_measured"`, never an error |
 | 415 | no connector handles the file type; the message lists the supported types |
-| 422 | the connector can't read the file (`ParseError`), or the request body is invalid |
+| 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters) |
 | 500 | anything else; the client never sees internal details |
 
-**2.2 Public ids only.** Clients see `document_id` (`doc_<ULID>`). Internal
-integer ids, and `RetrievedChunk.chunk_id`, never leave the backend.
+**2.2 Public ids only.** Clients see `document_id` (`doc_<ULID>`) and
+`answer_id` (`ans_<ULID>`). Internal integer ids, `RetrievedChunk.chunk_id`
+and a source file's `filename` (kept on the recorded answer for the
+feedback export) never leave the backend: `/chat` strips `filename` from the
+`citations` event.
 
 **2.3 No confidence numbers.** Responses never carry a model-reported
 confidence or a retrieval score. Trust comes from citations and evals.
@@ -86,7 +95,21 @@ confidence or a retrieval score. Trust comes from citations and evals.
 **2.4 `/chat` is a contract.** Its SSE events (`delta`, `citations`,
 `abstain`, `error`, `done`) are fixed in design D8, and
 `frontend/src/chat/adapter.ts` consumes them. Changing one means changing
-the other **in the same PR**.
+the other **in the same PR**. `done` carries `{"answer_id": "ans_<ULID>"}`
+for answers and abstentions, and is absent on the error path. An answer is
+recorded (`feedback.record_answer`) before it streams; if recording fails
+the client gets `error`, never an answer it cannot rate.
+
+**2.5 `/quality` is an allowlist.** `quality.load_quality` reads the eval
+runner's summary file (`PLUMBLINE_EVAL_SUMMARY`, default
+`evals/reports/latest.summary.json`) and builds the response from named
+fields only: the three gated metrics, PASS/FAIL and `failed` as the runner
+wrote them, the run date, model ids, threshold and a `config_matches` check
+of chat model, embedding model and threshold. `host`, `git_commit`, `report`,
+`reason`, latency and every other summary field are never returned. A missing,
+malformed, sampled or exit-2 summary is `not_measured`. *Enforced by*
+`test_no_internal_fields_leak` in `tests/test_quality.py` and
+`tests/test_quality_api.py`.
 
 ## 3. Errors
 
@@ -155,7 +178,7 @@ threshold (the LLM isn't called), or a model reply that is
 
 **5.3 Prompt and threshold changes are answer-quality changes.** Editing
 `PROMPT`, `DEFAULT_THRESHOLD`, `top_k` or chunk sizes changes behaviour.
-Run `insight-rag-eval`, compare with the baseline, and record the result
+Run `plumbline-eval`, compare with the baseline, and record the result
 (AGENTS.md workflow rule 4). Tuning stops at the eval plan's pass rule:
 change parameters, never golden answers.
 
@@ -165,8 +188,8 @@ shown.
 
 ## 6. Models
 
-**6.1 Models come from `provider:model` strings** in `INSIGHT_RAG_LLM`,
-`INSIGHT_RAG_EMBEDDINGS` and `INSIGHT_RAG_JUDGE_LLM`, created by
+**6.1 Models come from `provider:model` strings** in `PLUMBLINE_LLM`,
+`PLUMBLINE_EMBEDDINGS` and `PLUMBLINE_JUDGE_LLM`, created by
 LangChain's `init_chat_model` / `init_embeddings` in `models.py`. Never
 import a provider class directly.
 
@@ -177,12 +200,12 @@ core stays provider-free. The Docker image picks it with
 **6.3 The judge is separate on purpose.** Changing the chat model must not
 silently change the judge that grades it.
 
-**6.4 Remote endpoints use `INSIGHT_RAG_MODEL_BASE_URL`**, forwarded as
+**6.4 Remote endpoints use `PLUMBLINE_MODEL_BASE_URL`**, forwarded as
 `base_url`:
 
 ```python
 # ✅ models.py
-    base_url = os.environ.get("INSIGHT_RAG_MODEL_BASE_URL")
+    base_url = os.environ.get("PLUMBLINE_MODEL_BASE_URL")
     return {"base_url": base_url} if base_url else {}
 ```
 
@@ -196,7 +219,7 @@ autogenerate.
 one.
 
 **7.3 The vector dimension is fixed at migration time** from
-`INSIGHT_RAG_EMBEDDING_DIM`, with no default. A different embedding model
+`PLUMBLINE_EMBEDDING_DIM`, with no default. A different embedding model
 means a new migration and re-ingestion (ADR 0002).
 
 **7.4 One default database location:** `db.database_url()`. Don't
@@ -208,6 +231,10 @@ hard-code a URL anywhere else.
 the real thing: `tests/fake_embeddings.py` (`FakeEmbeddings`,
 `FailingEmbeddings`, `FixedEmbeddings`), `tests/fake_connectors.py`, and
 recording or scripted LLMs that keep the prompts they receive.
+
+**8.1a `/chat` tests inject a fake recorder** through the `get_recorder`
+dependency (`FakeRecorder` in `tests/test_chat_api.py`), so they need no
+database; `tests/test_feedback.py` checks the stored row against real tables.
 
 **8.2 Database tests are marked `db`** and use the `database_url` and
 `migrate` fixtures from `tests/conftest.py`. Each run gets its own

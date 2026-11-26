@@ -1,7 +1,7 @@
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 
-from insight_rag.graph import ABSTAIN_MESSAGE, build_graph
-from insight_rag.retrieval import RetrievedChunk
+from plumbline.graph import ABSTAIN_MESSAGE, build_graph
+from plumbline.retrieval import RetrievedChunk
 
 
 def _chunk(i: int, score: float) -> RetrievedChunk:
@@ -41,6 +41,7 @@ def test_answer_with_citations():
             "id": "c1",
             "document_id": "doc_1",
             "title": "Doc 1",
+            "filename": "",
             "locator": "p. 1",
             "text": "text 1",
         }

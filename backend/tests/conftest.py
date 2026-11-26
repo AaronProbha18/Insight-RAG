@@ -7,7 +7,7 @@ from alembic import command
 from alembic.config import Config
 from psycopg import sql
 
-from insight_rag import db
+from plumbline import db
 
 
 @pytest.fixture(scope="session")
@@ -21,7 +21,7 @@ def database_url():
             f"Postgres unreachable at DATABASE_URL ({exc}); run `docker compose up -d db`"
         )
 
-    name = f"insight_rag_test_{secrets.token_hex(4)}"
+    name = f"plumbline_test_{secrets.token_hex(4)}"
     admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
     url = psycopg.conninfo.make_conninfo(admin_url, dbname=name)
     try:
@@ -39,7 +39,7 @@ def database_url():
 def migrate(database_url, monkeypatch):
     """Run alembic on the isolated database (8-dim vectors); always ends at base."""
     monkeypatch.setenv("DATABASE_URL", database_url)
-    monkeypatch.setenv("INSIGHT_RAG_EMBEDDING_DIM", "8")
+    monkeypatch.setenv("PLUMBLINE_EMBEDDING_DIM", "8")
     cfg = Config(Path(__file__).parents[1] / "alembic.ini")
     yield lambda rev="head": command.upgrade(cfg, rev)
     command.downgrade(cfg, "base")

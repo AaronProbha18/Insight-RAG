@@ -1,0 +1,62 @@
+{
+  "started_at": "2026-11-25T19:09:23.651980+00:00",
+  "git_commit": "54650ed",
+  "host": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "cpus": 8,
+    "python": "3.13.14"
+  },
+  "models": {
+    "llm": "ollama:llama3.1:8b",
+    "embeddings": "ollama:nomic-embed-text",
+    "judge": "ollama:qwen2.5:7b"
+  },
+  "threshold": 0.3,
+  "top_k": 5,
+  "sample": null,
+  "result": "FAIL",
+  "exit_code": 1,
+  "judge_agreement": {
+    "correctness": 1.0,
+    "faithfulness": 0.9
+  },
+  "connectors": {
+    "docx": {
+      "result": "FAIL",
+      "failed": [
+        "correctness"
+      ],
+      "metrics": {
+        "correctness": 0.667,
+        "faithfulness": 0.885,
+        "abstention": 1.0,
+        "hit_rate": 0.967
+      },
+      "latency_ms": {
+        "p50": 21022.9,
+        "p95": 32793.7
+      },
+      "questions": 40,
+      "golden_version": "978d5dd9dbf9"
+    },
+    "pdf": {
+      "result": "PASS",
+      "failed": [],
+      "metrics": {
+        "correctness": 0.833,
+        "faithfulness": 0.962,
+        "abstention": 1.0,
+        "hit_rate": 1.0
+      },
+      "latency_ms": {
+        "p50": 32857.5,
+        "p95": 66213.0
+      },
+      "questions": 40,
+      "golden_version": "0fe95e6a5d59"
+    }
+  },
+  "report": "../evals/reports/post-rename.json",
+  "duration_s": 3017
+}

@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from insight_rag.chunking import chunk
-from insight_rag.connectors import ParsedDocument, Section
-from insight_rag.connectors.builtin.docx import DocxConnector
+from plumbline.chunking import chunk
+from plumbline.connectors import ParsedDocument, Section
+from plumbline.connectors.builtin.docx import DocxConnector
 
 CORPUS = Path(__file__).parents[2] / "evals" / "connectors" / "docx" / "corpus"
 

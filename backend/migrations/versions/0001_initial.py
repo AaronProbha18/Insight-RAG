@@ -13,10 +13,10 @@ down_revision = None
 
 
 def _embedding_dim() -> int:
-    value = os.environ.get("INSIGHT_RAG_EMBEDDING_DIM", "")
+    value = os.environ.get("PLUMBLINE_EMBEDDING_DIM", "")
     if not value.isdigit() or int(value) == 0:
         raise RuntimeError(
-            "INSIGHT_RAG_EMBEDDING_DIM must be a positive integer matching the "
+            "PLUMBLINE_EMBEDDING_DIM must be a positive integer matching the "
             f"embedding model (e.g. 768 for nomic-embed-text); got {value!r}"
         )
     return int(value)

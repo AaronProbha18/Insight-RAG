@@ -1,6 +1,6 @@
 # Architecture overview
 
-insight-rag answers questions over documents you upload, citing where each
+Plumbline answers questions over documents you upload, citing where each
 answer came from or saying the documents don't cover it. Content enters
 through **connectors**, is chunked and embedded into **Postgres +
 pgvector**, and is answered by a small **LangGraph** graph that runs inside
@@ -10,7 +10,7 @@ served from the same origin.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST /documents, POST /chat SSE| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE; POST /feedback; GET /quality| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
   ING --> C[connectors via entry points]
@@ -22,7 +22,7 @@ flowchart LR
 ```
 
 Design decisions and their reasons live in
-[design.md](../../openspec/changes/rag-foundation/design.md) (D1–D10) and
+[design.md](../../openspec/changes/archive/2026-11-26-rag-foundation/design.md) (D1–D10) and
 [docs/adr/](../adr/). This page is the map; those are the why.
 
 ## Where things live
@@ -32,10 +32,12 @@ goes:
 
 | Adding… | Goes in |
 | --- | --- |
-| a file connector | its own package, registered under the `insight_rag.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/insight_rag/connectors/builtin/` |
-| an API route | `backend/src/insight_rag/api/app.py` (thin: validate, call a module, map errors to status codes) |
+| a file connector | its own package, registered under the `plumbline.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/plumbline/connectors/builtin/` |
+| an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
 | a UI component | `frontend/src/chat/` or `frontend/src/upload/`, or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
+| the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`) |
+| answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
 
 ## Flows
@@ -55,6 +57,17 @@ goes:
 6. **Embed before writing anything**, so a provider failure stores nothing.
 7. Insert the document and all chunks in **one transaction** → **201**.
 
+### Delete: `DELETE /documents/{document_id}`
+
+1. `api/app.py` `remove_document` calls `ingestion.delete_document`: one
+   `DELETE` by `public_id`. The chunks go with it through
+   `ON DELETE CASCADE`.
+2. Deleted → **204**. Unknown or already deleted → **404**
+   ("Document not found").
+3. Retrieval reads only `chunks`, so a deleted document can't be
+   retrieved or cited. Uploading the same bytes again indexes them again
+   (**201**).
+
 ### Ask: `POST /chat`
 
 1. `api/app.py` `chat` takes the last user message as the question and
@@ -62,18 +75,50 @@ goes:
 2. `graph.build_graph` runs `retrieve` (`retrieval.retrieve`: exact cosine
    top-k).
 3. If there are no chunks, or the best score is below
-   `INSIGHT_RAG_ABSTAIN_THRESHOLD`, it goes to **abstain**, and the LLM is
+   `PLUMBLINE_ABSTAIN_THRESHOLD`, it goes to **abstain**, and the LLM is
    not called.
 4. Otherwise, **generate**: sources are numbered `[c1]…[cN]`, and the model
    must answer only from them and cite every claim. A reply of
    `NOT_IN_SOURCES`, or one with no valid citation, becomes an
    abstention.
-5. The whole result is computed **before** the response starts (D8,
+5. The result is recorded as one `answers` row (`feedback.record_answer`).
+6. The whole result is computed **before** the response starts (D8,
    option A), then streamed as SSE: `delta…`, `citations`, `done`; or
-   `abstain`, `done`; or `error` with a generic message. There is never a
-   confidence score.
+   `abstain`, `done`; each `done` carries the answer's public `answer_id`.
+   If anything fails, including recording, the stream is a single `error`
+   with a generic message and no `answer_id`. There is never a confidence
+   score.
 
-### Evaluate: `insight-rag-eval`
+### Rate an answer: `POST /feedback`
+
+1. The UI shows thumbs up and down on a recorded answer (answers and
+   abstentions alike); thumbs down can add a reason and comment.
+2. `feedback.save_feedback` upserts the one `feedback` row for that answer,
+   so a change replaces the earlier rating: **204**. An unknown `answer_id`
+   is **404**, an invalid body **422**.
+
+### Review feedback: `plumbline-feedback-export`
+
+`feedback.export_candidates` turns every feedback row into a candidate in
+the `golden.yaml` shape and writes it to `evals/feedback/candidates.yaml`
+(git-ignored). A maintainer reviews it and copies entries into a golden set
+by hand; nothing is added automatically ([evals README](../../evals/README.md#feedback-candidates)).
+
+### Show the last eval: `GET /quality`
+
+1. The route reads the runner's summary file on every request:
+   `PLUMBLINE_EVAL_SUMMARY`, default `evals/reports/latest.summary.json`.
+   It uses no database and no model.
+2. `quality.load_quality` returns `not_measured` (with the eval command) when
+   the file is missing or invalid, the run stopped at the judge gate (exit 2)
+   or was sampled. Otherwise it returns allowlisted fields only: PASS/FAIL per
+   connector as the runner wrote it, the three gated metrics, run date, model
+   ids and threshold.
+3. `config_matches` compares the evaluated chat model, embedding model and
+   abstain threshold with the running ones; the judge is not compared. The
+   route always answers **200**.
+
+### Evaluate: `plumbline-eval`
 
 1. `evals.runner.run` checks the judge against human labels first
    (`evals.judge.validate_judge`). If they're unreviewed or agreement is
@@ -95,12 +140,13 @@ fails CI.
   a retriever function and an LLM injected. That's why it is tested with
   fakes and no Postgres.
 - **Built-in connectors use only the public contract**
-  (`insight_rag.connectors.contract`), the same surface a third-party
+  (`plumbline.connectors.contract`), the same surface a third-party
   connector gets. If a built-in needs more, the contract is missing
   something.
 - **Configuration is read in a few places only:** `models.py` (models),
   `db.py` (database location), and the composition roots `api/app.py` and
   `evals/runner.py` (thresholds), plus the migration (vector dimension).
+  `config.py` only rejects pre-rename variable names at startup.
   Everything else takes its inputs as arguments.
 - **Evals exercise production code**, never a copy of it. A metric that
   moves reflects a real behaviour change.
@@ -111,9 +157,15 @@ fails CI.
 | --- | --- | --- |
 | `documents` | one row per unique file | `content_hash` (SHA-256) is unique: the idempotency key. `public_id` is `doc_<ULID>`, the only id clients ever see. |
 | `chunks` | text + locator + `embedding vector(N)` | `ON DELETE CASCADE` from `documents`; unique `(document_id, ordinal)` |
+| `answers` | one row per answer or abstention `/chat` returned | `public_id` is `ans_<ULID>`. Holds the question, answer text, `abstained`, model ids and abstain threshold, and `citations` as JSONB (`document_id`, `title`, `filename`, `locator`) **copied** so a later document delete doesn't lose it. |
+| `feedback` | at most one row per answer | `answer_id` is unique; `ON DELETE CASCADE` from `answers`. `rating` up or down, optional `reason` (down only) and `comment` (max 2000), enforced by `CHECK`s. |
+
+**Stored locally:** every question asked and every answer is kept, with no
+retention limit, so nobody should type real personal data into the chat.
+The exported candidates file holds the same text.
 
 - Internal integer ids never leave the backend.
-- `N` comes from `INSIGHT_RAG_EMBEDDING_DIM` **when the migration runs**,
+- `N` comes from `PLUMBLINE_EMBEDDING_DIM` **when the migration runs**,
   and is then fixed. Changing the embedding model means a new migration and
   re-ingesting every document ([ADR 0002](../adr/0002-postgres-pgvector-default-store.md)).
 - Schema changes are **new** Alembic revisions with hand-written SQL in
@@ -148,4 +200,4 @@ provider's package (a `pyproject.toml` extra), never a code change.
   the question.
 - **Measurement:** the eval gates above, per connector, with a judge that
   is itself validated first. Details are in the
-  [eval plan](../../openspec/changes/rag-foundation/eval-plan.md).
+  [eval plan](../../openspec/changes/archive/2026-11-26-rag-foundation/eval-plan.md).

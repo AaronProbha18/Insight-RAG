@@ -4,10 +4,10 @@ from pathlib import Path
 import pytest
 from pypdf import PdfWriter
 
-from insight_rag.connectors import ParseError
-from insight_rag.connectors.builtin.pdf import PdfConnector
-from insight_rag.connectors.registry import load_connectors
-from insight_rag.connectors.testing import run_conformance
+from plumbline.connectors import ParseError
+from plumbline.connectors.builtin.pdf import PdfConnector
+from plumbline.connectors.registry import load_connectors
+from plumbline.connectors.testing import run_conformance
 
 CORPUS = Path(__file__).parents[2] / "evals" / "connectors" / "pdf" / "corpus"
 
