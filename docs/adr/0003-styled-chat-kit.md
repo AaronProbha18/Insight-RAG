@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Introduced by the `assistant-ui-styled-chat` change (issue #3).
+Accepted. Introduced by the `assistant-ui-styled-chat` change (issue #3).
 
 ## Context
 

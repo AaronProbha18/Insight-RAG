@@ -15,9 +15,9 @@ LangGraph agent, behind a chat UI.
 | --- | --- | --- |
 | Agent / orchestration | Python, LangGraph (embedded in FastAPI) | - |
 | API | FastAPI | - |
-| Frontend | React + Vite, assistant-ui styled kit (vendored), Tailwind v4 | 0003 (Proposed) |
+| Frontend | React + Vite, assistant-ui styled kit (vendored), Tailwind v4 | 0003 (Accepted) |
 | Connectors | Pluggable, entry-point discovered | 0001 |
-| Store | Postgres + pgvector | 0002 (Proposed) |
+| Store | Postgres + pgvector | 0002 (Accepted) |
 | Open source | MIT | - |
 | Answer trust bar | >= 80% per connector, cited, abstains | - |
 

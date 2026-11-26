@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed. Introduced by the `datamodel-system` change (issue #21), extended
+Accepted. Introduced by the `datamodel-system` change (issue #21), extended
 by `datamodel-plumbline-mirror` (issue #28).
 Architecture and technical sign-off: business tech review.
 

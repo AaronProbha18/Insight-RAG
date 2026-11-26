@@ -33,7 +33,7 @@ defaults that keep the sample unchanged (Q2a); the gate as a second job in
   docs only with no gate (C).
 - **Why**: B is a cutover on a live schema, and `vector(N)` has no clean
   home in it. C drifts, which is the problem #21 exists to fix.
-- **ADR**: docs/adr/0004-yaml-data-model.md (extended; still Proposed)
+- **ADR**: docs/adr/0004-yaml-data-model.md (extended)
 
 ### Models under `datamodel/models/<name>/`
 

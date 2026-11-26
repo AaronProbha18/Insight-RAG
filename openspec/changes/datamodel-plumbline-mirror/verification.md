@@ -54,7 +54,7 @@ N/A per eval-plan: schema tooling and a CI gate; nothing in Plumbline's retrieva
 ## Deviations
 
 - **Alembic-comparison test dropped (task 3.1).** The task asked for a test comparing `models/plumbline` with the Alembic SQL, but design.md says `datamodel/` never reads `backend/`. The owner chose to rely on the drift gate, and `tasks.md` 3.1 was reworded. The gate has now run once for real (above).
-- **No separate ADR 0005 (task 5.1).** design.md and the proposal named a new ADR 0005. The owner chose to fold the decision into ADR 0004, still Proposed; `proposal.md`, `design.md` and `tasks.md` were updated.
+- **No separate ADR 0005 (task 5.1).** design.md and the proposal named a new ADR 0005. The owner chose to fold the decision into ADR 0004 (Proposed when extended; later marked Accepted in this PR); `proposal.md`, `design.md` and `tasks.md` were updated.
 - **`public_id_prefix` is optional** (task 2.2, not in `tasks.md`): required only when `public_id` is injected. Plumbline's `chunks` and `feedback` have no `public_id`.
 - **Drift gate ignores column order.** This settles the question left open in 3.1.
 - **`feedback` checks written without `IS NULL OR`** (task 4.2): the first real comparison found Postgres renders the explicit form differently from Alembic's column checks, so the YAML now matches Alembic's expressions.

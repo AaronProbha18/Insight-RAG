@@ -19,4 +19,4 @@
 
 ## 5. Docs
 
-- [x] 5.1 Extend ADR 0004 (still Proposed, business tech review) with the mirror decision, `models/` layout and conventions; `datamodel/README.md` (models, `MODEL=`, `model.yaml`, the drift rule: "change Alembic and the YAML in the same PR"); overview and `AGENTS.md` (backend schema changes now need the YAML too); backend development guide's migration section. Test: `python scripts/check_links.py` passes.
+- [x] 5.1 Extend ADR 0004 (business tech review) with the mirror decision, `models/` layout and conventions; `datamodel/README.md` (models, `MODEL=`, `model.yaml`, the drift rule: "change Alembic and the YAML in the same PR"); overview and `AGENTS.md` (backend schema changes now need the YAML too); backend development guide's migration section. Test: `python scripts/check_links.py` passes.
