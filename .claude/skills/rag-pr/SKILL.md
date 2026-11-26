@@ -32,10 +32,10 @@ closes it and says how each acceptance criterion was met.
    `git push -u origin HEAD`, then
    `gh pr create --draft --title "<title>" --body-file <tmpfile> --base main
    --label <labels>`, copying the issue's `type:*`, `area:*` and
-   `answer-quality-change` and `db-change` labels (never `status:*`, which tracks the issue, not
-   the PR). Report the PR URL. Then `bash scripts/board.sh <N> "In Review"`.
-   - `answer-quality-change` PRs: the body's eval line must hold real results. If
-     it says "n/a", stop and say why that's wrong.
+   `answer-quality-change` and `db-change` labels (never `status:*`, which
+   tracks the issue, not the PR). Report the PR URL. Then `bash scripts/board.sh <N> "In Review"`.
+   - `answer-quality-change` PRs: the body's eval line must hold real
+     results. If it says "n/a", stop and say why that's wrong.
 5. Suggest commenting the PR link on the issue. Do it only on approval.
 
 ## Guardrails
