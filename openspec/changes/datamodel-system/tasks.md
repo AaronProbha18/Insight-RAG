@@ -14,5 +14,6 @@
 
 ## 4. CI and docs
 
-- [ ] 4.1 `.github/workflows/datamodel.yml` (paths `datamodel/**` + itself): uv, Postgres 16 service, `make check test`; decide whether `main.json` lists it as required (path-filtered checks). Test: the PR's CI runs it green; a scratch commit moving YAML without a migration makes it fail (then reverted).
+- [x] 4.1 `.github/workflows/datamodel.yml` (paths `datamodel/**` + itself): uv, Postgres 16 service, `make check test`; decide whether `main.json` lists it as required (path-filtered checks). Test: the PR's CI runs it green; a scratch commit moving YAML without a migration makes it fail (then reverted).
+  - Result 2026-11-26: not a required check (path-filtered; a required one would block other PRs). Run 45774816073 (26e25a0) green, 26 passed, 0 skipped. Scratch a9c6d5b (YAML column, no migration): run 45775860672 failed at `make check` ("model has unmigrated changes"); reverted in 951deaf. Run 45777014136 (2913cf5) green, 26 passed. CI pg_dump is 18.7 against the Postgres 16 server; both sides of the equivalence test use the same binary.
 - [x] 4.2 Docs: `datamodel/README.md` (make and Windows `uv run` commands, opening `build/explorer.html` locally, synthetic-data rule, workflow), architecture overview (what `datamodel/` is and isn't), root README and `AGENTS.md` commands; ADR 0004 status left Proposed pending business tech review. Test: `python scripts/check_links.py` passes.
