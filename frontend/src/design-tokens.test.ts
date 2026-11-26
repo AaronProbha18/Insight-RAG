@@ -13,16 +13,16 @@ const COLOUR = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(/
  * contrast depends on what is painted behind them.
  */
 const PAIRS: [text: string, background: string][] = [
-  ['--foreground', '--background'], // page text
-  ['--foreground', '--muted'], // assistant messages, user bubble
-  ['--muted-foreground', '--background'], // secondary text
+  ['--foreground', '--background'], // page text, Connectors page and cards
+  ['--foreground', '--muted'], // assistant messages, user bubble, current sidebar item, metric bar fill and 0.80 mark on their track
+  ['--muted-foreground', '--background'], // secondary text, card extensions and run line
   ['--muted-foreground', '--muted'], // secondary text on muted surfaces
   ['--primary-foreground', '--primary'], // primary buttons
   ['--secondary-foreground', '--secondary'], // secondary buttons
   ['--accent-foreground', '--accent'], // hovered items
   ['--popover-foreground', '--popover'], // menus
   ['--background', '--foreground'], // tooltips
-  ['--destructive', '--background'], // errors
+  ['--destructive', '--background'], // errors, Below bar, not-current note
 ]
 
 function tokenBlocks(source: string): { light: string; dark: string; rest: string } {

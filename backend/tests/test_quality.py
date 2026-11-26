@@ -74,3 +74,40 @@ def test_no_internal_fields_leak(name):
         "judge_agreement", "reason", "top_k", "duration_s", "extra_metric", "abc1234",
     ):  # fmt: skip
         assert leak not in out
+
+
+def test_question_counts_pass_through():
+    q = load("with_counts")
+    assert q["connectors"]["pdf"]["answerable_questions"] == 30
+    assert q["connectors"]["pdf"]["unanswerable_questions"] == 10
+    assert q["connectors"]["docx"]["answerable_questions"] == 28
+
+
+def test_summary_without_counts_still_measures():
+    q = load("both_pass")
+    assert q["state"] == "measured"
+    for c in q["connectors"].values():
+        assert "answerable_questions" not in c and "unanswerable_questions" not in c
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"answerable_questions": -1},
+        {"answerable_questions": 1.5},
+        {"answerable_questions": "30"},
+        {"answerable_questions": True},
+        {"unanswerable_questions": None},
+    ],
+)
+def test_invalid_count_leaves_both_out_and_stays_measured(tmp_path, bad):
+    s = json.loads((FIX / "with_counts.json").read_text())
+    s["connectors"]["pdf"].update(bad)
+    path = tmp_path / "s.json"
+    path.write_text(json.dumps(s))
+
+    q = load_quality(path, RUNNING)
+
+    assert q["state"] == "measured"
+    assert set(q["connectors"]["pdf"]) == {"result", "failed", "metrics"}
+    assert q["connectors"]["docx"]["answerable_questions"] == 28

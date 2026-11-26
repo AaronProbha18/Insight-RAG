@@ -9,7 +9,6 @@ import {
 import type { ReactElement } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Quality } from '../quality/Quality'
 import { isPlainClick, navigate, type Page } from './route'
 
 const DOCS_URL = 'https://github.com/AaronProbha18/Plumbline/blob/main/docs/architecture/overview.md'
@@ -43,6 +42,26 @@ export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNe
   const row = collapsed ? `${item} justify-center py-2.5` : `${item} py-1.5`
   const stack = collapsed ? 'flex flex-col gap-2' : undefined
   const group = `px-2 pb-1 text-xs font-medium text-muted-foreground ${collapsed ? 'sr-only' : ''}`
+  // A link to an app page. A function, not a component, so the anchor stays in Sidebar's own element tree.
+  const pageLink = (href: string, current: boolean, Icon: typeof FileTextIcon, text: string, tip = text) => (
+    <Tip label={tip} show={collapsed}>
+      <a
+        href={href}
+        aria-current={current ? 'page' : undefined}
+        onClick={(e) => {
+          if (isPlainClick(e)) {
+            e.preventDefault()
+            navigate(href)
+          }
+          onNavigate?.()
+        }}
+        className={`${row} aria-[current=page]:bg-muted aria-[current=page]:font-medium`}
+      >
+        <Icon aria-hidden="true" className="size-4 shrink-0" />
+        <span className={label}>{text}</span>
+      </a>
+    </Tip>
+  )
   const CollapseIcon = collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon
   return (
     <TooltipProvider delay={200}>
@@ -91,38 +110,8 @@ export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNe
 
         <div className={stack}>
           <p className={group}>Knowledge</p>
-          <Tip label={`Documents (${documentCount})`} show={collapsed}>
-            <a
-              href="/app/documents"
-              aria-current={page === 'documents' ? 'page' : undefined}
-              onClick={(e) => {
-                if (isPlainClick(e)) {
-                  e.preventDefault()
-                  navigate('/app/documents')
-                }
-                onNavigate?.()
-              }}
-              className={`${row} aria-[current=page]:bg-muted aria-[current=page]:font-medium`}
-            >
-              <FileTextIcon aria-hidden="true" className="size-4 shrink-0" />
-              <span className={label}>Documents ({documentCount})</span>
-            </a>
-          </Tip>
-          <Tip label="Connectors (Coming soon)" show={collapsed}>
-            <span aria-disabled="true" className={`${row} cursor-not-allowed text-muted-foreground hover:bg-transparent`}>
-              <PlugIcon aria-hidden="true" className="size-4 shrink-0" />
-              <span className={label}>Connectors (Coming soon)</span>
-            </span>
-          </Tip>
-        </div>
-
-        <div className={stack}>
-          <p className={group}>Insights</p>
-          <Tip label="Quality" show={collapsed}>
-            <div>
-              <Quality compact={collapsed} itemClassName={`${row} w-full`} />
-            </div>
-          </Tip>
+          {pageLink('/app/documents', page === 'documents', FileTextIcon, `Documents (${documentCount})`)}
+          {pageLink('/app/connectors', page === 'connectors', PlugIcon, 'Connectors and quality')}
         </div>
 
         <Tip label="Docs" show={collapsed}>

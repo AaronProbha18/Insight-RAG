@@ -28,7 +28,7 @@ src/
   App.tsx              wiring only: route, collapse state, documents, chat key
   shell/  route.ts     useRoute(), navigate(): pages over the History API
           collapsed.ts sidebar collapse, kept in localStorage
-          Sidebar.tsx  navigation: New chat, Documents, Quality, docs link
+          Sidebar.tsx  navigation: New chat, Documents, Connectors and quality, docs link
           SidebarDrawer.tsx  menu button + the sidebar as a drawer below md
           AppShell.tsx layout and page switch
   chat/   sse.ts       SSE parser
@@ -38,12 +38,16 @@ src/
   upload/ api.ts       POST /documents -> user-facing outcome
   documents/ api.ts    GET /documents, DELETE /documents/{id}
           useDocuments.ts    list, refresh and delete, shared by page and sidebar count
-          pageLogic.ts       title search, type filter, upload-then-refresh
+          pageLogic.ts       title search, type filter, upload-then-refresh, count per connector
           DocumentList.tsx   rows: title, type, date, delete button
           DocumentsPage.tsx  upload, search, type filter, list, delete confirm
+  connectors/ api.ts   GET /connectors
+          useConnectors.ts   the loaded connectors, fetched when the page shows
+          ConnectorCard.tsx  one connector: subtitle, status pill, metric bars, last-checked footer
+          ConnectorsPage.tsx title, intro, 0.80 explainer, card grid, Build your own card;
+                             joins /connectors, /quality and /documents by connector name
   quality/ api.ts      GET /quality
-          QualityPanel.tsx   per-connector PASS/FAIL, metrics, mismatch warning
-          Quality.tsx        "Quality: <state>" button and dialog
+          useQuality.ts      the latest eval result, fetched once in App and passed to the Connectors page
   components/
     assistant-ui/elements/  vendored kit: thread.aui.tsx, markdown-text.tsx,
                             tooltip-icon-button.tsx (ADR 0003)
@@ -63,9 +67,9 @@ filesystems ignore case, and TypeScript then can't tell which file
 **1.3 Tests sit next to the code they test** (`sse.test.ts` beside
 `sse.ts`).
 
-**1.4 Pages are URLs under `/app/`.** The chat is at `/` and Documents at
-`/app/documents`. A client page never reuses an API path (`/documents` is
-the API), so the prefix can't collide with a route. Routing is the built-in
+**1.4 Pages are URLs under `/app/`.** The chat is at `/`, Documents at
+`/app/documents` and Connectors at `/app/connectors`. A client page never
+reuses an API path (`/documents` and `/connectors` are the API), so the prefix can't collide with a route. Routing is the built-in
 `shell/route.ts`: `useRoute()` reads the path and `navigate(path)` pushes
 history; back and forward work through `popstate`. There is no router
 library, and one comes when pages need nested routes or loaders. Sidebar
@@ -203,9 +207,9 @@ for an empty list, so abstentions show no sources without a special case:
   bottom"), suggestions via their text, and each source via its
   `<summary>`. *Checked by* `src/App.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
-- **The sidebar:** a `<nav aria-label="Main">`. The current page is `aria-current="page"` on its link. Documents is a real link whose text includes the count ("Documents (n)"). Connectors is a non-link marked `aria-disabled` with "Coming soon". Collapsed to icons, every item keeps its name as `sr-only` text, and the collapse button is "Collapse sidebar" or "Expand sidebar" with `aria-expanded`. Below `md` a button named "Open menu" opens the sidebar as a drawer, with base-ui's focus trap and Escape. *Checked by* `shell/Sidebar.test.tsx`, `shell/SidebarDrawer.test.tsx` and `shell/AppShell.test.tsx`.
+- **The sidebar:** a `<nav aria-label="Main">`. The current page is `aria-current="page"` on its link. Documents is a real link whose text includes the count ("Documents (n)"). "Connectors and quality" is a real link to `/app/connectors`, marked current there. There is no Quality item, no Insights group and no quality state in the sidebar. Collapsed to icons, every item keeps its name as `sr-only` text, and the collapse button is "Collapse sidebar" or "Expand sidebar" with `aria-expanded`. Below `md` a button named "Open menu" opens the sidebar as a drawer, with base-ui's focus trap and Escape. *Checked by* `shell/Sidebar.test.tsx`, `shell/SidebarDrawer.test.tsx` and `shell/AppShell.test.tsx`.
 - **The Documents page:** the file input, the Search box and the Type select each have a visible label, each delete button is named `Delete <title>`, deleting asks for confirmation in an alert dialog, and load/delete failures appear in a `role="status"` region. *Checked by* `documents/DocumentList.test.tsx` and `documents/DocumentsPage.test.tsx`.
-- **The quality dialog:** the button's text ("Quality", "Quality: PASS", "Quality: FAIL" or "Quality: Not measured") is its name; PASS and FAIL are words next to an `aria-hidden` icon, never colour alone; a configuration mismatch is a `role="status"` warning. *Checked by* `quality/QualityPanel.test.tsx` and `quality/Quality.test.tsx`.
+- **The Connectors page:** each connector is a card (`<section>` named by the connector). Passes, Below bar and Not measured are words next to an `aria-hidden` icon, never colour alone; the metric bars are `aria-hidden` and the number is text; a configuration mismatch ("This result is not current") and load or error messages are `role="status"`. The two external links ("How it's measured", "Connector guide") are real `<a>` elements with a visible focus ring and `rel="noreferrer"`, and the "Build your own" card appears only once the page has loaded. *Checked by* `connectors/ConnectorCard.test.tsx`, `connectors/ConnectorsPage.test.tsx`, `shell/Sidebar.test.tsx` and `shell/a11y.test.tsx`.
 - **Feedback controls:** "Good answer" and "Bad answer" are named buttons
   with `aria-pressed`; the thumbs-down form is a native `<fieldset>` with a
   `<legend>`, radio inputs and a labelled textarea; the outcome
@@ -276,9 +280,9 @@ feedback form (Tab order through Copy, Regenerate, Good, Bad; Enter and
 Space; arrow keys across the reasons; Cancel and Send return focus to the
 Bad button; focus rings; light and dark themes) and the
 Documents page (Tab order, search and type filter, upload outcome, delete
-confirm and cancel, focus rings, light and dark themes) and the quality
-dialog (open with Enter or Space, Tab to Close, Esc closes, focus returns to
-the Quality button, focus ring, light and dark themes) and the shell: New
+confirm and cancel, focus rings, light and dark themes) and the
+Connectors page (Tab reaches the Connectors and quality link, Enter opens
+the page, focus rings, light and dark themes) and the shell: New
 chat clears a conversation, including while an answer streams; going to
 Documents and back leaves the chat unchanged; the drawer opens from the menu
 button, closes on Escape, the backdrop and navigation, and returns focus to

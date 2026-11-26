@@ -1,3 +1,5 @@
+/// <reference types="node" />
+import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import type { Page } from './route'
@@ -5,19 +7,28 @@ import { Sidebar } from './Sidebar'
 
 const render = (page: Page = 'chat', collapsed = false) =>
   renderToStaticMarkup(
-    <Sidebar page={page} documentCount={3} collapsed={collapsed} onToggleCollapse={() => {}} onNewChat={() => {}} />,
+    <Sidebar
+      page={page}
+      documentCount={3}
+      collapsed={collapsed}
+      onToggleCollapse={() => {}}
+      onNewChat={() => {}}
+    />,
   )
+const links = (html: string, href: string) => html.match(new RegExp(`<a[^>]*href="${href}"[^>]*>`, 'g')) ?? []
 
 describe('Sidebar', () => {
-  it('lists logo, New chat, Knowledge, Insights and Docs in order', () => {
+  it('lists logo, New chat, Knowledge and Docs in order', () => {
     const html = render()
-    const order = ['Plumbline', 'New chat', 'Knowledge', 'Documents (3)', 'Connectors', 'Insights', 'Quality', 'Docs<']
+    const order = ['Plumbline', 'New chat', 'Knowledge', 'Documents (3)', 'Connectors and quality', 'Docs<']
     const at = order.map((t) => html.indexOf(t))
 
     expect(at.every((i) => i >= 0)).toBe(true)
     expect(at).toEqual([...at].sort((a, b) => a - b))
     expect(html).toContain('aria-label="Main"')
-    expect(html).toContain('Coming soon')
+    expect(html).not.toContain('Coming soon')
+    expect(html).not.toContain('Insights')
+    expect(html).not.toContain('>Quality<')
   })
 
   it('marks Documents as the current page only on that page', () => {
@@ -27,11 +38,21 @@ describe('Sidebar', () => {
     expect(link(render('chat'))).not.toContain('aria-current')
   })
 
-  it('does not make Connectors a link', () => {
-    const html = render()
+  it('makes Connectors and quality the one link to the page, current only there', () => {
+    expect(links(render(), '/app/connectors')).toHaveLength(1)
+    expect(render()).not.toContain('aria-disabled')
+    expect(links(render('connectors'), '/app/connectors')[0]).toContain('aria-current="page"')
+    expect(links(render('chat'), '/app/connectors')[0]).not.toContain('aria-current')
+  })
 
-    expect(html).toMatch(/<span[^>]*aria-disabled="true"/)
-    expect(html.match(/<a[^>]*>/g)?.length).toBe(2) // Documents and Docs only
+  it('has no quality state in the sidebar', () => {
+    expect(render()).not.toMatch(/Quality: |Passes|Below bar|Not measured/)
+  })
+
+  it('has no quality dialog any more', () => {
+    expect(render()).not.toMatch(/aria-haspopup|data-slot="dialog/)
+    for (const f of ['Quality.tsx', 'QualityPanel.tsx', 'label.ts'])
+      expect(existsSync(new URL(`../quality/${f}`, import.meta.url))).toBe(false)
   })
 
   it('collapsed keeps every name as screen-reader text and offers Expand', () => {
@@ -39,7 +60,7 @@ describe('Sidebar', () => {
 
     expect(html).toContain('aria-label="Expand sidebar"')
     expect(html).toContain('aria-expanded="false"')
-    for (const name of ['Plumbline', 'New chat', 'Documents (3)', 'Docs'])
+    for (const name of ['Plumbline', 'New chat', 'Documents (3)', 'Connectors and quality', 'Docs'])
       expect(html).toContain(`<span class="sr-only">${name}</span>`)
   })
 
@@ -61,7 +82,7 @@ describe('Sidebar', () => {
   it('has tooltips on the icon-only items, and only when collapsed', () => {
     const triggers = (html: string) => html.match(/data-slot="tooltip-trigger"/g)?.length ?? 0
 
-    expect(triggers(render('chat', true))).toBe(6) // expand, New chat, Documents, Connectors, Quality, Docs
+    expect(triggers(render('chat', true))).toBe(5) // expand, New chat, Documents, Connectors and quality, Docs
     expect(triggers(render('chat', false))).toBe(0)
   })
 

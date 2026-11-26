@@ -11,6 +11,13 @@ export function filterDocuments(documents: DocumentSummary[], query: string, typ
   )
 }
 
+/** Documents per connector name. */
+export function countByConnector(documents: DocumentSummary[]): Record<string, number> {
+  const counts: Record<string, number> = {}
+  for (const d of documents) counts[d.connector] = (counts[d.connector] ?? 0) + 1
+  return counts
+}
+
 /** Uploads one file and asks for a list refresh only when it was newly indexed. */
 export async function uploadAndRefresh(
   file: File,

@@ -4,6 +4,9 @@ export type ConnectorQuality = {
   result: 'PASS' | 'FAIL'
   failed: string[]
   metrics: Metrics
+  // Both or neither: /quality omits them for a summary written before the counts existed.
+  answerable_questions?: number
+  unanswerable_questions?: number
 }
 
 export type Quality =
