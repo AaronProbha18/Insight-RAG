@@ -1,0 +1,6 @@
+domain: core
+title: Core
+layer: runtime
+load_order: 10
+depends_on: []
+description: Test domain with two tables and a foreign key.

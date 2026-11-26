@@ -1,0 +1,7 @@
+table: event
+domain: audit
+status: published
+system_columns: [created_at]
+description: A test event.
+columns:
+  - {name: kind, type: text, description: Event kind.}

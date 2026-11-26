@@ -1,0 +1,11 @@
+table: note
+domain: core
+status: published
+public_id_prefix: nte
+system_columns: [public_id, created_at]
+description: A note on an account.
+columns:
+  - {name: account_id, type: bigint, references: account.id, on_delete: cascade, description: The account the note belongs to.}
+  - {name: body, type: text, description: Note text.}
+checks:
+  - {name: ck_note_body, expr: "body <> ''"}

@@ -1,0 +1,8 @@
+table: account
+domain: core
+status: published
+public_id_prefix: acc
+description: A test account.
+columns:
+  - {name: display_name, type: text, description: Name shown to users.}
+  - {name: first_name, type: text, pii: direct, description: Given name.}
