@@ -17,7 +17,7 @@ function label(q: QualityData | null) {
 
 /** "Quality: <state>" button; opens the latest eval result. `initial` seeds state for static tests.
  *  `compact` shows the icon only; the label stays as screen-reader text.
- *  `itemClassName` swaps the outlined button for a plain trigger with that class (the sidebar's item style). */
+ *  `itemClassName` styles the trigger (the sidebar's item style). */
 export function Quality({
   initial = null,
   compact = false,
@@ -25,7 +25,7 @@ export function Quality({
 }: {
   initial?: QualityData | null
   compact?: boolean
-  itemClassName?: string
+  itemClassName: string
 }) {
   const [quality, setQuality] = useState<QualityData | null>(initial)
   const [open, setOpen] = useState(false)
@@ -48,13 +48,11 @@ export function Quality({
   }, [open])
 
   const { text, Icon: Loaded } = label(quality)
-  const Icon = Loaded ?? (compact || itemClassName ? ChartNoAxesColumnIcon : null)
+  const Icon = Loaded ?? ChartNoAxesColumnIcon
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger
-        {...(itemClassName ? { className: itemClassName } : { render: <Button variant="outline" size="sm" /> })}
-      >
-        {Icon && <Icon aria-hidden="true" className="size-4 shrink-0" />}
+      <Dialog.Trigger className={itemClassName}>
+        <Icon aria-hidden="true" className="size-4 shrink-0" />
         {compact ? <span className="sr-only">{text}</span> : text}
       </Dialog.Trigger>
       <Dialog.Portal>

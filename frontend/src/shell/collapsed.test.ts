@@ -17,15 +17,23 @@ const broken = {
 describe('collapsed storage', () => {
   it('round-trips and defaults to expanded', () => {
     const store = memory()
-    expect(readCollapsed(store)).toBe(false)
-    writeCollapsed(store, true)
-    expect(readCollapsed(store)).toBe(true)
-    writeCollapsed(store, false)
-    expect(readCollapsed(store)).toBe(false)
+    expect(readCollapsed(() => store)).toBe(false)
+    writeCollapsed(() => store, true)
+    expect(readCollapsed(() => store)).toBe(true)
+    writeCollapsed(() => store, false)
+    expect(readCollapsed(() => store)).toBe(false)
+  })
+
+  it('swallows an error thrown while reaching storage itself', () => {
+    const unreachable = () => {
+      throw new Error('blocked')
+    }
+    expect(readCollapsed(unreachable)).toBe(false)
+    expect(() => writeCollapsed(unreachable, true)).not.toThrow()
   })
 
   it('swallows storage errors', () => {
-    expect(readCollapsed(broken)).toBe(false)
-    expect(() => writeCollapsed(broken, true)).not.toThrow()
+    expect(readCollapsed(() => broken)).toBe(false)
+    expect(() => writeCollapsed(() => broken, true)).not.toThrow()
   })
 })

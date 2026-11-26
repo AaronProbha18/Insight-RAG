@@ -4,37 +4,30 @@ const KEY = 'plumbline.sidebar.collapsed'
 
 type Store = Pick<Storage, 'getItem' | 'setItem'>
 
-// Storage can be missing or throw (private windows, blocked site data); the sidebar then starts expanded.
-export function readCollapsed(storage: Store): boolean {
+// Storage can be missing or throw (private windows, blocked site data), even on access to
+// `window.localStorage`, so callers pass a getter. The sidebar then starts expanded.
+export function readCollapsed(storage: () => Store): boolean {
   try {
-    return storage.getItem(KEY) === 'true'
+    return storage().getItem(KEY) === 'true'
   } catch {
     return false
   }
 }
 
-export function writeCollapsed(storage: Store, value: boolean): void {
+export function writeCollapsed(storage: () => Store, value: boolean): void {
   try {
-    storage.setItem(KEY, String(value))
+    storage().setItem(KEY, String(value))
   } catch {
     // not persisted; ignore
   }
 }
 
+const local = () => window.localStorage
+
 export function useCollapsed(): [boolean, () => void] {
-  const [collapsed, setCollapsed] = useState(() => {
-    try {
-      return readCollapsed(window.localStorage)
-    } catch {
-      return false
-    }
-  })
+  const [collapsed, setCollapsed] = useState(() => readCollapsed(local))
   const toggle = () => {
-    try {
-      writeCollapsed(window.localStorage, !collapsed)
-    } catch {
-      // window.localStorage itself can throw; the toggle still works for this session
-    }
+    writeCollapsed(local, !collapsed)
     setCollapsed(!collapsed)
   }
   return [collapsed, toggle]

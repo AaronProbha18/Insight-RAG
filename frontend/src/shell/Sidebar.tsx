@@ -46,92 +46,92 @@ export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNe
   const CollapseIcon = collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon
   return (
     <TooltipProvider delay={200}>
-    <nav
-      aria-label="Main"
-      className={`flex h-full flex-col border-r border-border bg-background p-2 ${collapsed ? 'w-14 gap-6' : 'w-60 gap-4'}`}
-    >
-      {/* Collapsed: the expand button sits over the logo and shows on hover or focus. It stays
-          focusable (opacity, not display), so keyboard users reach it. */}
-      <div className={`group/head relative flex items-center gap-2 ${collapsed ? 'h-8 justify-center' : 'justify-between'}`}>
-        <span
-          className={`flex items-center gap-2 px-2 font-semibold ${collapsed ? 'group-hover/head:opacity-0 group-has-[:focus-visible]/head:opacity-0' : ''}`}
-        >
-          <img src="/favicon.svg" alt="" className="size-5 shrink-0" />
-          <span className={label}>Plumbline</span>
-        </span>
-        {onToggleCollapse && (
-          <Tip label="Expand sidebar" show={collapsed}>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              aria-expanded={!collapsed}
-              onClick={onToggleCollapse}
-              className={collapsed ? 'absolute inset-0 m-auto opacity-0 group-hover/head:opacity-100 group-has-[:focus-visible]/head:opacity-100' : undefined}
-            >
-              <CollapseIcon aria-hidden="true" />
-            </Button>
-          </Tip>
-        )}
-      </div>
-
-      <Tip label="New chat" show={collapsed}>
-        <button
-          type="button"
-          onClick={() => {
-            onNewChat()
-            onNavigate?.()
-          }}
-          className={`${row} font-medium`}
-        >
-          <MessageSquarePlusIcon aria-hidden="true" className="size-4 shrink-0" />
-          <span className={label}>New chat</span>
-        </button>
-      </Tip>
-
-      <div className={stack}>
-        <p className={group}>Knowledge</p>
-        <Tip label={`Documents (${documentCount})`} show={collapsed}>
-        <a
-          href="/app/documents"
-          aria-current={page === 'documents' ? 'page' : undefined}
-          onClick={(e) => {
-            if (isPlainClick(e)) {
-              e.preventDefault()
-              navigate('/app/documents')
-            }
-            onNavigate?.()
-          }}
-          className={`${row} aria-[current=page]:bg-muted aria-[current=page]:font-medium`}
-        >
-          <FileTextIcon aria-hidden="true" className="size-4 shrink-0" />
-          <span className={label}>Documents ({documentCount})</span>
-        </a>
-        </Tip>
-        <Tip label="Connectors (Coming soon)" show={collapsed}>
-          <span aria-disabled="true" className={`${row} cursor-not-allowed text-muted-foreground hover:bg-transparent`}>
-            <PlugIcon aria-hidden="true" className="size-4 shrink-0" />
-            <span className={label}>Connectors (Coming soon)</span>
+      <nav
+        aria-label="Main"
+        className={`flex h-full flex-col border-r border-border bg-background p-2 ${collapsed ? 'w-14 gap-6' : 'w-60 gap-4'}`}
+      >
+        {/* Collapsed: the expand button sits over the logo and shows on hover or focus. It stays
+            focusable (opacity, not display), so keyboard users reach it. */}
+        <div className={`group/head relative flex items-center gap-2 ${collapsed ? 'h-8 justify-center' : 'justify-between'}`}>
+          <span
+            className={`flex items-center gap-2 px-2 font-semibold ${collapsed ? 'group-hover/head:opacity-0 group-has-[:focus-visible]/head:opacity-0' : ''}`}
+          >
+            <img src="/favicon.svg" alt="" className="size-5 shrink-0" />
+            <span className={label}>Plumbline</span>
           </span>
-        </Tip>
-      </div>
+          {onToggleCollapse && (
+            <Tip label="Expand sidebar" show={collapsed}>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-expanded={!collapsed}
+                onClick={onToggleCollapse}
+                className={collapsed ? 'absolute inset-0 m-auto opacity-0 group-hover/head:opacity-100 group-has-[:focus-visible]/head:opacity-100' : undefined}
+              >
+                <CollapseIcon aria-hidden="true" />
+              </Button>
+            </Tip>
+          )}
+        </div>
 
-      <div className={stack}>
-        <p className={group}>Insights</p>
-        <Tip label="Quality" show={collapsed}>
-          <div>
-            <Quality compact={collapsed} itemClassName={`${row} w-full`} />
-          </div>
+        <Tip label="New chat" show={collapsed}>
+          <button
+            type="button"
+            onClick={() => {
+              onNewChat()
+              onNavigate?.()
+            }}
+            className={`${row} font-medium`}
+          >
+            <MessageSquarePlusIcon aria-hidden="true" className="size-4 shrink-0" />
+            <span className={label}>New chat</span>
+          </button>
         </Tip>
-      </div>
 
-      <Tip label="Docs" show={collapsed}>
-        <a href={DOCS_URL} target="_blank" rel="noreferrer" className={`${row} mt-auto`}>
-          <BookOpenIcon aria-hidden="true" className="size-4 shrink-0" />
-          <span className={label}>Docs</span>
-        </a>
-      </Tip>
-    </nav>
+        <div className={stack}>
+          <p className={group}>Knowledge</p>
+          <Tip label={`Documents (${documentCount})`} show={collapsed}>
+            <a
+              href="/app/documents"
+              aria-current={page === 'documents' ? 'page' : undefined}
+              onClick={(e) => {
+                if (isPlainClick(e)) {
+                  e.preventDefault()
+                  navigate('/app/documents')
+                }
+                onNavigate?.()
+              }}
+              className={`${row} aria-[current=page]:bg-muted aria-[current=page]:font-medium`}
+            >
+              <FileTextIcon aria-hidden="true" className="size-4 shrink-0" />
+              <span className={label}>Documents ({documentCount})</span>
+            </a>
+          </Tip>
+          <Tip label="Connectors (Coming soon)" show={collapsed}>
+            <span aria-disabled="true" className={`${row} cursor-not-allowed text-muted-foreground hover:bg-transparent`}>
+              <PlugIcon aria-hidden="true" className="size-4 shrink-0" />
+              <span className={label}>Connectors (Coming soon)</span>
+            </span>
+          </Tip>
+        </div>
+
+        <div className={stack}>
+          <p className={group}>Insights</p>
+          <Tip label="Quality" show={collapsed}>
+            <div>
+              <Quality compact={collapsed} itemClassName={`${row} w-full`} />
+            </div>
+          </Tip>
+        </div>
+
+        <Tip label="Docs" show={collapsed}>
+          <a href={DOCS_URL} target="_blank" rel="noreferrer" className={`${row} mt-auto`}>
+            <BookOpenIcon aria-hidden="true" className="size-4 shrink-0" />
+            <span className={label}>Docs</span>
+          </a>
+        </Tip>
+      </nav>
     </TooltipProvider>
   )
 }
