@@ -1,44 +1,49 @@
 ## Task
-6.4 Sidebar: one item "Connectors and quality" in Knowledge; remove the Quality item, the Insights group, the `quality` prop (Sidebar, SidebarDrawer, AppShell) and `quality/label.ts` with its test; `App` keeps `useQuality` for the page; update Sidebar, SidebarDrawer, AppShell and a11y tests
+7.1 Update the backend guide (`/connectors` has four fields; `/quality` counts), frontend guide (folder tree, sidebar and page accessibility text, checklist) and the architecture overview; remove the Quality-link wording added in 4.1
 
 ## Scope
-- `shell/Sidebar.tsx`: the Connectors link's text becomes "Connectors and quality" (and so its collapsed tooltip and screen-reader text; same `PlugIcon`, same link to `/app/connectors`, `aria-current` on its page). Remove the Quality link and the whole Insights group, the `quality?` prop, the `qualityLabel` and `Quality` imports, the `qualityText`/`QualityIcon` code and the four icons only they used (`ChartNoAxesColumnIcon`, `CircleCheckIcon`, `CircleHelpIcon`, `CircleXIcon`). `pageLink` stays, now used twice.
-- `shell/SidebarDrawer.tsx`: remove the `quality` prop and the `Quality` import.
-- `shell/AppShell.tsx`: stop passing `quality.quality` to `Sidebar` and `SidebarDrawer`. The `quality` prop of `AppShell` itself stays: the Connectors page still takes it.
-- `App.tsx`: unchanged (`useQuality()` still feeds the page).
-- Delete `quality/label.ts` and `quality/label.test.ts`.
-- Result, top to bottom: logo and collapse; New chat; Knowledge: Documents, Connectors and quality; Docs.
-- Guides read: `docs/guides/frontend-development-guide.md` (1.4 real links with plain-click handling; 5 sidebar accessibility; 7.1 `Sidebar` is called as a function in `SidebarDrawer.test.tsx`, so the anchors must stay in `Sidebar`'s own element tree, which `pageLink` keeps).
+Docs only, no code. Each edit makes a sentence true of the code now on the branch (tasks 5.1 to 6.4).
+
+**`docs/guides/backend-development-guide.md`**
+- 2.5 (`/quality` allowlist): add that each connector entry also carries `answerable_questions` and `unanswerable_questions` when the summary has both as non-negative integers (both or neither; never a reason for `not_measured`), and name the tests: `tests/test_quality.py` and `tests/test_quality_api.py` (already named) plus `tests/test_runner.py` for the runner's side.
+- 2.6 (`/connectors` allowlist): "three named fields" becomes four: `name`, `extensions`, `contract_version` and `builtin` (true when the class's module is under `plumbline.connectors.builtin`, so the built-in `pdf` and `docx` are true and a third-party connector is false).
+
+**`docs/guides/frontend-development-guide.md`**
+- 1.1 folder tree: `Sidebar.tsx` line becomes "navigation: New chat, Documents, Connectors and quality, docs link"; `ConnectorCard.tsx` says "one connector: subtitle, status pill, metric bars, last-checked footer"; `ConnectorsPage.tsx` says "title, intro, 0.80 explainer, card grid and a Build your own card; joins /connectors, /quality and /documents by connector name"; `useQuality.ts` says "the latest eval result, fetched once in App and passed to the Connectors page"; delete the `label.ts` line.
+- 5 accessibility, "The sidebar" bullet: one link, "Connectors and quality", to `/app/connectors` with `aria-current` on that page; no Quality item, no Insights group and no quality state in the sidebar; drop the four "Quality: ..." wordings.
+- 5 accessibility, "The Connectors page" bullet: remove `quality/label.test.ts` from *Checked by*; add that the two external links ("How it's measured", "Connector guide") are real `<a>` elements with a visible focus ring and `rel="noreferrer"`; that "Build your own" appears only once the page has loaded.
+- 7.1 by-hand checklist: "Tab reaches the Connectors and quality link" (was "the Connectors and Quality links").
+- 6 styling: no change needed (the page uses tokens only; no new pair).
+
+**`docs/architecture/overview.md`**
+- "Where new work goes", quality row: "the Connectors page reads it" (remove "and the sidebar's Quality label").
+- "List connectors" flow: each entry has `name`, `extensions`, `contract_version` and `builtin` (true for connectors shipped in this repo, derived from the class's module).
+- "Show the last eval" flow: add that each connector entry carries the answerable and unanswerable question counts when the summary has them; the runner writes them (`evals/runner.py`), and a summary from before that has none, so the page omits them.
+- "Open a page" flow: no change needed (already says "Connectors at `/app/connectors`" and the client-side join).
+
+Guides read: all three docs; AGENTS.md workflow rule 7.
 
 ## Not in scope
-- Page, cards, `useQuality`, `App` (unchanged).
-- Guide text for the sidebar (7.1) and the accessibility re-check wording (7.2). The frontend guide's sidebar bullet and folder tree are stale until 7.1.
-- A sidebar quality indicator of any kind (decided: page only).
+- Code, tests, specs, ADRs, README, AGENTS.md.
+- `evals/README.md` (its sentence about the counts was added in 5.2).
+- The accessibility re-check itself (7.2) and `verification.md`.
 
 ## Files
 | File | Change |
 | --- | --- |
-| `frontend/src/shell/Sidebar.tsx` | merge to one item; remove Quality item, Insights group, prop, imports |
-| `frontend/src/shell/SidebarDrawer.tsx` | remove the prop |
-| `frontend/src/shell/AppShell.tsx` | stop passing quality to the sidebar and drawer |
-| `frontend/src/quality/label.ts`, `label.test.ts` | delete |
-| `frontend/src/shell/Sidebar.test.tsx` | update |
-| `frontend/src/shell/a11y.test.tsx` | current-page count on the connectors page becomes 1; link-count comment |
-| `frontend/src/shell/SidebarDrawer.test.tsx`, `AppShell.test.tsx` | only if they fail to compile or assert old text |
+| `docs/guides/backend-development-guide.md` | 2.5 and 2.6 |
+| `docs/guides/frontend-development-guide.md` | tree, sidebar and page bullets, checklist |
+| `docs/architecture/overview.md` | quality row, two flows |
 
 ## Tests
-- Order (spec "Open Connectors and quality from the sidebar"): logo, New chat, Knowledge, "Documents (3)", "Connectors and quality", then Docs; the words "Insights" and "Quality" as an item are absent (the title text "Connectors and quality" contains "quality", so I assert on `>Quality<` and `Insights`).
-- One link to `/app/connectors` (spec "Quality opens its dialog": no Quality item, exactly one link goes to the page), with `aria-current="page"` only on the connectors page.
-- Quality prop gone: `Sidebar` renders with no `quality` argument (the existing `render` helper drops it), and no "Quality: ..." text appears for any state.
-- Collapsed: "Connectors and quality" kept as `sr-only` text; tooltip triggers drop from 6 to 5 (expand, New chat, Documents, Connectors and quality, Docs); expanded 0.
-- Dialog still gone and the removed files stay removed: `existsSync` list gains `label.ts`.
-- `a11y.test.tsx`: connectors page announces `aria-current` once (Documents page once, chat zero); every control named; the keyboard-reach test still has four links or more (Documents, Connectors and quality, Docs, "How it's measured").
-- `SidebarDrawer.test.tsx` callbacks tests still pass (the anchor is still reachable in `Sidebar`'s tree).
+- None new. Docs are checked by the link checker and by greps for stale wording.
+- Read-through: no remaining mention of the sidebar's Quality item or label, `quality/label`, "Insights", or "three named fields" in `docs/`.
 
 ## Checks to run
-- From `D:\PROJECTS\Plumbline\frontend`: `npm run lint && npm run build && npm test`
-- `grep -rn "qualityLabel\|quality/label" frontend/src` returns nothing.
+- `grep -rn "sidebar's Quality\|Quality link\|Connectors and Quality\|label\.ts\|label\.test\|Insights\|three named fields\|\"Quality: " docs README.md AGENTS.md` returns nothing stale
+- `python scripts/check_links.py`
+- `openspec validate --all`
+- `cd backend && uv run python -m pytest tests/test_check_links.py -q`
 
 ## Risks / Questions
-- With the Insights group gone the sidebar loses its only "Insights" heading; the design keeps the heading for its Unanswered page, which isn't built (out of scope), so there is nothing to put under it.
-- None otherwise.
+- None. The two external GitHub links on the page are not covered by the link checker (said before), so the guide only states that they exist.

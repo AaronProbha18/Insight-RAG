@@ -37,7 +37,7 @@ goes:
 | an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
 | a UI page or component | `frontend/src/chat/`, `documents/`, `connectors/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
-| the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`); the Connectors page and the sidebar's Quality label read it |
+| the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`); the Connectors page reads it |
 | the list of loaded connectors | `api/app.py` (`GET /connectors`, over the registry) |
 | answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
@@ -110,7 +110,8 @@ by hand; nothing is added automatically ([evals README](../../evals/README.md#fe
 
 1. The route returns the registry that `get_connectors` loaded at startup. It
    uses no database and no model.
-2. Each entry has `name`, `extensions` and `contract_version`, sorted by name.
+2. Each entry has `name`, `extensions`, `contract_version` and `builtin` (true
+   for connectors shipped in this repo, derived from the class's module), sorted by name.
    A connector the registry skipped (it failed to load, or declares another
    contract version) is not listed. The names equal the keys of `/quality`.
 
@@ -123,7 +124,9 @@ by hand; nothing is added automatically ([evals README](../../evals/README.md#fe
    the file is missing or invalid, the run stopped at the judge gate (exit 2)
    or was sampled. Otherwise it returns allowlisted fields only: PASS/FAIL per
    connector as the runner wrote it, the three gated metrics, run date, model
-   ids and threshold.
+   ids and threshold. Each connector also carries its answerable and
+   unanswerable question counts when the summary has them (the runner writes
+   them; an older summary has none, and the page omits them).
 3. `config_matches` compares the evaluated chat model, embedding model and
    abstain threshold with the running ones; the judge is not compared. The
    route always answers **200**.
@@ -149,8 +152,8 @@ The chat is at `/`, Documents at `/app/documents` and Connectors at
 under `/app/` so they cannot collide with an API path. In production,
 `api/app.py` serves `index.html` for `GET /app/{path}` when
 `PLUMBLINE_UI_DIR` is set, so a reload or a shared page link works; any
-other unknown path still gets the API's own 404. Only `GET /connectors` is new
-data: the Documents page uses the same `/documents` routes as before, and the
+other unknown path still gets the API's own 404. `GET /connectors` is the only new
+endpoint: the Documents page uses the same `/documents` routes as before, and the
 Connectors page joins `/connectors`, `/quality` and `/documents` in the
 browser, by connector name. The
 chat stays in memory while the person moves between pages
