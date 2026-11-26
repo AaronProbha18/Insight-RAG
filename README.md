@@ -112,6 +112,7 @@ Use synthetic data only, never real documents or personal data.
 ## Learn more
 
 - [docs/architecture/overview.md](docs/architecture/overview.md) - how the system fits together: flows, boundary rules, data model
+- [datamodel/README.md](datamodel/README.md) - the YAML data model toolkit: validate, DDL, migrations, explorer
 - [docs/guides/backend-development-guide.md](docs/guides/backend-development-guide.md) - rules for backend code
 - [docs/guides/frontend-development-guide.md](docs/guides/frontend-development-guide.md) - rules for the chat UI
 - [docs/guides/connector-development-guide.md](docs/guides/connector-development-guide.md) - write your own connector

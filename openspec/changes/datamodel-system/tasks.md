@@ -15,4 +15,4 @@
 ## 4. CI and docs
 
 - [ ] 4.1 `.github/workflows/datamodel.yml` (paths `datamodel/**` + itself): uv, Postgres 16 service, `make check test`; decide whether `main.json` lists it as required (path-filtered checks). Test: the PR's CI runs it green; a scratch commit moving YAML without a migration makes it fail (then reverted).
-- [ ] 4.2 Docs: `datamodel/README.md` (make and Windows `uv run` commands, opening `build/explorer.html` locally, synthetic-data rule, workflow), architecture overview (what `datamodel/` is and isn't), root README and `AGENTS.md` commands; ADR 0004 status left Proposed pending business tech review. Test: `python scripts/check_links.py` passes.
+- [x] 4.2 Docs: `datamodel/README.md` (make and Windows `uv run` commands, opening `build/explorer.html` locally, synthetic-data rule, workflow), architecture overview (what `datamodel/` is and isn't), root README and `AGENTS.md` commands; ADR 0004 status left Proposed pending business tech review. Test: `python scripts/check_links.py` passes.
