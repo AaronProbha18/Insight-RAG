@@ -10,7 +10,7 @@ from typing import Annotated
 
 import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Response, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 
@@ -224,4 +224,10 @@ def post_feedback(request: FeedbackRequest, conn: Conn) -> Response:
 # Production image: serve the built UI on the same origin. Mounted last so API routes win.
 _ui_dir = os.environ.get("PLUMBLINE_UI_DIR")
 if _ui_dir and os.path.isdir(_ui_dir):
+    # Client-side pages live under /app/, so a shared link loads the SPA. Only this
+    # prefix falls back to index.html; mistyped API paths still 404.
+    @app.get("/app/{path:path}", include_in_schema=False)
+    def spa(path: str) -> FileResponse:
+        return FileResponse(Path(_ui_dir) / "index.html")
+
     app.mount("/", StaticFiles(directory=_ui_dir, html=True), name="ui")
