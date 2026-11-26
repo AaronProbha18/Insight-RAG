@@ -1,0 +1,6 @@
+domain: audit
+title: Audit
+layer: runtime
+load_order: 20
+depends_on: []
+description: Test domain that does not depend on core.

@@ -7,16 +7,17 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
+MINI = ROOT / "tests" / "fixtures" / "mini"  # a tiny Plumbline-shaped model, read-only in tests
 
 
 @pytest.fixture
 def workcopy(tmp_path):
-    """A throwaway copy of the tools and sample model, so tests can edit YAML and run migrate.
+    """A throwaway copy of the tools and the mini fixture, so tests can edit YAML and run the tools.
     Returns the model folder; the toolkit copy is two levels up."""
     work = tmp_path / "dm"
     shutil.copytree(ROOT / "tools", work / "tools", ignore=shutil.ignore_patterns("__pycache__"))
-    model = work / "models" / "sample"
-    shutil.copytree(ROOT / "models" / "sample", model, ignore=shutil.ignore_patterns("build"))
+    model = work / "models" / "mini"
+    shutil.copytree(MINI, model, ignore=shutil.ignore_patterns("build"))
     return model
 
 

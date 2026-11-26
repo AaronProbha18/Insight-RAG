@@ -10,7 +10,7 @@ import yaml
 from schema import Column, Domain, EnumDef, Settings, Table
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # the toolkit; models live under models/<name>/
-DEFAULT_MODEL = "models/sample"
+DEFAULT_MODEL = "models/plumbline"
 
 
 def model_dir(name: str = DEFAULT_MODEL) -> pathlib.Path:

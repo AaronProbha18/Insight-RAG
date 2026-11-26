@@ -1,3 +1,0 @@
-enum: billing_frequency
-description: How often a plan is billed.
-values: [MONTHLY, YEARLY]
