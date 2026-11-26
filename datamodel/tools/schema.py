@@ -98,11 +98,3 @@ class Domain(Strict):
     load_order: int
     depends_on: list[str] = Field(default_factory=list)
     description: str
-
-
-class Settings(Strict):
-    """model.yaml: per-model conventions."""
-    public_id_check: bool = True
-    updated_at_trigger: bool = True
-    comments: bool = True
-    constraint_names: Literal["generated", "postgres"] = "generated"

@@ -14,21 +14,15 @@ RESERVED = {"user", "order", "group", "table", "column", "check", "default", "en
 
 def constraint_names(m: Model):
     """Yield (table, kind, generated_name) for everything the DDL generator names."""
-    s = m.settings
     for t in m.tables.values():
-        names = {c.name for c in all_columns(t)}
-        yield t.table, "pk", con_name(s, "pk", t.table, [])
-        if s.public_id_check and "public_id" in names:
-            yield t.table, "check", f"ck_{t.table}_public_id"
-        if s.updated_at_trigger and "updated_at" in names:
-            yield t.table, "trigger", f"tg_{t.table}_updated_at"
+        yield t.table, "pk", con_name("pk", t.table, [])
         for c in all_columns(t):
             if c.references:
-                yield t.table, "fk", con_name(s, "fk", t.table, [c.name])
+                yield t.table, "fk", con_name("fk", t.table, [c.name])
             if c.unique:
-                yield t.table, "unique", con_name(s, "uq", t.table, [c.name])
+                yield t.table, "unique", con_name("uq", t.table, [c.name])
         for cols in t.unique:
-            yield t.table, "unique", con_name(s, "uq", t.table, cols)
+            yield t.table, "unique", con_name("uq", t.table, cols)
         for ix in t.indexes:
             yield t.table, "index", f"ix_{t.table}_{'_'.join(ix.columns)}"
         for ck in t.checks:

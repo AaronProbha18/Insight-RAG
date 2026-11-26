@@ -42,7 +42,6 @@ def test_system_columns_subset(workcopy):
     acc = ddl.build_objects(m)["tables"]["account"]
     assert [c for c in acc["columns"] if c in ("id", "public_id", "created_at", "updated_at")] == ["id", "created_at"]
     assert not any("public_id" in n for n in acc["constraints"])
-    assert not acc["triggers"]
 
 
 @pytest.mark.parametrize("entry", ["id", "bogus"])

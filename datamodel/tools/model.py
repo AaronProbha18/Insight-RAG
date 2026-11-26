@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 import yaml
 
-from schema import Column, Domain, Settings, Table
+from schema import Column, Domain, Table
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # the toolkit; models live under models/<name>/
 DEFAULT_MODEL = "models/plumbline"
@@ -48,19 +48,16 @@ def all_columns(t: Table) -> list[Column]:
     return system_columns(t) + t.columns
 
 
-def con_name(s: Settings, kind: str, table: str, cols: list[str]) -> str:
-    """Constraint name per model.yaml constraint_names: ours (pk_/fk_/uq_) or Postgres's defaults."""
+def con_name(kind: str, table: str, cols: list[str]) -> str:
+    """Postgres's own constraint names, as Alembic's plain SQL gets them."""
     c = "_".join(cols)
-    if s.constraint_names == "postgres":
-        return {"pk": f"{table}_pkey", "fk": f"{table}_{c}_fkey", "uq": f"{table}_{c}_key"}[kind]
-    return {"pk": f"pk_{table}", "fk": f"fk_{table}_{c}", "uq": f"uq_{table}_{c}"}[kind]
+    return {"pk": f"{table}_pkey", "fk": f"{table}_{c}_fkey", "uq": f"{table}_{c}_key"}[kind]
 
 
 @dataclass
 class Model:
     domains: dict[str, Domain] = field(default_factory=dict)
     tables: dict[str, Table] = field(default_factory=dict)
-    settings: Settings = field(default_factory=Settings)
 
     def ordered_tables(self) -> list[Table]:
         """Domain load order first, then FK dependency order inside a domain, then name."""
@@ -94,7 +91,8 @@ def load(root: pathlib.Path | None = None) -> Model:
     root = root or model_dir()
     m = Model()
     if (root / "model.yaml").exists():
-        m.settings = Settings(**(_yaml(root / "model.yaml") or {}))
+        raise ValueError(f"{root / 'model.yaml'}: model.yaml is no longer supported; "
+                         "the toolkit has one set of conventions")
     for p in sorted((root / "domains").glob("*/domain.yaml")):
         d = Domain(**_yaml(p))
         m.domains[d.domain] = d

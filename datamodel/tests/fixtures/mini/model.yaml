@@ -1,5 +1,0 @@
-# Plumbline's conventions, so the tests exercise what models/plumbline uses.
-public_id_check: false
-updated_at_trigger: false
-comments: false
-constraint_names: postgres

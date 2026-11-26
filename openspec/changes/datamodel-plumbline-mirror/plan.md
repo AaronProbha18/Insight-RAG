@@ -1,52 +1,46 @@
 ## Task
-6.3 Remove enums (the `enums/` folder, `EnumDef`, the column `enum` field, the enum checks), immutable tables (`immutable`, `mutable_columns`, trigger generation, validation), uuid ids, `sample_rows` (and the SSN and email checks) and `business_rules`, from `schema.py`, `model.py`, `validate.py`, `ddl.py`, `explorer.py` and the explorer template; remove `sample_rows` from the four Plumbline tables. Test: a table YAML that sets `immutable`, `sample_rows`, `business_rules` or a column `enum` fails to load naming the field; the Plumbline model still validates and generates.
+6.4 Remove `model.yaml` loading and the `Settings` model; hard-code Plumbline's conventions (`bigserial`, no `public_id` CHECK, no `updated_at` trigger, no comments, Postgres-style names, `bigint` foreign keys); delete `models/plumbline/model.yaml`. Keep `system_columns`. Test: the generated DDL for `models/plumbline` is byte-identical to before this task; a `uuid` foreign key fails validation naming `bigint`.
 
 ## Scope
-- **`schema.py`:**
-  - Remove `EnumDef`, `Rule`, the column `enum` field, and the table fields `immutable`, `mutable_columns`, `business_rules` and `sample_rows`. The models forbid unknown fields, so a YAML that still sets one fails to load and names it.
-  - Remove `Settings.id_type`: with uuid ids gone there is one id type, so the setting has no meaning. The other four settings go in 6.4.
-  - Slim the column `TYPE` regex to what Plumbline uses: `text`, `int`, `bigint`, `bool`, `jsonb`, `timestamptz`, `char(n)`, `double precision`, `vector(n)`, `vector({embedding_dim})`. That drops `uuid`, `date`, `time`, `inet`, `numeric(p,s)` and `varchar(n)`, which Plumbline's four tables don't use (your rule: "if not used in Plumbline, remove it"). Say if you'd rather keep the other basic types.
-- **`model.py`:** drop the `enums` field and the `enums/` loading; `system_columns()` always injects `id bigserial` (no uuid branch, no `id_type` parameter); `updated_at` is injected whenever it is in `system_columns` (no immutable exception); drop the `enum` name kind from `con_name()`. Update the module docstring.
-- **`validate.py`:** drop the enum, immutable, `mutable_columns`, `business_rules` and `sample_rows` checks, the SSN and email checks, the enum-value rules, the uuid/`id_type` branch (a foreign key must be `bigint`, always), and the `enums` count in the summary line. `constraint_names()` stops yielding enum-check and immutable-trigger names. Keep: names, prefixes, `system_columns`, foreign keys, `unique`, indexes, PII default rule, open-question rules, the CMO-published rule, identifier lengths.
-- **`ddl.py`:** drop the enum CHECK generation and the immutable trigger block, and the `CREATE EXTENSION IF NOT EXISTS pgcrypto;` line. It only existed for `gen_random_uuid()`, which nothing generates now. **This changes the generated DDL by that one line**; Plumbline's schema never used pgcrypto.
-- **`explorer.py` and the template:** remove the enums, immutable, rules and samples fields from the payload; in the template, remove the Enums nav item and page, the Enums, Sample rows and Rules stat tiles, the Rules and Samples tabs, the immutable chip and the enum pill. Open questions, columns, constraints and relationships stay.
-- **`model.yaml` files** (the mini fixture and `models/plumbline`): remove the `id_type: bigserial` line, since the key no longer exists.
-- **`models/plumbline`:** remove the `sample_rows` blocks from `documents`, `answers` and `feedback`.
-- Guides read: none apply (datamodel only). I grepped every use of each removed field in `tools/` and the template.
+- **`schema.py`:** delete `Settings`.
+- **`model.py`:** delete the `Settings` import, `Model.settings`, and the `model.yaml` loading. `con_name(kind, table, cols)` loses its settings argument and always returns Postgres-style names (`<t>_pkey`, `<t>_<c>_fkey`, `<t>_<cols>_key`). Guard: if a model folder contains a `model.yaml`, `load()` raises `ValueError("model.yaml is no longer supported: the toolkit has one set of conventions")`, so a leftover file can't silently look like it applies.
+- **`ddl.py`:**
+  - No `public_id` CHECK, no comments (the `COMMENT ON` statements, the `comment` fields in the objects dict, and the `q()` quoting helper they used), no `updated_at` trigger, and so no `SET_UPDATED_AT` function or `triggers` entries.
+  - `build_objects` and `create_table_sql` lose the settings handling; `render_full` no longer checks for triggers.
+- **`validate.py`:** `constraint_names()` yields only the names the DDL generates: primary key, foreign key, unique and the YAML `checks`.
+- **Delete** `models/plumbline/model.yaml` and `tests/fixtures/mini/model.yaml`.
+- **Keep:** `system_columns`, `unique` groups, YAML `checks`, `indexes` and the review metadata. Plumbline has no indexes today, but the overview names an HNSW index as a later migration and the drift gate already compares indexes, so I'm leaving `indexes` in. Say if you want it gone too.
+- Guides read: none apply (datamodel only). I grepped every use of `settings`, `con_name`, `comment` and `SET_UPDATED_AT` in `tools/` and `tests/`.
 
 ## Not in scope
-- The other four settings (`public_id_check`, `updated_at_trigger`, `comments`, `constraint_names`) and `model.yaml`: 6.4.
-- `SET_UPDATED_AT` and the `updated_at` trigger generation: 6.4, with its setting.
-- README, `AGENTS.md`, the overview, ADR 0004 and the `datamodel-system` delta spec: 6.6.
-- Opening the explorer in a browser (not possible here); see Risks.
+- README, `AGENTS.md`, the overview, ADR 0004, the explorer callout text ("The YAML is the model") and the `datamodel-system` delta spec: 6.6.
+- Drift output labels (`alembic`/`yaml`): 6.5.
+- Any change to `models/plumbline`'s tables.
 
 ## Files
 | File | Change |
 | --- | --- |
-| `datamodel/tools/schema.py` | remove the fields, classes and types above |
-| `datamodel/tools/model.py` | no enums, no uuid, no immutable branch |
-| `datamodel/tools/validate.py` | drop the removed-feature checks |
-| `datamodel/tools/ddl.py` | no enum CHECK, no immutable trigger, no pgcrypto |
-| `datamodel/tools/explorer.py`, `explorer.template.html` | drop the removed sections |
-| `datamodel/tests/fixtures/mini/model.yaml`, `datamodel/models/plumbline/model.yaml` | remove `id_type` |
-| `datamodel/models/plumbline/domains/rag/tables/{documents,answers,feedback}.yaml` | remove `sample_rows` |
-| `datamodel/tests/test_toolkit_scope.py` | new tests below |
-| `datamodel/tests/test_conventions.py` | the uuid-foreign-key test uses an `int` foreign key |
+| `datamodel/tools/schema.py` | delete `Settings` |
+| `datamodel/tools/model.py` | no settings; fixed `con_name`; `model.yaml` guard |
+| `datamodel/tools/ddl.py` | fixed conventions; no comments, triggers, `q()`, `SET_UPDATED_AT` |
+| `datamodel/tools/validate.py` | `constraint_names()` simplified |
+| `datamodel/models/plumbline/model.yaml`, `datamodel/tests/fixtures/mini/model.yaml` | deleted |
+| `datamodel/tests/test_toolkit_scope.py` | one new test |
 
 ## Tests
-- `test_toolkit_scope.py` (spec scenario "Removed field rejected"): for each of `immutable`, `mutable_columns`, `business_rules`, `sample_rows` (table fields) and `enum` (a column field), edit the mini fixture in a temp copy and assert `load()` raises a `ValidationError` naming the field. Plus a column typed `uuid` is rejected as an unsupported type.
-- The explorer payload built from the mini fixture has no `enums`, `rules`, `samples` or `immutable` keys.
-- `test_conventions.py`: `test_uuid_foreign_key_rejected` now uses an `int` foreign key, because a `uuid` column no longer loads; the validator still rejects it and names `bigint`.
-- The rest of the suite passes; `test_plumbline_model.py` still shows the four tables and their columns.
+- **Byte-identical DDL:** `models/plumbline`'s `schema.sql` is compared with the previous commit's (not a pytest test; run as a check, since it spans two commits), and `test_plumbline_model.py` and `test_conventions.py::test_plumbline_conventions_generated` still pass unchanged. The latter now proves the conventions with no `model.yaml` at all: `bigserial`, `bigint` foreign keys, no `public_id` CHECK, no trigger, no `COMMENT ON`, Postgres-style names.
+- **Foreign key type:** the existing `test_non_bigint_foreign_key_rejected` covers "a foreign key that isn't `bigint` fails validation naming `bigint`". A literal `uuid` foreign key no longer loads at all (6.3 removed the type), so the `tasks.md` wording "`uuid` foreign key" is covered by `test_uuid_column_rejected` plus this test.
+- **New:** `test_toolkit_scope.py::test_model_yaml_rejected`: a `model.yaml` in a model folder makes `load()` raise, naming `model.yaml`.
+- The mini fixture and Plumbline model still validate.
 
 ## Checks to run
 - `cd datamodel && PYTHONPATH=tools uv run python -m pytest -q -rs tests`
-- `validate` and `ddl` on `models/plumbline`; diff its `schema.sql` against the previous commit's. Expect exactly one removed line (`CREATE EXTENSION IF NOT EXISTS pgcrypto;`).
-- Explorer: regenerate for `models/plumbline`, extract the page's `<script>` and run `node --check` on it, and grep the page for `Enums`, `Sample rows` and `immutable` (expect none).
-- In a throwaway `pgvector/pgvector:pg18` container, as in 4.2: the suite with Postgres, then Alembic head vs the generated DDL with `drift.py` (expect `no drift`), which proves Plumbline's schema still loads without pgcrypto.
+- `validate` and `ddl` on `models/plumbline`, then diff its `schema.sql` against the previous commit's: expect no difference.
+- `grep -rn "Settings\|settings\|model.yaml" tools tests` leaves only the guard and its test.
+- The Postgres container run isn't needed: the generated SQL is byte-identical, and no test touching Postgres changes.
 
 ## Risks / Questions
-- **Explorer not viewed in a browser.** The checks are a JavaScript syntax check and a grep. A mistake in the template's rendering code (for example a leftover reference to a removed variable) would only show when the page is opened. After this task, open `datamodel/models/plumbline/build/explorer.html` and tell me if any page errors.
-- **The generated DDL changes** (the pgcrypto line is gone), so the drift job's input changes. The container run proves it still compares equal.
-- **Type list slimmed** beyond the task text, per your "remove what Plumbline doesn't use" rule. It's reversible in one regex if you want some back.
-- Docs still describe enums, immutable tables and `sample_rows` until 6.6.
+- **`indexes` kept** (see Scope), a judgment call against your "remove what Plumbline doesn't use" rule.
+- **The `model.yaml` guard** is a small addition beyond the task text. Without it a stray `model.yaml` would be silently ignored. Say if you'd rather have no guard.
+- **No comments in generated DDL, ever.** Plumbline's tables have none, so nothing changes for the gate, but a future model that wants `COMMENT ON` would need the feature back.
+- The task's byte-identical check is a manual diff because it compares two commits.

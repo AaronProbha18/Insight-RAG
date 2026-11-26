@@ -50,3 +50,9 @@ def test_explorer_payload_has_no_removed_sections():
     for t in data["tables"]:
         assert not {"immutable", "mutable_columns", "rules", "samples"} & t.keys()
         assert all("enum" not in c for c in t["columns"])
+
+
+def test_model_yaml_rejected(workcopy):
+    (workcopy / "model.yaml").write_text("comments: false\n")
+    with pytest.raises(ValueError, match="model.yaml"):
+        load(workcopy)
