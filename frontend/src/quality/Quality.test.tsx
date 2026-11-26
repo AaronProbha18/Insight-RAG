@@ -35,3 +35,19 @@ describe('Quality button', () => {
     expect(html).toMatch(/<svg[^>]*aria-hidden="true"/)
   })
 })
+
+describe('Quality compact', () => {
+  it('shows an icon and keeps the full label as screen-reader text', () => {
+    const html = renderToStaticMarkup(<Quality initial={measured('PASS')} compact />)
+
+    expect(html).toContain('<svg')
+    expect(html).toContain('<span class="sr-only">Quality: PASS</span>')
+  })
+
+  it('has a fallback icon before any result', () => {
+    const html = renderToStaticMarkup(<Quality compact />)
+
+    expect(html).toContain('<svg')
+    expect(html).toContain('<span class="sr-only">Quality</span>')
+  })
+})

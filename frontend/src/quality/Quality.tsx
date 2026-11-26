@@ -1,5 +1,5 @@
 import { Dialog } from '@base-ui/react/dialog'
-import { CircleCheckIcon, CircleHelpIcon, CircleXIcon } from 'lucide-react'
+import { ChartNoAxesColumnIcon, CircleCheckIcon, CircleHelpIcon, CircleXIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { getQuality, type Quality as QualityData } from './api'
@@ -15,8 +15,9 @@ function label(q: QualityData | null) {
   return { text: `Quality: ${q.result}`, Icon: q.result === 'PASS' ? CircleCheckIcon : CircleXIcon }
 }
 
-/** "Quality: <state>" button; opens the latest eval result. `initial` seeds state for static tests. */
-export function Quality({ initial = null }: { initial?: QualityData | null }) {
+/** "Quality: <state>" button; opens the latest eval result. `initial` seeds state for static tests.
+ *  `compact` shows the icon only; the label stays as screen-reader text. */
+export function Quality({ initial = null, compact = false }: { initial?: QualityData | null; compact?: boolean }) {
   const [quality, setQuality] = useState<QualityData | null>(initial)
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState('')
@@ -37,12 +38,13 @@ export function Quality({ initial = null }: { initial?: QualityData | null }) {
     }
   }, [open])
 
-  const { text, Icon } = label(quality)
+  const { text, Icon: Loaded } = label(quality)
+  const Icon = Loaded ?? (compact ? ChartNoAxesColumnIcon : null)
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger render={<Button variant="outline" size="sm" />}>
         {Icon && <Icon aria-hidden="true" className="size-4" />}
-        {text}
+        {compact ? <span className="sr-only">{text}</span> : text}
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Backdrop className={backdrop} />

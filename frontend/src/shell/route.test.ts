@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { currentPage, navigate, pageFor, subscribe } from './route'
+import { currentPage, isPlainClick, navigate, pageFor, subscribe } from './route'
 
 // Node has no window, so stub the few parts of it the router touches.
 function stubWindow() {
@@ -68,5 +68,15 @@ describe('navigation', () => {
     win.dispatchEvent(new Event('popstate'))
 
     expect(listener).not.toHaveBeenCalled()
+  })
+})
+
+describe('isPlainClick', () => {
+  const click = { button: 0, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false }
+
+  it('is true only for an unmodified left click', () => {
+    expect(isPlainClick(click)).toBe(true)
+    expect(isPlainClick({ ...click, button: 1 })).toBe(false)
+    for (const key of ['metaKey', 'ctrlKey', 'shiftKey', 'altKey']) expect(isPlainClick({ ...click, [key]: true })).toBe(false)
   })
 })
