@@ -1,6 +1,6 @@
 ## Context
 
-`datamodel/` (#21, [ADR 0004](../../../docs/adr/0004-yaml-data-model.md))
+`datamodel/` (#21, [ADR 0004](../../../../docs/adr/0004-yaml-data-model.md))
 generates DDL from YAML, but it hard-codes conventions Plumbline doesn't
 use, and it carries features that only a synthetic sample model used.
 Plumbline's schema is Alembic head, in `backend/migrations/versions/`:
