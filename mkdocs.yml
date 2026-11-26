@@ -17,11 +17,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
@@ -31,6 +35,9 @@ exclude_docs: |
   brand/*
   !brand/plumbline-icon.svg
   !brand/plumbline-icon-small.svg
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Home: index.md
