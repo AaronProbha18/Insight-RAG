@@ -4,8 +4,10 @@
 
 Each card on the Connectors page SHALL show that connector's correctness,
 faithfulness and abstention, each as a number and a bar with the 0.80 mark,
-labelled "Passes" or "Below bar" against the 0.80 gates, and the run date,
-the chat, embedding and judge model ids and the abstain threshold.
+labelled "Passes" or "Below bar" in a status pill against the 0.80 gates, and
+a footer with the run date, the number of answerable and unanswerable
+questions when the summary has them, the chat, embedding and judge model ids
+and the abstain threshold.
 
 #### Scenario: Both connectors passed
 
@@ -18,6 +20,18 @@ the chat, embedding and judge model ids and the abstain threshold.
 - **GIVEN** a quality summary where PDF is below the bar on correctness
 - **WHEN** the Connectors page opens
 - **THEN** the PDF card shows "Below bar" and names correctness as the metric under 0.80
+
+#### Scenario: Question counts
+
+- **GIVEN** a summary that has answerable and unanswerable question counts for pdf
+- **WHEN** the Connectors page opens
+- **THEN** the PDF card's footer says it was checked on that many answerable and unanswerable questions
+
+#### Scenario: Summary without counts
+
+- **GIVEN** a summary written before the counts existed
+- **WHEN** the Connectors page opens
+- **THEN** the cards show everything else and omit the question counts, with no error and no invented numbers
 
 ### Requirement: Not measured state
 
@@ -61,3 +75,40 @@ by keyboard.
 - **GIVEN** the Connectors page
 - **WHEN** viewed in light and dark mode, by keyboard
 - **THEN** Passes and Below bar are not shown by colour alone, text meets 4.5:1 contrast, and every link is reachable
+
+### Requirement: Read-only summary endpoint
+
+`GET /quality` SHALL return summary fields only, including each connector's
+answerable and unanswerable question counts when the summary has them as
+non-negative integers, and `/chat` responses SHALL be unchanged.
+
+#### Scenario: Summary fields only
+
+- **GIVEN** the read-only endpoint for the summary
+- **WHEN** called
+- **THEN** it returns summary fields only (no per-question answers, file paths or internal ids), and `/chat` responses are unchanged
+
+#### Scenario: Counts passed through
+
+- **GIVEN** a summary whose pdf entry has `answerable_questions` and `unanswerable_questions`
+- **WHEN** `GET /quality` is called
+- **THEN** the pdf entry carries both numbers
+
+#### Scenario: Counts absent or invalid
+
+- **GIVEN** a summary without the counts, or with a count that is not a non-negative integer
+- **WHEN** `GET /quality` is called
+- **THEN** the entry omits the counts and the result is otherwise unchanged
+
+## ADDED Requirements
+
+### Requirement: Runner records question counts
+
+The eval runner's summary SHALL record, for each connector, how many
+answerable and how many unanswerable questions were scored.
+
+#### Scenario: Counts in the summary
+
+- **GIVEN** a run over a golden set of answerable and unanswerable questions
+- **WHEN** the summary is written
+- **THEN** each connector entry has `answerable_questions` and `unanswerable_questions` that add up to its question total

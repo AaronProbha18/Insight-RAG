@@ -4,10 +4,10 @@
 
 The app SHALL show a persistent left sidebar holding, top to bottom: the
 Plumbline logo and a collapse button; New chat; a Knowledge group with
-Documents (showing the document count) and Connectors; an Insights group
-with Quality, which links to the Connectors page and shows the overall
-quality state in words; and a link to the docs. The sidebar SHALL mark the
-current page. There SHALL be no quality dialog.
+Documents (showing the document count) and "Connectors and quality", which
+links to the Connectors page; and a link to the docs. There SHALL be no
+separate Quality item, no Insights group, no quality state in the sidebar
+and no quality dialog. The sidebar SHALL mark the current page.
 
 #### Scenario: Open Documents from the sidebar
 
@@ -15,11 +15,17 @@ current page. There SHALL be no quality dialog.
 - **WHEN** the person clicks Documents in the sidebar
 - **THEN** the Documents page shows at `/app/documents`, and the sidebar marks Documents as the current page
 
+#### Scenario: Open Connectors and quality from the sidebar
+
+- **GIVEN** the app is open
+- **WHEN** the person activates "Connectors and quality" in the sidebar
+- **THEN** the Connectors page shows at `/app/connectors`, the sidebar marks that item as the current page, and no quality dialog exists
+
 #### Scenario: Quality opens its dialog
 
 - **GIVEN** this change has landed
-- **WHEN** the person activates Quality in the sidebar
-- **THEN** the Connectors page shows at `/app/connectors`, and no quality dialog exists
+- **WHEN** the person looks for the quality results in the sidebar
+- **THEN** there is no Quality item, no Insights group and no quality dialog, and exactly one link, "Connectors and quality", goes to `/app/connectors`
 
 ### Requirement: Page URLs
 
