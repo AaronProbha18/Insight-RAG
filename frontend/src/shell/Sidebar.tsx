@@ -18,12 +18,13 @@ type Props = {
   page: Page
   documentCount: number
   collapsed: boolean
-  onToggleCollapse: () => void
+  onToggleCollapse?: () => void // omitted in the drawer, where collapsing means nothing
   onNewChat: () => void
+  onNavigate?: () => void // after a navigating click, so the drawer can close
 }
 
 /** Main navigation. Collapsed shows icons only; every item keeps its name as screen-reader text. */
-export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNewChat }: Props) {
+export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNewChat, onNavigate }: Props) {
   const label = collapsed ? 'sr-only' : undefined
   const group = `px-2 pb-1 text-xs font-medium text-muted-foreground ${collapsed ? 'sr-only' : ''}`
   const CollapseIcon = collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon
@@ -37,18 +38,27 @@ export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNe
           <img src="/favicon.svg" alt="" className="size-5" />
           <span className={label}>Plumbline</span>
         </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          aria-expanded={!collapsed}
-          onClick={onToggleCollapse}
-        >
-          <CollapseIcon aria-hidden="true" />
-        </Button>
+        {onToggleCollapse && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-expanded={!collapsed}
+            onClick={onToggleCollapse}
+          >
+            <CollapseIcon aria-hidden="true" />
+          </Button>
+        )}
       </div>
 
-      <button type="button" onClick={onNewChat} className={`${item} font-medium`}>
+      <button
+        type="button"
+        onClick={() => {
+          onNewChat()
+          onNavigate?.()
+        }}
+        className={`${item} font-medium`}
+      >
         <MessageSquarePlusIcon aria-hidden="true" className="size-4 shrink-0" />
         <span className={label}>New chat</span>
       </button>
@@ -59,9 +69,11 @@ export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNe
           href="/app/documents"
           aria-current={page === 'documents' ? 'page' : undefined}
           onClick={(e) => {
-            if (!isPlainClick(e)) return
-            e.preventDefault()
-            navigate('/app/documents')
+            if (isPlainClick(e)) {
+              e.preventDefault()
+              navigate('/app/documents')
+            }
+            onNavigate?.()
           }}
           className={`${item} aria-[current=page]:bg-muted aria-[current=page]:font-medium`}
         >
