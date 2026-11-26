@@ -1,3 +1,0 @@
-enum: organization_status
-description: Operating state of an organization.
-values: [ACTIVE, INACTIVE]

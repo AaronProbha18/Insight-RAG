@@ -1,12 +1,13 @@
 """Render the model as one self-contained static HTML page (data embedded as JSON, no network)."""
 from __future__ import annotations
 
+import argparse
 import datetime
 import json
 import subprocess
 import sys
 
-from model import ROOT, Model, all_columns, load
+from model import DEFAULT_MODEL, ROOT, Model, all_columns, column_type, load, model_dir
 
 
 def payload(m: Model) -> dict:
@@ -14,22 +15,18 @@ def payload(m: Model) -> dict:
     for t in m.ordered_tables():
         cols = []
         for c in all_columns(t):
-            cols.append({"name": c.name, "type": c.type, "nullable": c.nullable, "pii": c.pii,
-                         "default": c.default, "enum": c.enum, "references": c.references,
+            cols.append({"name": c.name, "type": column_type(c), "nullable": c.nullable, "pii": c.pii,
+                         "default": c.default, "references": c.references,
                          "unique": c.unique, "description": c.description,
                          "system": c.name in ("id", "public_id", "created_at", "updated_at")})
         tables.append({"name": t.table, "domain": t.domain, "status": t.status,
                        "description": t.description, "prefix": t.public_id_prefix,
-                       "immutable": t.immutable, "mutable_columns": t.mutable_columns,
                        "columns": cols, "checks": [c.model_dump() for c in t.checks],
                        "unique": t.unique, "indexes": [i.model_dump() for i in t.indexes],
-                       "rules": [r.model_dump() for r in t.business_rules],
-                       "questions": [q.model_dump() for q in t.open_questions],
-                       "samples": t.sample_rows})
+                       "questions": [q.model_dump() for q in t.open_questions]})
     return {
         "domains": [d.model_dump() for d in sorted(m.domains.values(), key=lambda d: d.load_order)],
         "tables": tables,
-        "enums": [e.model_dump() for e in sorted(m.enums.values(), key=lambda e: e.enum)],
     }
 
 
@@ -45,15 +42,18 @@ def version() -> str:
 
 
 def main() -> int:
-    data = payload(load())
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default=DEFAULT_MODEL)
+    md = model_dir(ap.parse_args().model)
+    data = payload(load(md))
     data["build"] = {"version": version(),
                      "at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%MZ")}
     blob = json.dumps(data).replace("</", "<\\/").replace("<!--", "<\\!--")
     html = (ROOT / "tools" / "explorer.template.html").read_text().replace("/*__DATA__*/null", blob)
-    out = ROOT / "build" / "explorer.html"
+    out = md / "build" / "explorer.html"
     out.parent.mkdir(exist_ok=True)
     out.write_text(html)
-    print(f"wrote {out.relative_to(ROOT)} ({len(html) // 1024} KB)")
+    print(f"wrote {out} ({len(html) // 1024} KB)")
     return 0
 
 

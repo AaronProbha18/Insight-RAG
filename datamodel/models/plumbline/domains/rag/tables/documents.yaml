@@ -1,0 +1,11 @@
+table: documents
+domain: rag
+status: published
+public_id_prefix: doc
+system_columns: [public_id, created_at]
+description: One row per unique uploaded file.
+columns:
+  - {name: content_hash, type: char(64), unique: true, description: "SHA-256 of the file content. Unique: the idempotency key for uploads."}
+  - {name: title, type: text, description: "Title shown to the user."}
+  - {name: filename, type: text, description: "Original file name."}
+  - {name: connector, type: text, description: "Name of the connector that produced the document."}

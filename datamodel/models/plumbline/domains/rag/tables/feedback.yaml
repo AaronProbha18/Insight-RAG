@@ -1,0 +1,15 @@
+table: feedback
+domain: rag
+status: published
+system_columns: [updated_at]
+description: At most one rating per answer, with an optional reason and comment.
+columns:
+  - {name: answer_id, type: bigint, unique: true, references: answers.id, on_delete: cascade, description: "The answer being rated. Unique, so there is one row per answer."}
+  - {name: rating, type: text, description: "up or down."}
+  - {name: reason, type: text, nullable: true, description: "Why the answer was rated down: wrong, incomplete, wrong_source, should_have_answered or other."}
+  - {name: comment, type: text, nullable: true, description: "Free-text comment, at most 2000 characters."}
+checks:
+  - {name: feedback_rating_check, expr: "rating IN ('up', 'down')"}
+  - {name: feedback_reason_check, expr: "reason IN ('wrong', 'incomplete', 'wrong_source', 'should_have_answered', 'other')"}
+  - {name: feedback_comment_check, expr: "char_length(comment) <= 2000"}
+  - {name: feedback_check, expr: "reason IS NULL OR rating = 'down'"}
