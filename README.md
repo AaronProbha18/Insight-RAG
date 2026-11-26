@@ -5,6 +5,14 @@
   </picture>
 </h1>
 
+[![CI](https://github.com/AaronProbha18/Plumbline/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AaronProbha18/Plumbline/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](backend/pyproject.toml)
+![Status: pre-alpha](https://img.shields.io/badge/status-pre--alpha-orange.svg)
+![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688.svg)
+![React 19](https://img.shields.io/badge/frontend-React%2019-61dafb.svg)
+![PostgreSQL + pgvector](https://img.shields.io/badge/database-PostgreSQL%20%2B%20pgvector-336791.svg)
+
 Open-source retrieval-augmented generation: plug in a source through a
 connector, ask questions, and get answers that cite where they came from -
 or say the answer is not in your sources. Answer quality is measured, not
