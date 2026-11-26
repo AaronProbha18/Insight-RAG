@@ -30,10 +30,12 @@ closes it and says how each acceptance criterion was met.
      unticked with a note.
    - Title: `<type>: <issue title> (#<N>)`.
 3. **Show** the title and body to the user and wait for approval or edits.
-4. **Create** on approval:
-   `git push -u origin HEAD`, then
+4. **Create or update** on approval:
+   `git push -u origin HEAD`. If triage already opened a draft PR from this
+   branch, update it: `gh pr edit <PR> --title "<title>" --body-file
+   <tmpfile> --add-label <labels>`. Otherwise
    `gh pr create --draft --title "<title>" --body-file <tmpfile> --base main
-   --label <labels>`, copying the issue's `type:*`, `area:*` and
+   --label <labels>`. Either way, copy the issue's `type:*`, `area:*` and
    `answer-quality-change` and `db-change` labels (never `status:*`, which
    tracks the issue, not the PR). Report the PR URL. Then `bash scripts/board.sh <N> "In Review"`.
    - `answer-quality-change` PRs: the body's eval line must hold real

@@ -65,12 +65,19 @@ it back to the issue. Never edit code.
      or the change adds an Alembic revision. If triage itself is stuck on a
      decision, add `status:blocked` and say what it's waiting for.
    - Board: `bash scripts/board.sh <N> Ready`.
-   - Commit the change's planning artifacts on a branch
-     `triage/<N>-<slug>` with message `docs(openspec): plan #<N> <title>`.
-     Don't push unless asked.
+   - Commit the change's planning artifacts on the issue's one branch,
+     `<feat|fix|chore>/<N>-<slug>` (type from the `type:*` label, as in
+     `rag-quick`), with message `docs(openspec): plan #<N> <title>`. Never
+     a separate `triage/` branch: triage, plan, execute, verify, review and
+     archive all happen on this branch, in one PR.
+   - Push it and open a **draft** PR from it that `Closes #<N>`, titled
+     `<type>: <issue title> (#<N>)`, with the issue's `type:*`, `area:*`,
+     `answer-quality-change` and `db-change` labels. Triage ends here;
+     execution comes later on the same branch.
 
-7. **Report**: the change name, its tasks, the issue URL, and the next
-   step: `/rag-quick <N>`.
+7. **Report**: the change name, its tasks, the issue URL, the draft PR
+   URL, and the next step: `/rag-quick <N>` (it finds the branch and
+   continues on it).
 
 ## Guardrails
 
