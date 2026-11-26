@@ -10,7 +10,8 @@ NAME = re.compile(r"^[a-z][a-z0-9_]*$")
 # Logical types allowed in YAML. Anything else is rejected rather than passed through to SQL.
 TYPE = re.compile(
     r"^(text|int|bigint|bool|date|time|timestamptz|jsonb|uuid|inet|"
-    r"numeric\(\d{1,2},\d{1,2}\)|varchar\(\d{1,4}\))$"
+    r"numeric\(\d{1,2},\d{1,2}\)|varchar\(\d{1,4}\)|char\(\d{1,4}\)|double precision|"
+    r"vector\(\d{1,5}\)|vector\(\{embedding_dim\}\))$"
 )
 OPTIONAL_SYSTEM = ("public_id", "created_at", "updated_at")  # `id` is always injected
 PII = Literal["none", "indirect", "direct", "phi"]

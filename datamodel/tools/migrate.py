@@ -95,7 +95,7 @@ def diff(old: dict, new: dict) -> tuple[list[str], list[str]]:
 
 
 def _parts(coldef: str) -> dict:
-    m = re.match(r"^(\S+) (\S+(?: ?\(\d+(?:,\d+)?\))?)(.*)$", coldef)
+    m = re.match(r"^(\S+) (double precision|\S+(?: ?\(\d+(?:,\d+)?\))?)(.*)$", coldef)
     rest = m.group(3)
     d = re.search(r"DEFAULT (.+)$", rest)
     return {"type": m.group(2), "notnull": "NOT NULL" in rest, "default": d.group(1) if d else None}

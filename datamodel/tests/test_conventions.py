@@ -88,3 +88,42 @@ def test_system_columns_bad_entry(workcopy, entry):
 def test_prefix_only_with_public_id(workcopy):
     _table(workcopy, "system_columns: [created_at]\n")
     assert any("public_id_prefix set" in e for e in validate.validate(load(workcopy)))
+
+
+def _typed(model_dir):
+    _table(model_dir, "")
+    p = model_dir / "domains/organization/tables/organization.yaml"
+    p.write_text(p.read_text().replace("columns:\n", "columns:\n"
+        "  - {name: embedding, type: 'vector({embedding_dim})', description: Synthetic test vector.}\n"
+        "  - {name: digest, type: char(64), description: Synthetic hash.}\n"
+        "  - {name: score, type: double precision, description: Synthetic score.}\n", 1))
+    return load(model_dir)
+
+
+def test_embedding_dim_filled(workcopy, monkeypatch):
+    monkeypatch.setenv("PLUMBLINE_EMBEDDING_DIM", "8")
+    cols = ddl.build_objects(_typed(workcopy))["tables"]["organization"]["columns"]
+    assert cols["embedding"]["def"].startswith("embedding vector(8) ")
+    assert cols["digest"]["def"].startswith("digest char(64) ")
+    assert cols["score"]["def"].startswith("score double precision ")
+
+
+@pytest.mark.parametrize("value", [None, "0"])
+def test_embedding_dim_missing(workcopy, monkeypatch, value):
+    if value is None:
+        monkeypatch.delenv("PLUMBLINE_EMBEDDING_DIM", raising=False)
+    else:
+        monkeypatch.setenv("PLUMBLINE_EMBEDDING_DIM", value)
+    m = _typed(workcopy)
+    with pytest.raises(ValueError, match="PLUMBLINE_EMBEDDING_DIM"):
+        ddl.build_objects(m)
+
+
+def test_validate_needs_no_embedding_dim(workcopy, monkeypatch):
+    monkeypatch.delenv("PLUMBLINE_EMBEDDING_DIM", raising=False)
+    assert validate.validate(_typed(workcopy)) == []
+
+
+def test_migrate_parses_double_precision():
+    import migrate
+    assert migrate._parts("x double precision NOT NULL") == {"type": "double precision", "notnull": True, "default": None}

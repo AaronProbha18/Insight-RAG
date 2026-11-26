@@ -1,43 +1,39 @@
 ## Task
-2.2 Per-table `system_columns` in `schema.py`, `model.py` and `validate.py`. Test: subset injection; `id`/unknown entries fail validation naming the table.
+2.3 Types `char(n)`, `double precision`, `vector(n)`, `vector({embedding_dim})`, filled from `PLUMBLINE_EMBEDDING_DIM` in `ddl.py`/`explorer.py`. Test: filled to `vector(8)`; unset fails naming the variable; `validate` passes without it.
 
 ## Scope
-- `schema.py` `Table`:
-  - `system_columns: list[str]` defaults to `["public_id", "created_at", "updated_at"]`.
-  - `public_id_prefix` becomes `Optional[str] = None`. A table without `public_id` (Plumbline's `chunks`, `feedback`) has no prefix to give.
-- `model.py system_columns()`:
-  - Injects `id` always, then only the listed optional columns, in today's order.
-  - A fully immutable table still drops `updated_at`.
-  - The default list gives today's output exactly.
-- `validate.py`:
-  - An `id` entry, an unknown name, or a duplicate fails with `table <t>: system_columns ...`.
-  - `public_id_prefix` is required (and checked for format and uniqueness, as today) only when `public_id` is injected. It's an error when it's set but `public_id` isn't injected.
-- `explorer.template.html`: the `public_id <prefix>_…` chip is shown only when a prefix exists. Otherwise the explorer would render `public_id null_…`.
-- Guides read: none apply (datamodel only). I read design.md's "Conventions in `model.yaml`" section and the spec's "Per-table system columns" requirement.
+- `schema.py` `TYPE` regex: add `char\(\d{1,4}\)`, `double precision`, `vector\(\d{1,5}\)` and the literal `vector\(\{embedding_dim\}\)`.
+- `model.py`: `column_type(c) -> str` replaces `{embedding_dim}` with `PLUMBLINE_EMBEDDING_DIM`.
+  - It fails with `ValueError("PLUMBLINE_EMBEDDING_DIM must be set to a positive integer ...")` when the variable is unset or isn't a positive integer, matching backend migration 0001's own check.
+  - It only touches the environment when the placeholder is present, so the sample never needs the variable.
+- `ddl.py build_objects` and `explorer.py payload` use `column_type(c)` instead of `c.type`. `validate.py` keeps the raw `c.type`, so it passes without the variable.
+- `migrate.py _parts`: the regex takes the type as a single token, so `double precision` would be split apart. Matching `double precision` as one type keeps type-change diffs right. A unit test on `_parts` covers it.
+- Guides read: none apply (datamodel only). I also read the spec's new-types requirement and backend `migrations/versions/0001_initial.py` for the variable's rule.
 
 ## Not in scope
-- New types (2.3) and the Plumbline model (3.1).
-- `ddl.py`: it already derives everything from the injected columns, and the `public_id` CHECK is already guarded by `"public_id" in columns` since 2.1. No change expected; the tests prove it.
+- `CREATE EXTENSION vector` in generated DDL. Design.md has the drift job create the extension before `psql -f` (4.2), and the sample doesn't need it.
+- The Plumbline model (3.1).
 
 ## Files
 | File | Change |
 | --- | --- |
-| `datamodel/tools/schema.py` | `system_columns` field; optional `public_id_prefix` |
-| `datamodel/tools/model.py` | `system_columns()` honours the subset |
-| `datamodel/tools/validate.py` | entry checks; prefix required only with `public_id` |
-| `datamodel/tools/explorer.template.html` | hide the prefix chip when there's no prefix |
-| `datamodel/tests/test_conventions.py` | new tests below |
+| `datamodel/tools/schema.py` | widen `TYPE` |
+| `datamodel/tools/model.py` | `column_type()` |
+| `datamodel/tools/ddl.py`, `explorer.py` | use `column_type()` |
+| `datamodel/tools/migrate.py` | `_parts` handles `double precision` |
+| `datamodel/tests/test_conventions.py` | tests below |
 
-## Tests (on a `workcopy` model)
-- Subset: `organization` with `system_columns: [created_at]` gets columns `id` and `created_at` but no `public_id`/`updated_at`. Its DDL has no `public_id` unique or CHECK, and no `tg_organization_updated_at`. Covers *Subset injected*.
-- `system_columns: [id]` and `system_columns: [bogus]` each fail validation with a message containing the table name. Covers *Unknown entry*.
-- Without `public_id`, the table validates with no prefix, and setting a prefix there is an error.
-- The existing suite still passes, and `migrate --dry-run` says "no changes", so the default is unchanged.
+## Tests
+- A `workcopy` table gets columns `vector({embedding_dim})`, `char(64)` and `double precision`. With `monkeypatch.setenv("PLUMBLINE_EMBEDDING_DIM", "8")`, the DDL has `vector(8)`, `char(64)` and `double precision`. Covers *Embedding dimension filled*.
+- With the variable deleted, `build_objects` raises naming `PLUMBLINE_EMBEDDING_DIM`; `"0"` raises too. Covers *Dimension missing*.
+- With the variable unset, `validate.validate()` returns `[]`.
+- `migrate._parts("x double precision NOT NULL")` gives the type `double precision` with not-null set.
+- The sample is unchanged: the suite passes, `migrate --dry-run` says "no changes", and the byte compare matches.
 
 ## Checks to run
 - `cd datamodel && uv run python -m pytest -q -rs tests`
-- `uv run python tools/validate.py && uv run python tools/migrate.py --dry-run` prints "no changes"
-- Byte compare of the sample's `build/schema.sql` against the previous commit, as in 2.1.
+- `uv run python tools/validate.py && uv run python tools/migrate.py --dry-run`
+- Byte compare of the sample's `schema.sql` against the previous commit.
 
 ## Risks / Questions
-- Making `public_id_prefix` optional isn't spelled out in tasks.md. Without it, though, 3.1's `chunks` and `feedback` would need a dummy prefix, which is exactly the kind of drift the gate exists to catch. So it's a direct consequence of `system_columns`, and I've kept it in this task.
+- `explorer.py` will now need the variable for any model that has `vector({embedding_dim})`, so `make explorer MODEL=models/plumbline` without it fails with the named error. That's what the spec says for generation; the toolkit README notes it in 5.1.

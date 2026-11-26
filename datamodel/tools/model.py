@@ -1,6 +1,7 @@
 """Load domains/**/*.yaml and enums/*.yaml into one in-memory Model."""
 from __future__ import annotations
 
+import os
 import pathlib
 from dataclasses import dataclass, field
 
@@ -33,6 +34,16 @@ def system_columns(t: Table, id_type: str = "uuid") -> list[Column]:
         cols.append(Column(name="updated_at", type="timestamptz", default="now()",
                            description="When the row last changed."))
     return cols
+
+
+def column_type(c: Column) -> str:
+    """The SQL type, with {embedding_dim} filled from PLUMBLINE_EMBEDDING_DIM (same rule as backend migration 0001)."""
+    if "{embedding_dim}" not in c.type:
+        return c.type
+    value = os.environ.get("PLUMBLINE_EMBEDDING_DIM", "")
+    if not value.isdigit() or int(value) == 0:
+        raise ValueError(f"{c.name}: PLUMBLINE_EMBEDDING_DIM must be set to a positive integer; got {value!r}")
+    return c.type.replace("{embedding_dim}", value)
 
 
 def all_columns(t: Table, id_type: str = "uuid") -> list[Column]:

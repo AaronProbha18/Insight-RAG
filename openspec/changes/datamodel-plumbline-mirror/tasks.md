@@ -6,7 +6,7 @@
 
 - [x] 2.1 `model.yaml` loading with defaults (`id_type`, `public_id_check`, `updated_at_trigger`, `comments`, `constraint_names`), applied in `ddl.py`; FK type follows `id_type` in `validate.py`. Test: the sample's DDL is byte-identical to before; one test per setting on a temp model.
 - [x] 2.2 Per-table `system_columns` in `schema.py`, `model.py` and `validate.py`. Test: subset injection; `id`/unknown entries fail validation naming the table.
-- [ ] 2.3 Types `char(n)`, `double precision`, `vector(n)`, `vector({embedding_dim})`, filled from `PLUMBLINE_EMBEDDING_DIM` in `ddl.py`/`explorer.py`. Test: filled to `vector(8)`; unset fails naming the variable; `validate` passes without it.
+- [x] 2.3 Types `char(n)`, `double precision`, `vector(n)`, `vector({embedding_dim})`, filled from `PLUMBLINE_EMBEDDING_DIM` in `ddl.py`/`explorer.py`. Test: filled to `vector(8)`; unset fails naming the variable; `validate` passes without it.
 
 ## 3. Plumbline model
 

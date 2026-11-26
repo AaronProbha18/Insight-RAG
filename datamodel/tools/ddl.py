@@ -10,7 +10,7 @@ import json
 import pathlib
 import sys
 
-from model import DEFAULT_MODEL, Model, all_columns, con_name, load, model_dir
+from model import DEFAULT_MODEL, Model, all_columns, column_type, con_name, load, model_dir
 
 HEADER = "-- GENERATED from domains/**/*.yaml. Do not edit. Change the YAML and run `make ddl`.\n"
 
@@ -39,7 +39,7 @@ def build_objects(m: Model) -> dict:
 
         columns: dict[str, dict] = {}
         for c in ordered:
-            d = f"{c.name} {c.type}"
+            d = f"{c.name} {column_type(c)}"
             if not c.nullable:
                 d += " NOT NULL"
             if c.default is not None:

@@ -7,7 +7,7 @@ import json
 import subprocess
 import sys
 
-from model import DEFAULT_MODEL, ROOT, Model, all_columns, load, model_dir
+from model import DEFAULT_MODEL, ROOT, Model, all_columns, column_type, load, model_dir
 
 
 def payload(m: Model) -> dict:
@@ -15,7 +15,7 @@ def payload(m: Model) -> dict:
     for t in m.ordered_tables():
         cols = []
         for c in all_columns(t, m.settings.id_type):
-            cols.append({"name": c.name, "type": c.type, "nullable": c.nullable, "pii": c.pii,
+            cols.append({"name": c.name, "type": column_type(c), "nullable": c.nullable, "pii": c.pii,
                          "default": c.default, "enum": c.enum, "references": c.references,
                          "unique": c.unique, "description": c.description,
                          "system": c.name in ("id", "public_id", "created_at", "updated_at")})
