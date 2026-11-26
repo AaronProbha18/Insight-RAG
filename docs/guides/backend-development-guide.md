@@ -78,6 +78,7 @@ code marks this with a `ponytail:` comment.
 | 204 | (also) `POST /feedback` stored the rating, or replaced the earlier one for that answer |
 | 404 | (also) `POST /feedback` for an unknown `answer_id`; the message is always "Answer not found" |
 | 200 | `GET /quality` always; no usable summary is `state: "not_measured"`, never an error |
+| 200 | (also) `GET /connectors` always; a connector that failed to load or declares another contract version is not listed |
 | 415 | no connector handles the file type; the message lists the supported types |
 | 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters) |
 | 500 | anything else; the client never sees internal details |
@@ -110,6 +111,14 @@ of chat model, embedding model and threshold. `host`, `git_commit`, `report`,
 malformed, sampled or exit-2 summary is `not_measured`. *Enforced by*
 `test_no_internal_fields_leak` in `tests/test_quality.py` and
 `tests/test_quality_api.py`.
+
+**2.6 `/connectors` is an allowlist.** The route lists the registry that
+`get_connectors` returns, sorted by name, and builds each entry from three
+named fields: `name`, `extensions` and `contract_version`. Module paths,
+entry-point names and every other attribute stay out. A connector the
+registry skipped (it failed to load, or declares another contract version)
+is not listed. The names equal the keys of `/quality`, which the Connectors
+page uses to join the two. *Enforced by* `tests/test_connectors_api.py`.
 
 ## 3. Errors
 

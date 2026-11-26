@@ -16,5 +16,5 @@
 
 ## 4. Docs and accessibility
 
-- [ ] 4.1 Update the backend guide (`GET /connectors`), frontend guide (connectors folder, routes) and the architecture overview
+- [x] 4.1 Update the backend guide (`GET /connectors`), frontend guide (connectors folder, routes) and the architecture overview
 - [ ] 4.2 Accessibility pass: labels not by colour alone, 4.5:1 contrast in both themes (extend `design-tokens.test.ts` for new pairs), keyboard reach for every link
