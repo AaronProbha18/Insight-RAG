@@ -16,6 +16,3 @@ open_questions:
   - id: OQ-ANSWERS-001
     owner: CMO
     text: question, answer and feedback comments are free text a member could type health details into. Should they be classed pii indirect, and what retention applies?
-sample_rows:
-  - {public_id: ans_EXAMPLE0001, question: "What is the example policy?", answer: The example policy covers example topics., abstained: false, chat_model: example-chat, embedding_model: example-embed, abstain_threshold: 0.5}
-  - {public_id: ans_EXAMPLE0002, question: "What is not covered?", answer: The documents do not cover that., abstained: true, chat_model: example-chat, embedding_model: example-embed, abstain_threshold: 0.5}

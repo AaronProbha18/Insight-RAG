@@ -13,6 +13,3 @@ checks:
   - {name: feedback_reason_check, expr: "reason IN ('wrong', 'incomplete', 'wrong_source', 'should_have_answered', 'other')"}
   - {name: feedback_comment_check, expr: "char_length(comment) <= 2000"}
   - {name: feedback_check, expr: "reason IS NULL OR rating = 'down'"}
-sample_rows:
-  - {rating: up}
-  - {rating: down, reason: wrong, comment: Example comment.}

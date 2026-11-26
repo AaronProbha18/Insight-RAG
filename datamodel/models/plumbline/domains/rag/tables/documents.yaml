@@ -9,6 +9,3 @@ columns:
   - {name: title, type: text, description: "Title shown to the user."}
   - {name: filename, type: text, description: "Original file name."}
   - {name: connector, type: text, description: "Name of the connector that produced the document."}
-sample_rows:
-  - {public_id: doc_EXAMPLE0001, content_hash: "0000000000000000000000000000000000000000000000000000000000000001", title: Example handbook, filename: example-handbook.md, connector: markdown}
-  - {public_id: doc_EXAMPLE0002, content_hash: "0000000000000000000000000000000000000000000000000000000000000002", title: Example policy, filename: example-policy.md, connector: markdown}

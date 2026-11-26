@@ -16,19 +16,15 @@ def constraint_names(m: Model):
     """Yield (table, kind, generated_name) for everything the DDL generator names."""
     s = m.settings
     for t in m.tables.values():
-        names = {c.name for c in all_columns(t, s.id_type)}
+        names = {c.name for c in all_columns(t)}
         yield t.table, "pk", con_name(s, "pk", t.table, [])
         if s.public_id_check and "public_id" in names:
             yield t.table, "check", f"ck_{t.table}_public_id"
         if s.updated_at_trigger and "updated_at" in names:
             yield t.table, "trigger", f"tg_{t.table}_updated_at"
-        if t.immutable:
-            yield t.table, "trigger", f"trg_{t.table}_immutable"
-        for c in all_columns(t, s.id_type):
+        for c in all_columns(t):
             if c.references:
                 yield t.table, "fk", con_name(s, "fk", t.table, [c.name])
-            if c.enum:
-                yield t.table, "enum check", con_name(s, "enum", t.table, [c.name])
             if c.unique:
                 yield t.table, "unique", con_name(s, "uq", t.table, [c.name])
         for cols in t.unique:
@@ -81,22 +77,18 @@ def validate(m: Model) -> list[str]:
 
         if len(t.table.encode()) > PG_IDENT_MAX:
             e(f"{where}: table name is {len(t.table.encode())} bytes; Postgres truncates at {PG_IDENT_MAX}")
-        for c in all_columns(t, m.settings.id_type):
+        for c in all_columns(t):
             if len(c.name.encode()) > PG_IDENT_MAX:
                 e(f"{where}.{c.name}: column name is {len(c.name.encode())} bytes; Postgres truncates at {PG_IDENT_MAX}")
 
-        names = [c.name for c in all_columns(t, m.settings.id_type)]
+        names = [c.name for c in all_columns(t)]
         for n in {n for n in names if names.count(n) > 1}:
             e(f"{where}: duplicate or system-reserved column {n}")
-        cols = {c.name: c for c in all_columns(t, m.settings.id_type)}
+        cols = {c.name: c for c in all_columns(t)}
 
         for c in t.columns:
             if c.pii in ("direct", "phi") and c.default:
                 e(f"{where}.{c.name}: a direct identifier or PHI column cannot have a default")
-            if c.enum and c.enum not in m.enums:
-                e(f"{where}.{c.name}: unknown enum {c.enum}")
-            if c.enum and c.type != "text":
-                e(f"{where}.{c.name}: enum columns must be text")
             if c.references:
                 try:
                     rt, rc = c.references.split(".")
@@ -108,9 +100,8 @@ def validate(m: Model) -> list[str]:
                     continue
                 if rc != "id":
                     e(f"{where}.{c.name}: foreign keys point at the internal id, not {rc}")
-                fk_type = "bigint" if m.settings.id_type == "bigserial" else "uuid"
-                if c.type != fk_type:
-                    e(f"{where}.{c.name}: foreign key column must be {fk_type}")
+                if c.type != "bigint":
+                    e(f"{where}.{c.name}: foreign key column must be bigint")
                 if c.on_delete == "set null" and not c.nullable:
                     e(f"{where}.{c.name}: on_delete 'set null' needs a nullable column")
                 rd = m.tables[rt].domain
@@ -125,40 +116,17 @@ def validate(m: Model) -> list[str]:
             for n in ix.columns:
                 if n not in cols:
                     e(f"{where}: index names unknown column {n}")
-        for n in t.mutable_columns:
-            if n not in cols:
-                e(f"{where}: mutable_columns names unknown column {n}")
-        if t.mutable_columns and not t.immutable:
-            e(f"{where}: mutable_columns only makes sense on an immutable table")
-        if t.immutable and any(c.on_delete != "restrict" for c in t.columns):
-            e(f"{where}: an immutable table cannot rely on cascade or set null")
-
-        for r in t.business_rules:
-            if not r.id.startswith(f"BR-{t.table.upper()}-"):
-                e(f"{where}: rule {r.id} must start with BR-{t.table.upper()}-")
         for q in t.open_questions:
             if not q.id.startswith(f"OQ-{t.table.upper()}-"):
                 e(f"{where}: question {q.id} must start with OQ-{t.table.upper()}-")
             if q.status != "open" and not q.answer:
                 e(f"{where}: question {q.id} is {q.status} but has no answer")
-        for item in [*(r.id for r in t.business_rules), *(q.id for q in t.open_questions)]:
-            if item in ids:
-                e(f"{where}: id {item} already used in {ids[item]}")
-            ids[item] = t.table
+        for q in t.open_questions:
+            if q.id in ids:
+                e(f"{where}: id {q.id} already used in {ids[q.id]}")
+            ids[q.id] = t.table
         if t.status == "published" and any(q.status == "open" and q.owner == "CMO" for q in t.open_questions):
             e(f"{where}: published with an open CMO question; clinical scope is the CMO's to settle")
-
-        # sample rows: synthetic only, known columns only
-        for i, row in enumerate(t.sample_rows):
-            for k, v in row.items():
-                if k not in cols:
-                    e(f"{where}: sample row {i} has unknown column {k}")
-                elif cols[k].enum and v not in m.enums.get(cols[k].enum, type("x", (), {"values": []})).values:
-                    e(f"{where}: sample row {i} {k}={v!r} not in enum {cols[k].enum}")
-                if isinstance(v, str) and re.search(r"\b\d{3}-\d{2}-\d{4}\b", v):
-                    e(f"{where}: sample row {i} looks like an SSN. Synthetic data only")
-                if k == "email" and isinstance(v, str) and not v.endswith((".invalid", "@example.com", "@example.org")):
-                    e(f"{where}: sample row {i} email must use a reserved domain (.invalid, example.com)")
 
     # name length, collisions
     seen: dict[str, str] = {}
@@ -168,11 +136,6 @@ def validate(m: Model) -> list[str]:
         if name in seen and seen[name] != tbl:
             e(f"{name!r} used on both {seen[name]} and {tbl}")
         seen[name] = tbl
-    for en in m.enums.values():
-        if len(set(en.values)) != len(en.values):
-            e(f"enum {en.enum}: duplicate values")
-        if not all(re.fullmatch(r"[A-Z][A-Z0-9_]*", v) for v in en.values):
-            e(f"enum {en.enum}: values must be UPPER_SNAKE")
     return errs
 
 
@@ -183,7 +146,7 @@ def main() -> int:
     errs = validate(m)
     for x in errs:
         print("ERROR", x, file=sys.stderr)
-    print(f"{len(m.domains)} domains, {len(m.tables)} tables, {len(m.enums)} enums, {len(errs)} errors")
+    print(f"{len(m.domains)} domains, {len(m.tables)} tables, {len(errs)} errors")
     return 1 if errs else 0
 
 

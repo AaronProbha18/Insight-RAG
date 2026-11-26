@@ -1,4 +1,4 @@
-# All generators read $(MODEL)/domains/**/*.yaml and $(MODEL)/enums/*.yaml. Nothing under build/ is edited by hand.
+# All generators read $(MODEL)/domains/**/*.yaml. Nothing under build/ is edited by hand.
 export PYTHONPATH := tools
 PY ?= uv run python
 MODEL ?= models/plumbline

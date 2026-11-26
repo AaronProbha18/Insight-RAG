@@ -30,7 +30,7 @@ def build_objects(m: Model) -> dict:
     s = m.settings
     tables: dict[str, dict] = {}
     for t in m.ordered_tables():
-        cols = all_columns(t, s.id_type)
+        cols = all_columns(t)
         # id, public_id first; created_at/updated_at last
         head = [c for c in cols if c.name in ("id", "public_id")]
         tail = [c for c in cols if c.name in ("created_at", "updated_at")]
@@ -53,9 +53,6 @@ def build_objects(m: Model) -> dict:
         for c in cols:
             if c.unique:
                 cons[con_name(s, "uq", t.table, [c.name])] = f"UNIQUE ({c.name})"
-            if c.enum:
-                vals = ", ".join(q(v) for v in m.enums[c.enum].values)
-                cons[con_name(s, "enum", t.table, [c.name])] = f"CHECK ({c.name} IN ({vals}))"
             if c.references:
                 rt, rc = c.references.split(".")
                 cons[con_name(s, "fk", t.table, [c.name])] = (
@@ -78,24 +75,6 @@ def build_objects(m: Model) -> dict:
             trig[f"tg_{t.table}_updated_at"] = (
                 f"CREATE TRIGGER tg_{t.table}_updated_at BEFORE UPDATE ON {t.table} "
                 f"FOR EACH ROW EXECUTE FUNCTION set_updated_at();")
-        if t.immutable:
-            allowed = list(t.mutable_columns) + (["updated_at"] if "updated_at" in columns else [])
-            arr = "ARRAY[" + ", ".join(q(a) for a in allowed) + "]::text[]" if allowed else "ARRAY[]::text[]"
-            fn = f"trg_{t.table}_immutable"
-            trig[fn] = (
-                f"CREATE OR REPLACE FUNCTION {fn}() RETURNS trigger AS $$\n"
-                f"BEGIN\n"
-                f"  IF TG_OP = 'DELETE' THEN\n"
-                f"    RAISE EXCEPTION '{t.table} is immutable: rows cannot be deleted';\n"
-                f"  END IF;\n"
-                f"  IF (to_jsonb(NEW) - {arr}) IS DISTINCT FROM (to_jsonb(OLD) - {arr}) THEN\n"
-                f"    RAISE EXCEPTION '{t.table} is immutable: only {', '.join(allowed) or 'no columns'} may change';\n"
-                f"  END IF;\n"
-                f"  RETURN NEW;\n"
-                f"END;\n"
-                f"$$ LANGUAGE plpgsql;\n"
-                f"CREATE TRIGGER {fn} BEFORE UPDATE OR DELETE ON {t.table} "
-                f"FOR EACH ROW EXECUTE FUNCTION {fn}();")
 
         tables[t.table] = {"domain": t.domain, "comment": t.description if s.comments else None,
                            "columns": columns,
@@ -122,7 +101,7 @@ def create_table_sql(name: str, t: dict) -> tuple[list[str], list[str]]:
 
 
 def render_full(objs: dict) -> str:
-    parts = [HEADER, "CREATE EXTENSION IF NOT EXISTS pgcrypto;\n"]
+    parts = [HEADER]
     if any(n.startswith("tg_") for t in objs["tables"].values() for n in t["triggers"]):
         parts.append(SET_UPDATED_AT + "\n")
     all_fks: list[str] = []

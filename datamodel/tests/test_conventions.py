@@ -20,9 +20,9 @@ def test_plumbline_conventions_generated():
         assert old not in sql
 
 
-def test_uuid_foreign_key_rejected(workcopy):
+def test_non_bigint_foreign_key_rejected(workcopy):
     p = workcopy / "domains/core/tables/note.yaml"
-    p.write_text(p.read_text().replace("type: bigint", "type: uuid"))
+    p.write_text(p.read_text().replace("type: bigint", "type: int"))
     errs = validate.validate(load(workcopy))
     assert any("note.account_id" in e and "must be bigint" in e for e in errs)
 

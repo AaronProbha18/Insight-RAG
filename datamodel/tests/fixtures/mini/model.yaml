@@ -1,5 +1,4 @@
 # Plumbline's conventions, so the tests exercise what models/plumbline uses.
-id_type: bigserial
 public_id_check: false
 updated_at_trigger: false
 comments: false

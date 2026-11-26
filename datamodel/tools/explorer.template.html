@@ -94,7 +94,6 @@ function side(filter=""){
   <div class="navsec">Overview</div>
   <a class="ov" href="#overview" data-r="overview">The model at a glance</a>
   <a class="ov" href="#openq" data-r="openq">Open questions <span class="badge ${openQ.length?"hot":""}">${openQ.length}</span></a>
-  <a class="ov" href="#enums" data-r="enums">Enums <span class="badge">${D.enums.length}</span></a>
   <div class="navsec">Tables <span class="badge">${D.tables.length}</span></div>`;
   for (const d of D.domains) {
     const ts = D.tables.filter(t => t.domain === d.domain && match(t));
@@ -113,9 +112,8 @@ const tbl = (head, rows) => `<div class="scroll"><table><thead><tr>${head.map(h=
 const link = n => T[n] ? `<a href="#t-${esc(n)}">${esc(n)}</a>` : esc(n);
 
 function overview(){
-  const rules = D.tables.reduce((n,t)=>n+t.rules.length,0), samples = D.tables.reduce((n,t)=>n+t.samples.length,0);
   return `<div class="crumb">Overview</div><h2 class="tname">The model at a glance</h2>
-  <div class="stats">${[[D.domains.length,"Domains"],[D.tables.length,"Tables"],[D.enums.length,"Enums"],[samples,"Sample rows"],[rules,"Business rules"],[openQ.length,"Open questions"]]
+  <div class="stats">${[[D.domains.length,"Domains"],[D.tables.length,"Tables"],[openQ.length,"Open questions"]]
     .map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("")}</div>
   <div class="callout"><div class="lbl">The rule above all others</div>The YAML is the model. DDL and this page are generated from <code>domains/**/*.yaml</code>. A column that exists in the database but not in a table.yaml is a defect.</div>
   <h3 class="sec">Domains</h3>
@@ -125,7 +123,7 @@ function overview(){
 
 function colRow(t, c){
   const ref = c.references ? `<span class="pill">FK</span> ${link(c.references.split(".")[0])}` : "";
-  const typ = esc(c.type) + (c.enum ? ` <span class="pill">${esc(c.enum)}</span>` : "");
+  const typ = esc(c.type);
   return `<tr class="${c.system?"sys":""}"><td class="m">${esc(c.name)}${c.unique?'<span class="pill">unique</span>':""}${c.pii!=="none"?`<span class="pill p">${esc(c.pii)}</span>`:""}</td>
   <td class="m">${typ}</td><td>${c.nullable?"yes":"no"}</td><td class="m">${c.default?esc(c.default):'<span class="null">—</span>'}</td><td>${esc(c.description)} ${ref}</td></tr>`;
 }
@@ -139,12 +137,9 @@ let tab = "columns";
 function table(name){
   const t = T[name]; if(!t) return `<div class="pane"><h2 class="tname">Not found</h2></div>`;
   const refsTo = D.tables.filter(o=>o.columns.some(c=>c.references&&c.references.startsWith(name+".")));
-  const tabs = [["columns","Columns",t.columns.length],["rules","Rules",t.rules.length],["samples","Samples",t.samples.length],["questions","Questions",t.questions.length],["constraints","Constraints",t.checks.length+t.unique.length+t.indexes.length]];
+  const tabs = [["columns","Columns",t.columns.length],["questions","Questions",t.questions.length],["constraints","Constraints",t.checks.length+t.unique.length+t.indexes.length]];
   const body = {
     columns: () => tbl(["Column","Type","Null","Default","Description"], t.columns.map(c=>colRow(t,c))),
-    rules: () => t.rules.length ? tbl(["ID","Rule","Enforced by"], t.rules.map(r=>`<tr><td class="m">${esc(r.id)}</td><td>${esc(r.text)}</td><td>${esc(r.enforced_by)}</td></tr>`)) : `<p class="muted small">No rules recorded.</p>`,
-    samples: () => t.samples.length ? (()=>{const keys=[...new Set(t.samples.flatMap(r=>Object.keys(r)))];
-      return tbl(keys, t.samples.map(r=>`<tr>${keys.map(k=>`<td class="m">${k in r?esc(r[k]):'<span class="null">—</span>'}</td>`).join("")}</tr>`))})() : `<p class="muted small">No sample rows. Synthetic data only.</p>`,
     questions: () => t.questions.length ? t.questions.map(q=>question({...q,table:name},false)).join("") : `<p class="muted small">No open questions.</p>`,
     constraints: () => `<div class="lbl">Checks</div>${t.checks.length?tbl(["Name","Expression"],t.checks.map(c=>`<tr><td class="m">${esc(c.name)}</td><td class="m">${esc(c.expr)}</td></tr>`)):'<p class="muted small">None.</p>'}
       <h3 class="sec">Unique</h3>${t.unique.length?`<p class="mono small">${t.unique.map(u=>esc(u.join(", "))).join("<br>")}</p>`:'<p class="muted small">None.</p>'}
@@ -152,16 +147,10 @@ function table(name){
   };
   return `<div class="crumb">${esc(t.domain)}</div><h2 class="tname">${esc(t.name)}</h2>
   <div class="chips"><span class="chip k">${esc(t.status)}</span>${t.prefix?`<span class="chip">public_id ${esc(t.prefix)}_…</span>`:""}
-   ${t.immutable?`<span class="chip imm">immutable${t.mutable_columns.length?" · mutable: "+esc(t.mutable_columns.join(", ")):""}</span>`:""}
    ${refsTo.length?`<span class="chip">referenced by ${refsTo.map(o=>link(o.name)).join(", ")}</span>`:""}</div>
   <div class="callout"><div class="lbl">What it is</div>${esc(t.description)}</div>
   <div class="tabs">${tabs.map(([k,l,n])=>`<button class="tab ${k===tab?"on":""}" data-tab="${k}">${l}<span class="n">${n}</span></button>`).join("")}</div>
   ${body[tab]()}`;
-}
-
-function enums(){
-  return `<div class="crumb">Overview</div><h2 class="tname">Enums</h2><p class="small muted">Implemented as CHECK constraints, not Postgres ENUM types, so adding a value is a constraint change in a migration.</p>
-  ${tbl(["Enum","Values","Used by"], D.enums.map(e=>`<tr><td class="m">${esc(e.enum)}</td><td class="m">${e.values.map(esc).join(", ")}</td><td class="m small">${D.tables.flatMap(t=>t.columns.filter(c=>c.enum===e.enum).map(c=>link(t.name)+"."+esc(c.name))).join(", ")||'<span class="null">unused</span>'}</td></tr>`))}`;
 }
 
 function openq(){
@@ -173,7 +162,7 @@ function openq(){
 function route(){
   const r = location.hash.slice(1) || "overview";
   let h;
-  if (r === "overview") h = overview(); else if (r === "enums") h = enums(); else if (r === "openq") h = openq();
+  if (r === "overview") h = overview(); else if (r === "openq") h = openq();
   else if (r.startsWith("t-")) h = table(r.slice(2)); else h = overview();
   $("#main").innerHTML = `<section class="pane">${h}</section>`;
   document.querySelectorAll(".tab").forEach(b => b.onclick = () => { tab = b.dataset.tab; route(); });
