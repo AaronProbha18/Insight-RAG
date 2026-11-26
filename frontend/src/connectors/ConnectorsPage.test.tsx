@@ -54,11 +54,36 @@ describe('ConnectorsView', () => {
   it('shows a card per connector with its extensions and document count', () => {
     const html = view()
 
-    expect(html).toContain('<h1 class="mb-4 text-xl font-semibold">Connectors</h1>')
-    expect(html.match(/<section/g)).toHaveLength(2)
-    expect(html).toContain('.pdf · 3 documents')
-    expect(html).toContain('.docx · 0 documents')
+    expect(html.match(/<section aria-label="(PDF|DOCX)"/g)).toHaveLength(2)
+    expect(html).toContain('Built-in · .pdf · 3 documents')
+    expect(html).toContain('Built-in · .docx · 0 documents')
     expect(html.indexOf('DOCX')).toBeLessThan(html.indexOf('PDF'))
+  })
+
+  it('has the title, intro and the 0.80 explainer with its link, in every state', () => {
+    for (const html of [view(), view({ connectors: null }), view({ connectorsMessage: "Couldn't load connectors. Try again." })]) {
+      expect(html).toContain('>Connectors and quality</h1>')
+      expect(html).toContain('A connector reads one file type and turns it into passages Plumbline can cite.')
+      expect(html).toContain('The bar is 0.80 on correctness, faithfulness and abstention.')
+      expect(html).toMatch(/<a href="https:\/\/github.com\/AaronProbha18\/Plumbline\/blob\/main\/evals\/README.md"[^>]*rel="noreferrer"[^>]*>How it&#x27;s measured<\/a>/)
+    }
+  })
+
+  it('ends with Build your own, linking to the connector guide, once loaded', () => {
+    for (const html of [view(), view({ connectors: [] })]) {
+      expect(html).toContain('<section aria-label="Build your own"')
+      expect(html).toContain('href="https://github.com/AaronProbha18/Plumbline/blob/main/docs/guides/connector-development-guide.md"')
+      expect(html).toContain('Connector guide')
+    }
+    expect(view().indexOf('Build your own')).toBeGreaterThan(view().indexOf('PDF'))
+  })
+
+  it('shows no planned connectors, and no card for a quality entry that is not loaded', () => {
+    const html = view({ connectors: [connectors[1]] })
+
+    expect(html).not.toMatch(/Planned|Coming next/)
+    expect(html.match(/<section aria-label="(PDF|DOCX)"/g)).toHaveLength(1)
+    expect(html).not.toContain('aria-label="DOCX"')
   })
 
   it('joins quality by connector name', () => {
@@ -80,6 +105,7 @@ describe('ConnectorsView', () => {
     for (const html of [view({ connectors: null }), view({ quality: null })]) {
       expect(html).toContain('Loading connectors…')
       expect(html).not.toContain('<section')
+      expect(html).not.toContain('Build your own')
     }
   })
 
@@ -91,6 +117,7 @@ describe('ConnectorsView', () => {
       const html = view(over)
       expect(html).toContain("Couldn&#x27;t load")
       expect(html).not.toContain('<section')
+      expect(html).not.toContain('Build your own')
       expect(html).not.toContain('Loading')
     }
   })
