@@ -12,8 +12,8 @@ function respond(status: number, body?: object) {
 afterEach(() => vi.unstubAllGlobals())
 
 const connectors = [
-  { name: 'docx', extensions: ['.docx'], contract_version: 1 },
-  { name: 'pdf', extensions: ['.pdf'], contract_version: 1 },
+  { name: 'docx', extensions: ['.docx'], contract_version: 1, builtin: true },
+  { name: 'pdf', extensions: ['.pdf'], contract_version: 1, builtin: true },
 ]
 
 describe('listConnectors', () => {

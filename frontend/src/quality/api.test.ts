@@ -35,6 +35,21 @@ describe('getQuality', () => {
     expect(init?.method ?? 'GET').toBe('GET')
   })
 
+  it('passes the question counts through, and never invents them when absent', async () => {
+    const withCounts: Quality = {
+      ...measured,
+      connectors: {
+        pdf: { result: 'PASS', failed: [], metrics, answerable_questions: 30, unanswerable_questions: 10 },
+      },
+    }
+    respond(200, withCounts)
+    expect(await getQuality()).toEqual(withCounts)
+
+    respond(200, measured)
+    const got = await getQuality()
+    expect(got.state === 'measured' && 'answerable_questions' in got.connectors.pdf).toBe(false)
+  })
+
   it('returns not measured unchanged', async () => {
     const body = { state: 'not_measured', eval_command: 'uv run plumbline-eval' }
     respond(200, body)

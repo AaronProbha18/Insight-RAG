@@ -4,7 +4,7 @@ import type { Quality } from '../quality/api'
 import type { Connector } from './api'
 import { ConnectorCard } from './ConnectorCard'
 
-const pdf: Connector = { name: 'pdf', extensions: ['.pdf'], contract_version: 1 }
+const pdf: Connector = { name: 'pdf', extensions: ['.pdf'], contract_version: 1, builtin: true }
 const metrics = { correctness: 0.9, faithfulness: 0.88, abstention: 0.95 }
 const measured = {
   state: 'measured' as const,
@@ -68,7 +68,7 @@ describe('ConnectorCard', () => {
   })
 
   it('shows Not measured with the fallback command when the summary lacks this connector', () => {
-    const html = render(measured, 2, { name: 'docx', extensions: ['.docx'], contract_version: 1 })
+    const html = render(measured, 2, { name: 'docx', extensions: ['.docx'], contract_version: 1, builtin: true })
 
     expect(html).toContain('Not measured')
     expect(html).toContain('<code>uv run plumbline-eval</code>')

@@ -2,6 +2,7 @@ export type Connector = {
   name: string
   extensions: string[]
   contract_version: number
+  builtin: boolean
 }
 
 /** GET /connectors, sorted by name. Throws on any failure; the caller shows a generic message. */

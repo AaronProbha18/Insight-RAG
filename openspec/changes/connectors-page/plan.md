@@ -1,44 +1,35 @@
 ## Task
-5.2 Runner summary writes `answerable_questions` and `unanswerable_questions` per connector; `quality.load_quality` passes them through as optional non-negative integers (absent or invalid: left out, result otherwise unchanged); tests in `test_runner.py`, `test_quality.py`, `test_quality_api.py`, including a summary without the counts
+6.1 Types: `Connector.builtin` in `connectors/api.ts`; optional counts on `ConnectorQuality` in `quality/api.ts`; fixtures and tests follow
 
 ## Scope
-- `backend/src/plumbline/evals/runner.py`, the `connectors={...}` block of the summary written by `run()`: add, next to `"questions": len(r["questions"])`,
-  - `"answerable_questions": sum(q["answerable"] for q in r["questions"])`
-  - `"unanswerable_questions": sum(not q["answerable"] for q in r["questions"])`
-  `r["questions"]` entries are `asdict(QuestionScore)` plus latency, and `QuestionScore.answerable` is a bool (read in `evals/scoring.py`). `questions` (the total) stays. The full report is unchanged. The two counts add up to `questions`.
-- `backend/src/plumbline/quality.py`, `_connector()`: after the existing allowlisted fields, include `answerable_questions` and `unanswerable_questions` only when each is a non-negative `int` (not a bool; no floats, no negatives, no strings). Absent or invalid: the key is left out and nothing else changes. An invalid count never makes the summary `not_measured` (design.md "Question counts, optional end to end"). If only one of the two is valid it is still left out as a pair: both or neither, because the card sentence needs both.
-- New fixture `backend/tests/fixtures/quality/with_counts.json`: a copy of `both_pass.json` with synthetic counts (pdf 30 and 10, docx 28 and 12). `both_pass.json` stays as it is and serves as the "summary written before the counts existed".
-- Docs, per AGENTS workflow rule 7: one sentence in `evals/README.md` (the summary paragraph) naming the two fields; the backend guide's rule 2.5 and the overview are task 7.1.
-- Guides read: `docs/guides/backend-development-guide.md` (2.5 `/quality` is an allowlist from named fields; 3.2 broad `except` only at the trust boundary, which `load_quality` already is; 8 tests), `evals/README.md` for the summary description. Not an `answer-quality-change`: see eval-plan.md (output-only).
+- `frontend/src/connectors/api.ts`: add `builtin: boolean` to `Connector` (the backend sends it since 5.1). Update the doc comment of `listConnectors` if it names fields (it doesn't).
+- `frontend/src/quality/api.ts`: add `answerable_questions?: number` and `unanswerable_questions?: number` to `ConnectorQuality`. They are optional because `/quality` omits both for summaries written before 5.2 (specs "Summary without counts").
+- Fixtures follow: the `Connector` literals in `connectors/api.test.ts`, `ConnectorCard.test.tsx`, `ConnectorsPage.test.tsx` and `useConnectors.test.ts` get `builtin`. The type change is what forces this (`npm run build` typechecks tests: the repo's `tsc -b` includes them, as it did when I added `quality` to `AppShell` props), so it's the same task.
+- Behaviour does not change: nothing reads `builtin` or the counts until 6.2 and 6.3.
+- Guides read: `docs/guides/frontend-development-guide.md` (1.1 `api.ts` holds the wire types; 3.1 relative paths; 7.2 stubbed `fetch` tests).
 
 ## Not in scope
-- Frontend types and the card footer (6.1, 6.2).
-- Any change to scoring, gating, retrieval, prompts, `/chat`, or the full report file.
-- Backfilling old summary files or any default count: absent stays absent.
-- A real eval run (needs models; not required by eval-plan.md).
+- Showing "Built-in" or the counts (6.2), page changes (6.3), sidebar (6.4).
+- Runtime validation of the response shape (the project doesn't do it for any `api.ts`).
+- Guide text (7.1).
 
 ## Files
 | File | Change |
 | --- | --- |
-| `backend/src/plumbline/evals/runner.py` | two count fields in the summary's per-connector entry |
-| `backend/src/plumbline/quality.py` | pass the pair through when both are valid |
-| `backend/tests/fixtures/quality/with_counts.json` | new synthetic fixture |
-| `backend/tests/test_runner.py` | summary has the counts and they add up to `questions` |
-| `backend/tests/test_quality.py` | counts passed through; absent and invalid cases |
-| `backend/tests/test_quality_api.py` | counts appear in `/quality`; old summary has none; no new leak |
-| `evals/README.md` | one sentence |
+| `frontend/src/connectors/api.ts` | `builtin: boolean` |
+| `frontend/src/quality/api.ts` | two optional counts |
+| `frontend/src/connectors/api.test.ts` | `builtin` in the sample list |
+| `frontend/src/connectors/ConnectorCard.test.tsx` | `builtin` in both `Connector` literals |
+| `frontend/src/connectors/ConnectorsPage.test.tsx` | `builtin` in the sample list |
+| `frontend/src/connectors/useConnectors.test.ts` | `builtin` in the sample |
+| `frontend/src/quality/api.test.ts` | a case: a `/quality` body with the counts parses through unchanged, and one without them does too |
 
 ## Tests
-- Runner (spec "Counts in the summary"): in `test_summary_is_small_and_shareable`, assert `pdf["answerable_questions"] + pdf["unanswerable_questions"] == pdf["questions"] == 40`, and that `unanswerable_questions` equals the number of `answerable: false` items in the golden file (`len(UNANSWERABLE)`). This test is marked `db` and needs Postgres; it ran in this session's suite earlier.
-- `load_quality` (spec "Counts passed through"): `with_counts` gives `pdf` and `docx` entries carrying both numbers.
-- `load_quality` (spec "Summary without counts" and "Counts absent or invalid"): `both_pass` entries have neither key, result unchanged; parametrized in-test variants of `with_counts` written to `tmp_path` with a negative number, a float, a string, a bool, one count missing: each leaves both keys out, still `measured`, other fields identical.
-- `/quality` API (spec "Counts passed through", "Summary fields only"): with the `with_counts` fixture the response entry has exactly `result`, `failed`, `metrics`, `answerable_questions`, `unanswerable_questions`; the existing no-leak test still passes (no `host`, `git_commit`, `report`, `latency_ms`, `questions`, `golden_version`).
+- Existing tests keep passing with the new literal shape (they assert the list passes through unchanged, so they now prove `builtin` survives `listConnectors`).
+- `quality/api.test.ts`: `getQuality` returns a measured body with both counts as given, and a body without them unchanged (no defaulting to 0, per design.md "never invent numbers").
 
 ## Checks to run
-- `cd backend && uv run ruff check . && uv run ruff format --check .`
-- `cd backend && uv run python -m pytest tests/test_quality.py tests/test_quality_api.py tests/test_runner.py -q`, then `uv run python -m pytest -q` (the db tests need the local Postgres; if they skip, I'll say so)
-- `python scripts/check_links.py`
+- From `D:\PROJECTS\Plumbline\frontend`: `npm run lint && npm run build && npm test`
 
 ## Risks / Questions
-- `test_runner.py` is `db`-marked; if Postgres is unreachable the runner assertion is skipped, not run. I'll report which.
-- Edge: a summary where `questions` (total) disagrees with the sum of the two counts is not validated; the runner writes them together, and a hand-edited file is not a case this endpoint polices.
+- None. This task has no visible change; its value is that 6.2 and 6.3 compile against the right types.

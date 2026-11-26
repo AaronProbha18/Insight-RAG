@@ -7,8 +7,8 @@ import { countByConnector } from '../documents/pageLogic'
 import { ConnectorsView } from './ConnectorsPage'
 
 const connectors: Connector[] = [
-  { name: 'docx', extensions: ['.docx'], contract_version: 1 },
-  { name: 'pdf', extensions: ['.pdf'], contract_version: 1 },
+  { name: 'docx', extensions: ['.docx'], contract_version: 1, builtin: true },
+  { name: 'pdf', extensions: ['.pdf'], contract_version: 1, builtin: true },
 ]
 const doc = (connector: string, i: number): DocumentSummary => ({
   document_id: `doc_${i}`,

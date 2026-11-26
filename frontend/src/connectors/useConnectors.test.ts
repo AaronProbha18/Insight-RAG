@@ -7,7 +7,7 @@ const message = "Couldn't load connectors. Try again."
 
 describe('connectorsOutcome', () => {
   it('returns the list', async () => {
-    const list = [{ name: 'pdf', extensions: ['.pdf'], contract_version: 1 }]
+    const list = [{ name: 'pdf', extensions: ['.pdf'], contract_version: 1, builtin: true }]
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(list), { status: 200 })))
 
     expect(await connectorsOutcome()).toEqual({ connectors: list })
