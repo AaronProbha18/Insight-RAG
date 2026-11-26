@@ -34,4 +34,4 @@
 ## 7. Docs and accessibility again
 
 - [x] 7.1 Update the backend guide (`/connectors` has four fields; `/quality` counts), frontend guide (folder tree, sidebar and page accessibility text, checklist) and the architecture overview; remove the Quality-link wording added in 4.1
-- [ ] 7.2 Accessibility re-check: one current-page link on the Connectors page (a11y test), status pills are words plus icon, new link text is named, 4.5:1 test still passes with no new token; by-hand light/dark and keyboard check noted in `verification.md`
+- [x] 7.2 Accessibility re-check: one current-page link on the Connectors page (a11y test), status pills are words plus icon, new link text is named, 4.5:1 test still passes with no new token; by-hand light/dark and keyboard check noted in `verification.md`

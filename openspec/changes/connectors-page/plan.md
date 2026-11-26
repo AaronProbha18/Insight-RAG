@@ -1,49 +1,39 @@
 ## Task
-7.1 Update the backend guide (`/connectors` has four fields; `/quality` counts), frontend guide (folder tree, sidebar and page accessibility text, checklist) and the architecture overview; remove the Quality-link wording added in 4.1
+7.2 Accessibility re-check: one current-page link on the Connectors page (a11y test), status pills are words plus icon, new link text is named, 4.5:1 test still passes with no new token; by-hand light/dark and keyboard check noted in `verification.md`
 
 ## Scope
-Docs only, no code. Each edit makes a sentence true of the code now on the branch (tasks 5.1 to 6.4).
+A re-audit of what changed since 4.2 (card redesign, page frame, external links, sidebar merge), with guards for what the existing tests do not reach. Findings from reading the code:
 
-**`docs/guides/backend-development-guide.md`**
-- 2.5 (`/quality` allowlist): add that each connector entry also carries `answerable_questions` and `unanswerable_questions` when the summary has both as non-negative integers (both or neither; never a reason for `not_measured`), and name the tests: `tests/test_quality.py` and `tests/test_quality_api.py` (already named) plus `tests/test_runner.py` for the runner's side.
-- 2.6 (`/connectors` allowlist): "three named fields" becomes four: `name`, `extensions`, `contract_version` and `builtin` (true when the class's module is under `plumbline.connectors.builtin`, so the built-in `pdf` and `docx` are true and a third-party connector is false).
+- **Already guarded, still true:** one `aria-current` on the connectors page (6.4's a11y change); every control named (`unnamed()` over `AppShell` markup); no `outline-none` without `focus-visible:` and no colour literals in the shell and connectors sources (both files are in the scan list).
+- **Contrast:** the card and page use only `text-foreground`, `text-muted-foreground`, `text-destructive`, `border-border`, `border-destructive`, `bg-foreground`, `bg-muted` and `bg-background`. Every text/background pair they form is already in `PAIRS` (`--foreground`/`--background`, `--muted-foreground`/`--background`, `--destructive`/`--background`, `--foreground`/`--muted`). `--destructive` on `--muted` is **not** used (6.2 dropped it after it measured 4.37:1). So no new token and no new pair.
+- **Gap 1:** `AppShell`'s static render of the connectors page only shows the loading state, so the cards, the status pills and "Build your own" are never exercised by the a11y suite.
+- **Gap 2:** nothing stops a later change from adding a colour class whose pair is not measured.
 
-**`docs/guides/frontend-development-guide.md`**
-- 1.1 folder tree: `Sidebar.tsx` line becomes "navigation: New chat, Documents, Connectors and quality, docs link"; `ConnectorCard.tsx` says "one connector: subtitle, status pill, metric bars, last-checked footer"; `ConnectorsPage.tsx` says "title, intro, 0.80 explainer, card grid and a Build your own card; joins /connectors, /quality and /documents by connector name"; `useQuality.ts` says "the latest eval result, fetched once in App and passed to the Connectors page"; delete the `label.ts` line.
-- 5 accessibility, "The sidebar" bullet: one link, "Connectors and quality", to `/app/connectors` with `aria-current` on that page; no Quality item, no Insights group and no quality state in the sidebar; drop the four "Quality: ..." wordings.
-- 5 accessibility, "The Connectors page" bullet: remove `quality/label.test.ts` from *Checked by*; add that the two external links ("How it's measured", "Connector guide") are real `<a>` elements with a visible focus ring and `rel="noreferrer"`; that "Build your own" appears only once the page has loaded.
-- 7.1 by-hand checklist: "Tab reaches the Connectors and quality link" (was "the Connectors and Quality links").
-- 6 styling: no change needed (the page uses tokens only; no new pair).
+Changes, all tests:
+1. `shell/a11y.test.tsx`: render `ConnectorsView` loaded, with a passing, a failing and a not-measured connector, and check: every link and control has a name (reuse `unnamed()`); each card is a `<section>` with an `aria-label`; the headings run h1 then h2 with no skipped level; each status pill has an `aria-hidden` icon next to its word (Passes, Below bar, Not measured); the two external links have `href`, `rel="noreferrer"` and visible text; no element relies on `tabindex` or `aria-disabled`.
+2. `shell/a11y.test.tsx`: a source guard for the page links: the `link` class string in `ConnectorsPage.tsx` contains `focus-visible:`; and a guard that the colour utilities in `ConnectorCard.tsx` and `ConnectorsPage.tsx` are only from the allowed set above, so a new colour forces a `PAIRS` update. (Spacing and size classes like `text-sm` are not colours; the check matches only `text-`, `bg-` and `border-` followed by a token name.)
+3. `design-tokens.test.ts`: no change (it must still pass as is; I'll say so in the report).
+4. By-hand check (not runnable from here): in the running app, `/app/connectors` in light and dark OS themes, Tab through the sidebar, Enter on "Connectors and quality", Tab reaches "How it's measured" and "Connector guide" with a visible ring, and the three card states read correctly. I will not mark this done for you: either you do it and tell me, or `verification.md` (written by `rag-verify`) records "not checked by hand".
 
-**`docs/architecture/overview.md`**
-- "Where new work goes", quality row: "the Connectors page reads it" (remove "and the sidebar's Quality label").
-- "List connectors" flow: each entry has `name`, `extensions`, `contract_version` and `builtin` (true for connectors shipped in this repo, derived from the class's module).
-- "Show the last eval" flow: add that each connector entry carries the answerable and unanswerable question counts when the summary has them; the runner writes them (`evals/runner.py`), and a summary from before that has none, so the page omits them.
-- "Open a page" flow: no change needed (already says "Connectors at `/app/connectors`" and the client-side join).
-
-Guides read: all three docs; AGENTS.md workflow rule 7.
+Guides read: `docs/guides/frontend-development-guide.md` §5 accessibility, §6 styling (pairs and tokens), §7.1 (what is checked by hand).
 
 ## Not in scope
-- Code, tests, specs, ADRs, README, AGENTS.md.
-- `evals/README.md` (its sentence about the counts was added in 5.2).
-- The accessibility re-check itself (7.2) and `verification.md`.
+- Any visual or markup change (this task adds guards, not fixes; if a guard fails on real markup, I stop and report it rather than change the page silently).
+- Screen-reader testing with real assistive tech.
+- `verification.md` (the next step, `rag-verify`).
 
 ## Files
 | File | Change |
 | --- | --- |
-| `docs/guides/backend-development-guide.md` | 2.5 and 2.6 |
-| `docs/guides/frontend-development-guide.md` | tree, sidebar and page bullets, checklist |
-| `docs/architecture/overview.md` | quality row, two flows |
+| `frontend/src/shell/a11y.test.tsx` | loaded-page checks; link-focus and colour-class source guards |
 
 ## Tests
-- None new. Docs are checked by the link checker and by greps for stale wording.
-- Read-through: no remaining mention of the sidebar's Quality item or label, `quality/label`, "Insights", or "three named fields" in `docs/`.
+These are the tests (spec "Themes and keyboard": Passes and Below bar not by colour alone, text meets 4.5:1, every link reachable). Existing `design-tokens.test.ts` is the contrast evidence.
 
 ## Checks to run
-- `grep -rn "sidebar's Quality\|Quality link\|Connectors and Quality\|label\.ts\|label\.test\|Insights\|three named fields\|\"Quality: " docs README.md AGENTS.md` returns nothing stale
+- From `D:\PROJECTS\Plumbline\frontend`: `npm run lint && npm run build && npm test`
 - `python scripts/check_links.py`
-- `openspec validate --all`
-- `cd backend && uv run python -m pytest tests/test_check_links.py -q`
 
 ## Risks / Questions
-- None. The two external GitHub links on the page are not covered by the link checker (said before), so the guide only states that they exist.
+- The colour-class guard is a small regex over two source files; it can false-positive on a future class that happens to start with `text-` and a colour-like word. It lives in a test file and is cheap to adjust.
+- The by-hand check is the only part that can't be proven by tests. Everything else here is static.
