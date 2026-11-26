@@ -5,6 +5,7 @@ import argparse
 import re
 import sys
 
+from schema import OPTIONAL_SYSTEM
 from model import DEFAULT_MODEL, Model, all_columns, con_name, load, model_dir
 
 PG_IDENT_MAX = 63  # Postgres silently truncates longer identifiers, so the model stops matching the database.
@@ -61,11 +62,22 @@ def validate(m: Model) -> list[str]:
             e(f"{where}: unknown domain {t.domain}")
         if t.table in RESERVED:
             e(f"{where}: reserved word")
-        if t.public_id_prefix in prefixes:
-            e(f"{where}: public_id_prefix {t.public_id_prefix!r} already used by {prefixes[t.public_id_prefix]}")
-        prefixes[t.public_id_prefix] = t.table
-        if not re.fullmatch(r"[a-z]{2,6}", t.public_id_prefix):
-            e(f"{where}: public_id_prefix must be 2 to 6 lowercase letters")
+        for n in t.system_columns:
+            if n not in OPTIONAL_SYSTEM:
+                e(f"{where}: system_columns entry {n!r} must be one of {', '.join(OPTIONAL_SYSTEM)}")
+        if len(set(t.system_columns)) != len(t.system_columns):
+            e(f"{where}: system_columns has duplicates")
+        if "public_id" not in t.system_columns:
+            if t.public_id_prefix is not None:
+                e(f"{where}: public_id_prefix set but public_id is not in system_columns")
+        elif t.public_id_prefix is None:
+            e(f"{where}: public_id_prefix is required when public_id is injected")
+        else:
+            if t.public_id_prefix in prefixes:
+                e(f"{where}: public_id_prefix {t.public_id_prefix!r} already used by {prefixes[t.public_id_prefix]}")
+            prefixes[t.public_id_prefix] = t.table
+            if not re.fullmatch(r"[a-z]{2,6}", t.public_id_prefix):
+                e(f"{where}: public_id_prefix must be 2 to 6 lowercase letters")
 
         if len(t.table.encode()) > PG_IDENT_MAX:
             e(f"{where}: table name is {len(t.table.encode())} bytes; Postgres truncates at {PG_IDENT_MAX}")

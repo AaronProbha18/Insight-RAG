@@ -151,7 +151,7 @@ function table(name){
       <h3 class="sec">Indexes</h3>${t.indexes.length?`<p class="mono small">${t.indexes.map(i=>esc(i.columns.join(", ")+(i.unique?" (unique)":"")+(i.where?" where "+i.where:""))).join("<br>")}</p>`:'<p class="muted small">None.</p>'}`
   };
   return `<div class="crumb">${esc(t.domain)}</div><h2 class="tname">${esc(t.name)}</h2>
-  <div class="chips"><span class="chip k">${esc(t.status)}</span><span class="chip">public_id ${esc(t.prefix)}_…</span>
+  <div class="chips"><span class="chip k">${esc(t.status)}</span>${t.prefix?`<span class="chip">public_id ${esc(t.prefix)}_…</span>`:""}
    ${t.immutable?`<span class="chip imm">immutable${t.mutable_columns.length?" · mutable: "+esc(t.mutable_columns.join(", ")):""}</span>`:""}
    ${refsTo.length?`<span class="chip">referenced by ${refsTo.map(o=>link(o.name)).join(", ")}</span>`:""}</div>
   <div class="callout"><div class="lbl">What it is</div>${esc(t.description)}</div>

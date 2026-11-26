@@ -58,3 +58,33 @@ def test_unknown_key_rejected(workcopy):
     (workcopy / "model.yaml").write_text("id_typo: bigserial\n")
     with pytest.raises(ValidationError, match="id_typo"):
         load(workcopy)
+
+
+def _table(model_dir, extra: str, drop_prefix=False):
+    p = model_dir / "domains/organization/tables/organization.yaml"
+    text = p.read_text()
+    if drop_prefix:
+        text = "\n".join(line for line in text.splitlines() if not line.startswith("public_id_prefix:")) + "\n"
+    p.write_text(text + extra)
+
+
+def test_system_columns_subset(workcopy):
+    _table(workcopy, "system_columns: [created_at]\n", drop_prefix=True)
+    m = load(workcopy)
+    assert validate.validate(m) == []
+    org = ddl.build_objects(m)["tables"]["organization"]
+    assert [c for c in org["columns"] if c in ("id", "public_id", "created_at", "updated_at")] == ["id", "created_at"]
+    assert not any("public_id" in n for n in org["constraints"])
+    assert not org["triggers"]
+
+
+@pytest.mark.parametrize("entry", ["id", "bogus"])
+def test_system_columns_bad_entry(workcopy, entry):
+    _table(workcopy, f"system_columns: [{entry}]\n")
+    errs = validate.validate(load(workcopy))
+    assert any("table organization: system_columns" in e and entry in e for e in errs)
+
+
+def test_prefix_only_with_public_id(workcopy):
+    _table(workcopy, "system_columns: [created_at]\n")
+    assert any("public_id_prefix set" in e for e in validate.validate(load(workcopy)))

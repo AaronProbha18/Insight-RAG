@@ -22,14 +22,14 @@ def system_columns(t: Table, id_type: str = "uuid") -> list[Column]:
                 description="Internal primary key. Never leaves the backend.")
     if id_type == "bigserial":  # a key-only pseudo-type, deliberately not a YAML column type
         pk = pk.model_copy(update={"type": "bigserial", "default": None})
-    cols = [
-        pk,
-        Column(name="public_id", type="text", unique=True,
-               description=f"Opaque external identifier, prefixed '{t.public_id_prefix}_'."),
-        Column(name="created_at", type="timestamptz", default="now()",
-               description="When the row was written."),
-    ]
-    if not t.immutable or t.mutable_columns:
+    cols = [pk]
+    if "public_id" in t.system_columns:
+        cols.append(Column(name="public_id", type="text", unique=True,
+                           description=f"Opaque external identifier, prefixed '{t.public_id_prefix}_'."))
+    if "created_at" in t.system_columns:
+        cols.append(Column(name="created_at", type="timestamptz", default="now()",
+                           description="When the row was written."))
+    if "updated_at" in t.system_columns and (not t.immutable or t.mutable_columns):
         cols.append(Column(name="updated_at", type="timestamptz", default="now()",
                            description="When the row last changed."))
     return cols

@@ -12,6 +12,7 @@ TYPE = re.compile(
     r"^(text|int|bigint|bool|date|time|timestamptz|jsonb|uuid|inet|"
     r"numeric\(\d{1,2},\d{1,2}\)|varchar\(\d{1,4}\))$"
 )
+OPTIONAL_SYSTEM = ("public_id", "created_at", "updated_at")  # `id` is always injected
 PII = Literal["none", "indirect", "direct", "phi"]
 Layer = Literal["configuration", "reference", "runtime"]
 
@@ -80,7 +81,8 @@ class Table(Strict):
     description: str
     # Two-identifier model: internal `id` (UUID) never leaves the backend,
     # `public_id` (prefixed, opaque) is the only identifier exposed externally.
-    public_id_prefix: str
+    public_id_prefix: Optional[str] = None  # required when public_id is injected
+    system_columns: list[str] = Field(default_factory=lambda: list(OPTIONAL_SYSTEM))
     immutable: bool = False
     mutable_columns: list[str] = Field(default_factory=list)  # allow-list on immutable tables
     columns: list[Column]
