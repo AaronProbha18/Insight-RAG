@@ -53,3 +53,21 @@ def test_different_chat_model_is_flagged(get, monkeypatch):
     monkeypatch.setenv("PLUMBLINE_LLM", "other:chat")
     body, _ = get("both_pass")
     assert body["config_differences"] == ["chat"]
+
+
+def test_question_counts_are_in_the_entry_and_nothing_else_new(get):
+    body, text = get("with_counts")
+    assert set(body["connectors"]["pdf"]) == {
+        "result",
+        "failed",
+        "metrics",
+        "answerable_questions",
+        "unanswerable_questions",
+    }
+    for leak in ("latency_ms", "golden_version", '"questions"', "/secret"):
+        assert leak not in text
+
+
+def test_old_summary_has_no_counts(get):
+    body, _ = get("both_pass")
+    assert "answerable_questions" not in body["connectors"]["pdf"]

@@ -239,6 +239,10 @@ def run(
                 "metrics": {k: round(v, 3) for k, v in r["metrics"].items()},
                 "latency_ms": r["latency_ms"],
                 "questions": len(r["questions"]),
+                "answerable_questions": sum(q["answerable"] for q in r["questions"]),
+                "unanswerable_questions": sum(
+                    not q["answerable"] for q in r["questions"]
+                ),
                 "golden_version": r["golden_version"],
             }
             for name, r in results.items()
