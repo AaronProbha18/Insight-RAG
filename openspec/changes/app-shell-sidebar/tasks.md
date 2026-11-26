@@ -5,7 +5,7 @@
 ## 2. Routing and data
 
 - [x] 2.1 `shell/route.ts`: `useRoute()` and `navigate()` over the History API, with tests for push, back (`popstate`) and unknown paths
-- [ ] 2.2 `documents/useDocuments.ts`: list, refresh and delete in one hook, extracted from `Documents.tsx`, with tests
+- [x] 2.2 `documents/useDocuments.ts`: list, refresh and delete in one hook, extracted from `Documents.tsx`, with tests
 
 ## 3. Pages and shell
 

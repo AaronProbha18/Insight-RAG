@@ -2,8 +2,9 @@ import { AlertDialog } from '@base-ui/react/alert-dialog'
 import { Dialog } from '@base-ui/react/dialog'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { type DocumentSummary, deleteDocument, listDocuments } from './api'
+import type { DocumentSummary } from './api'
 import { DocumentList } from './DocumentList'
+import { useDocuments } from './useDocuments'
 
 const backdrop = 'fixed inset-0 bg-foreground/40'
 const popup =
@@ -11,39 +12,18 @@ const popup =
 
 /** "Documents (n)" button; opens the list of indexed documents with delete + confirm. */
 export function Documents({ refreshKey }: { refreshKey: number }) {
-  const [documents, setDocuments] = useState<DocumentSummary[]>([])
+  const { documents, message, refresh, remove } = useDocuments()
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState<DocumentSummary | null>(null)
-  const [message, setMessage] = useState('')
 
-  const [version, setVersion] = useState(0) // bumped after a delete to refetch
+  // Refetch after an upload (refreshKey) and when the dialog opens.
+  useEffect(refresh, [refreshKey, open, refresh])
 
-  // Fetch on mount, after an upload (refreshKey), when the dialog opens, and after a delete.
-  useEffect(() => {
-    let stale = false
-    listDocuments().then(
-      (list) => {
-        if (stale) return
-        setDocuments(list)
-        setMessage('')
-      },
-      () => !stale && setMessage("Couldn't load documents. Try again."),
-    )
-    return () => {
-      stale = true
-    }
-  }, [refreshKey, open, version])
-
-  async function confirmDelete() {
+  function confirmDelete() {
     if (!pending) return
     const target = pending
     setPending(null)
-    try {
-      await deleteDocument(target.document_id) // 'not-found' = already gone; refetch either way
-      setVersion((v) => v + 1)
-    } catch {
-      setMessage("Couldn't delete the document. Try again.")
-    }
+    void remove(target)
   }
 
   return (
