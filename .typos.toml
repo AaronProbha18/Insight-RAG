@@ -1,0 +1,11 @@
+[files]
+extend-exclude = ["openspec/changes/archive/"]
+
+[default.extend-words]
+# Project terms and identifiers the spell checker would otherwise flag.
+CMO = "CMO"
+CHEC = "CHEC"
+PN = "PN"
+PNGs = "PNGs"
+thr = "thr"
+unparseable = "unparseable"

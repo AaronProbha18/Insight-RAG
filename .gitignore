@@ -33,3 +33,7 @@ evals/feedback/
 Thumbs.db
 .idea/
 .vscode/
+
+# mkdocs output
+site/
+.venv-docs/

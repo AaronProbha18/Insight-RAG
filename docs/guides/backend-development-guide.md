@@ -4,7 +4,7 @@ Rules for writing backend code in Plumbline, for people and AI agents
 alike. Every rule describes how the code already works; where a rule is
 enforced by a test, the test is named. For the system's shape, read
 [the architecture overview](../architecture/overview.md) first. For coding
-style in general, follow the guidelines in [CLAUDE.md](../../CLAUDE.md):
+style in general, follow the guidelines in [CLAUDE.md](https://github.com/AaronProbha18/Plumbline/blob/main/CLAUDE.md):
 think first, keep it simple, make surgical changes, and verify.
 
 ## Contents

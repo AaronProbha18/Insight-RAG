@@ -23,12 +23,12 @@ flowchart LR
 ```
 
 Design decisions and their reasons live in
-[design.md](../../openspec/changes/archive/2026-11-26-rag-foundation/design.md) (D1–D10) and
-[docs/adr/](../adr/). This page is the map; those are the why.
+[design.md](https://github.com/AaronProbha18/Plumbline/blob/main/openspec/changes/archive/2026-11-26-rag-foundation/design.md) (D1–D10) and
+[docs/adr/](../adr/0001-connector-contract.md). This page is the map; those are the why.
 
 ## Where things live
 
-The full tree is in [AGENTS.md](../../AGENTS.md#layout). Where new work
+The full tree is in [AGENTS.md](https://github.com/AaronProbha18/Plumbline/blob/main/AGENTS.md#layout). Where new work
 goes:
 
 | Adding… | Goes in |
@@ -103,7 +103,7 @@ goes:
 `feedback.export_candidates` turns every feedback row into a candidate in
 the `golden.yaml` shape and writes it to `evals/feedback/candidates.yaml`
 (git-ignored). A maintainer reviews it and copies entries into a golden set
-by hand; nothing is added automatically ([evals README](../../evals/README.md#feedback-candidates)).
+by hand; nothing is added automatically ([evals README](https://github.com/AaronProbha18/Plumbline/blob/main/evals/README.md#feedback-candidates)).
 
 ### Show the last eval: `GET /quality`
 
@@ -190,7 +190,7 @@ The exported candidates file holds the same text.
 `datamodel/` is a separate toolkit: a YAML description of Plumbline's schema that
 checks and generates DDL and an explorer
 ([ADR 0004](../adr/0004-yaml-data-model.md),
-[datamodel/README.md](../../datamodel/README.md)). Alembic remains the
+[datamodel/README.md](https://github.com/AaronProbha18/Plumbline/blob/main/datamodel/README.md)). Alembic remains the
 source of Plumbline's schema; `datamodel/models/plumbline/` mirrors it, and
 the `plumbline-drift` CI job fails when the two differ. The toolkit never
 reads `backend/` or touches Plumbline's database outside that job.
@@ -198,7 +198,7 @@ reads `backend/` or touches Plumbline's database outside that job.
 ## Configuration
 
 Every environment variable, with examples, is in the
-[README](../../README.md#quickstart-docker). Models are chosen as
+[README](https://github.com/AaronProbha18/Plumbline/blob/main/README.md#quickstart-docker). Models are chosen as
 `provider:model` strings and created through LangChain's provider-agnostic
 initializers, so switching provider is a `.env` change plus installing that
 provider's package (a `pyproject.toml` extra), never a code change.
@@ -213,4 +213,4 @@ provider's package (a `pyproject.toml` extra), never a code change.
   the question.
 - **Measurement:** the eval gates above, per connector, with a judge that
   is itself validated first. Details are in the
-  [eval plan](../../openspec/changes/archive/2026-11-26-rag-foundation/eval-plan.md).
+  [eval plan](https://github.com/AaronProbha18/Plumbline/blob/main/openspec/changes/archive/2026-11-26-rag-foundation/eval-plan.md).

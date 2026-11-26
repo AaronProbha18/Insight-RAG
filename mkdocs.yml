@@ -1,0 +1,48 @@
+site_name: Plumbline
+site_description: Retrieval-augmented generation over pluggable connectors.
+repo_url: https://github.com/AaronProbha18/Plumbline
+repo_name: AaronProbha18/Plumbline
+edit_uri: edit/main/docs/
+strict: true
+
+theme:
+  name: material
+  logo: brand/plumbline-icon.svg
+  favicon: brand/plumbline-icon-small.svg
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+# Brand source files are not published; only the two used above are.
+exclude_docs: |
+  brand/*
+  !brand/plumbline-icon.svg
+  !brand/plumbline-icon-small.svg
+
+nav:
+  - Home: index.md
+  - Guides:
+      - Backend: guides/backend-development-guide.md
+      - Frontend: guides/frontend-development-guide.md
+      - Connector: guides/connector-development-guide.md
+      - Docs site: guides/docs-site.md
+  - Architecture:
+      - Overview: architecture/overview.md
+  - Decisions:
+      - 0001 Connector contract: adr/0001-connector-contract.md
+      - 0002 Postgres and pgvector: adr/0002-postgres-pgvector-default-store.md
+      - 0003 Styled chat kit: adr/0003-styled-chat-kit.md
+      - 0004 YAML data model: adr/0004-yaml-data-model.md

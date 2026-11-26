@@ -1,0 +1,3 @@
+# Docs site tooling only. Not part of the runtime image (backend/pyproject.toml).
+mkdocs==1.6.1
+mkdocs-material==9.8.2
