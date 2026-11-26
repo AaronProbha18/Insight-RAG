@@ -4,8 +4,8 @@ All run in this session on branch `feat/28-datamodel-plumbline-mirror`, after ta
 
 | Command | Result |
 | --- | --- |
-| `cd datamodel && PYTHONPATH=tools uv run python -m pytest -q -rs tests` (no database) | 45 passed, 4 skipped (the Postgres tests: `DATAMODEL_TEST_DATABASE_URL` not set) |
-| Same suite inside a throwaway `pgvector/pgvector:pg18` container, `DATAMODEL_TEST_DATABASE_URL` set, `psql` present | 49 passed, 0 skipped |
+| `cd datamodel && PYTHONPATH=tools uv run python -m pytest -q -rs tests` (no database) | 46 passed, 4 skipped (the Postgres tests: `DATAMODEL_TEST_DATABASE_URL` not set) |
+| Same suite inside a throwaway `pgvector/pgvector:pg18` container, `DATAMODEL_TEST_DATABASE_URL` set, `psql` present | 50 passed, 0 skipped |
 | `tools/validate.py` (no `--model`, so `models/plumbline`) | 1 domains, 4 tables, 0 errors |
 | `PLUMBLINE_EMBEDDING_DIM=8 tools/ddl.py` (no `--model`) | wrote `models/plumbline/build/schema.sql` (4 tables) |
 | `tools/ddl.py` with `PLUMBLINE_EMBEDDING_DIM` unset | `ValueError: embedding: PLUMBLINE_EMBEDDING_DIM must be set to a positive integer; got ''` |
@@ -58,7 +58,7 @@ Scenarios of `specs/datamodel-system/spec.md` (ADDED "Model validation" and "Gen
 | Model validation: Valid model | `test_validate.py::test_valid_model`, `test_model.py::test_mini_fixture_is_valid` |
 | Model validation: Foreign key outside depends_on, not at id, or not bigint | `test_validate.py::test_rule_fails[fk outside depends_on]`, `[fk not at id]`; `test_conventions.py::test_non_bigint_foreign_key_rejected` |
 | Model validation: Identifier too long | `test_validate.py::test_rule_fails[table name 64 bytes]`, `[column name 64 bytes]`, the two 63-byte cases; `test_model.py::test_long_constraint_name_rejected` |
-| Model validation: Duplicate prefix or question id | `test_validate.py::test_rule_fails[duplicate prefix]`. **Gap: no test for a duplicate `OQ-<TABLE>-` id.** The code (`validate.py`) still checks it; the only test of that shared check was the duplicate-rule-id case, deleted in 6.1 with `business_rules`. |
+| Model validation: Duplicate prefix or question id | `test_validate.py::test_rule_fails[duplicate prefix]` and `[duplicate question id]` (added after the first verification, which found this half uncovered) |
 | Model validation: Default on a direct identifier or PHI column | `test_validate.py::test_rule_fails[default on pii column]`, `test_model.py::test_pii_default_rejected` |
 | Model validation: Published with an open CMO question | `test_validate.py::test_rule_fails[published with open CMO question]` |
 | Model validation: Answered question without an answer | `test_validate.py::test_rule_fails[answered without answer]` |
@@ -83,8 +83,8 @@ N/A per eval-plan: schema tooling and a CI gate; nothing in Plumbline's retrieva
 - **`answers` is `status: draft`** with open question `OQ-ANSWERS-001` (owner CMO) about whether the free-text columns are PII `indirect`. It is a default taken when approving the plan, not a decision.
 - **The skills change (`db-change` rules) was moved out of this PR** into a separate chore (local branch `skills-db-change-wip`); this branch contains no `.claude/` changes.
 - **Pending, needs a push (the loop never pushes):** the green `plumbline-drift` and `datamodel` jobs on the PR, and the scratch commit that makes a YAML column nullable and fails the drift job (then reverted).
-- **Gaps to decide:** no test for a duplicate `OQ-` id, none for the explorer outside the stub-DOM check, and none that adds a column to a real Alembic revision. Each is one small test through rag-plan if wanted before the PR.
+- **Gaps to decide:** none for the explorer outside the stub-DOM check, and none that adds a column to a real Alembic revision. Each is one small test through rag-plan if wanted. The duplicate question id gap found in the first verification was closed with `test_rule_fails[duplicate question id]`.
 
 ## Verdict
 
-PASS, with the gaps and pending CI evidence listed above. Every check I ran passed, and every spec scenario has at least one test or a recorded real run. Three are partial: "Duplicate prefix or question id" (no question-id test), "uuid foreign key rejected" (a literal `uuid` fails at load, so the `bigint` message is shown for an `int` key), and the "Alembic changed without YAML" mechanism test. If you want the duplicate question id covered strictly, add one test before the PR.
+PASS, with the gaps and pending CI evidence listed above. Every check I ran passed, and every spec scenario has at least one test or a recorded real run. Two are partial: "uuid foreign key rejected" (a literal `uuid` fails at load, so the `bigint` message is shown for an `int` key) and the "Alembic changed without YAML" mechanism test. The duplicate question id gap from the first run was closed by one added test (suite re-run: 46 passed locally, 50 with Postgres).

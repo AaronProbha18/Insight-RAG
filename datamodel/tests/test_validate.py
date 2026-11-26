@@ -39,6 +39,10 @@ CASES = {
         "open CMO question",
     ),
     "answered without answer": (lambda m: m.tables["account"].open_questions.append(_q("answered")), "has no answer"),
+    "duplicate question id": (
+        lambda m: m.tables["account"].open_questions.extend([_q("open"), _q("open")]),
+        "OQ-ACCOUNT-099 already used in",
+    ),
 }
 
 
