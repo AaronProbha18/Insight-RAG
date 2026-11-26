@@ -51,8 +51,8 @@ skill orchestrates; the work happens in `rag-plan`, `rag-execute`,
 
 4. **Review**: `rag-review`. On `CHANGES`, list the findings and stop: each
    fix goes back through plan -> execute -> commit, then verify and review
-   again. After one automatic re-review, ask the user. Proceed past
-   `CHANGES` only if the user says so. On the chore path, run it after
+   again. If the re-review still says `CHANGES`, ask the user. Proceed
+   past `CHANGES` only if the user says so. On the chore path, run it after
    the last commit.
 
 5. **PR**: `rag-pr <N>`, passing the review verdict.

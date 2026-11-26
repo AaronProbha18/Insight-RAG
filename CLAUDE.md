@@ -45,8 +45,8 @@ must be signed in to the repo owner's account.
 | `/rag-quick <issue#>` | developer | Via stages | Preflight (branch, labels), then plan -> execute -> commit per task, verify, review, PR |
 | `/rag-plan <change>` | developer | No | Picks the next unchecked task, writes a short plan, waits for approval |
 | `/rag-execute <change>` | developer | Yes | Implements exactly that task, self-reviews, ticks the checkbox |
-| `/rag-review [PR#\|branch]` | developer | No | Reviews the diff against REVIEW.md, scope, complexity and prose; one line per finding; APPROVE or CHANGES |
 | `/rag-verify <change>` | developer | Evidence only | Runs all checks + eval, writes `verification.md` |
+| `/rag-review [PR#\|branch]` | developer | No | Reviews the diff against REVIEW.md, scope, complexity and prose; one line per finding; APPROVE or CHANGES |
 | `/rag-pr <issue#>` | developer | PR only | Drafts the PR from the template; creates a **draft** PR on approval |
 
 `/rag-quick` chains plan -> execute once per checkbox, then verify, review and PR;
