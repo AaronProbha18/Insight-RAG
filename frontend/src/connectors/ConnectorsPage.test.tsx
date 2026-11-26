@@ -66,7 +66,7 @@ describe('ConnectorsView', () => {
 
     expect(html).toContain('Passes')
     expect(html).toContain('Below bar')
-    expect(html).toContain('Correctness 0.70 (below 0.80)')
+    expect(html).toContain('0.70 (below 0.80)')
   })
 
   it('shows Not measured on every card when there is no valid run', () => {
