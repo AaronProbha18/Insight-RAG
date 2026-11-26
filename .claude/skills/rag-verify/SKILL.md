@@ -16,7 +16,7 @@ Produce evidence, not opinions. Never edit code.
    template and instruction.
 3. Run the project's full check suite (lint, typecheck, tests - the
    commands listed in `AGENTS.md`), then `openspec validate "<name>"`.
-   If the change adds an Alembic revision, also run the drift check
+   If the issue has `db-change` or the change adds an Alembic revision, also run the drift check
    (`datamodel/README.md`, "Plumbline's model and the drift rule"). If it
    can't run locally, record it as pending CI, never as passed.
 4. If `eval-plan.md` applies, run its "How to Run" command and compare

@@ -14,4 +14,5 @@
 - {name: "status:ready-for-dev", color: "0e8a16", description: "Change planned; run /rag-quick"}
 - {name: "status:in-progress", color: "c5def5", description: "A developer loop is running"}
 - {name: "status:blocked", color: "b60205", description: "Waiting on a decision or dependency"}
-- {name: "answer-quality", color: "e99695", description: "Can change answers: eval run required before merge"}
+- {name: "answer-quality-change", color: "e99695", description: "Can change answers: eval run required before merge"}
+- {name: "db-change", color: "bfdadc", description: "Adds or changes an Alembic revision: update datamodel/models/plumbline in the same PR; the plumbline-drift CI job must pass"}
