@@ -25,15 +25,22 @@ backend side of the `/chat` contract is in the
 
 ```text
 src/
-  App.tsx              composes Upload + Thread, welcome suggestions; no logic
+  App.tsx              wiring only: route, collapse state, documents, chat key
+  shell/  route.ts     useRoute(), navigate(): pages over the History API
+          collapsed.ts sidebar collapse, kept in localStorage
+          Sidebar.tsx  navigation: New chat, Documents, Quality, docs link
+          SidebarDrawer.tsx  menu button + the sidebar as a drawer below md
+          AppShell.tsx layout and page switch
   chat/   sse.ts       SSE parser
           adapter.ts   assistant-ui adapter for POST /chat
+          ChatPane.tsx runtime, welcome suggestions and Thread
           Citations.tsx
   upload/ api.ts       POST /documents -> user-facing outcome
-          Upload.tsx
   documents/ api.ts    GET /documents, DELETE /documents/{id}
+          useDocuments.ts    list, refresh and delete, shared by page and sidebar count
+          pageLogic.ts       title search, type filter, upload-then-refresh
           DocumentList.tsx   rows: title, type, date, delete button
-          Documents.tsx      "Documents (n)" button, dialog, delete confirm
+          DocumentsPage.tsx  upload, search, type filter, list, delete confirm
   quality/ api.ts      GET /quality
           QualityPanel.tsx   per-connector PASS/FAIL, metrics, mismatch warning
           Quality.tsx        "Quality: <state>" button and dialog
@@ -48,13 +55,26 @@ src/
 Vendored files are imported through the `@/` alias (`@/components/...`),
 set in both tsconfigs and `vite.config.ts`.
 
-**1.2 File names must differ by more than case.** `upload.ts` next to
-`Upload.tsx` collides on Windows and macOS, whose filesystems ignore case,
-and TypeScript then can't tell which file `./upload` means. That's why the
-helper is `api.ts`.
+**1.2 File names must differ by more than case.** A file `upload.ts` beside
+a component `Upload.tsx` would collide on Windows and macOS, whose
+filesystems ignore case, and TypeScript then can't tell which file
+`./upload` means. That's why a feature's network code is `api.ts`.
 
 **1.3 Tests sit next to the code they test** (`sse.test.ts` beside
 `sse.ts`).
+
+**1.4 Pages are URLs under `/app/`.** The chat is at `/` and Documents at
+`/app/documents`. A client page never reuses an API path (`/documents` is
+the API), so the prefix can't collide with a route. Routing is the built-in
+`shell/route.ts`: `useRoute()` reads the path and `navigate(path)` pushes
+history; back and forward work through `popstate`. There is no router
+library, and one comes when pages need nested routes or loaders. Sidebar
+links are real `<a href>` elements, and only a plain left-click is handled
+(`isPlainClick`), so middle-click and copy-link keep working. In
+production the backend serves `index.html` for `GET /app/{path}` when
+`PLUMBLINE_UI_DIR` is set, so a reload or a shared page link works; paths
+outside `/app/` keep their API behaviour. *Enforced by*
+`backend/tests/test_ui_mount.py`.
 
 ## 2. The chat runtime
 
@@ -62,9 +82,14 @@ helper is `api.ts`.
 **only** code that knows the `/chat` wire format (design D8):
 
 ```tsx
-// ✅ App.tsx
+// ✅ chat/ChatPane.tsx
   const runtime = useLocalRuntime(chatAdapter)
 ```
+
+The runtime lives in `ChatPane`. `AppShell` keeps `ChatPane` mounted but
+`hidden` while another page shows, so the conversation survives
+navigation. New chat gives `ChatPane` a new `key`, which remounts it with
+an empty thread.
 
 **2.2 Citations travel in `metadata.custom`**, not in assistant-ui
 `source` parts. Those can't carry a locator or the quoted text (finding
@@ -104,7 +129,7 @@ network chunks:
 markup. They are generic so they fit any uploaded documents:
 
 ```tsx
-// ✅ App.tsx
+// ✅ chat/ChatPane.tsx
     <AssistantRuntimeProvider runtime={runtime} config={config}>
 ```
 
@@ -112,7 +137,10 @@ markup. They are generic so they fit any uploaded documents:
 
 **3.1 Relative paths only** (`/chat`, `/documents`). In Docker, FastAPI
 serves the UI on the same origin. In dev, Vite proxies to the backend,
-which you can point elsewhere with `VITE_BACKEND`:
+which you can point elsewhere with `VITE_BACKEND`. Vite serves
+`index.html` for page URLs like `/app/documents` itself, so they need no
+proxy entry. A new API route that the UI calls needs a proxy entry; a new
+UI page does not (rule 1.4):
 
 ```ts
 // ✅ vite.config.ts
@@ -175,7 +203,8 @@ for an empty list, so abstentions show no sources without a special case:
   bottom"), suggestions via their text, and each source via its
   `<summary>`. *Checked by* `src/App.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
-- **The documents dialog:** the button's text ("Documents (n)") is its name, each delete button is named `Delete <title>`, deleting asks for confirmation in an alert dialog, and load/delete failures appear in a `role="status"` region. *Checked by* `documents/DocumentList.test.tsx` and `documents/Documents.test.tsx`.
+- **The sidebar:** a `<nav aria-label="Main">`. The current page is `aria-current="page"` on its link. Documents is a real link whose text includes the count ("Documents (n)"). Connectors is a non-link marked `aria-disabled` with "Coming soon". Collapsed to icons, every item keeps its name as `sr-only` text, and the collapse button is "Collapse sidebar" or "Expand sidebar" with `aria-expanded`. Below `md` a button named "Open menu" opens the sidebar as a drawer, with base-ui's focus trap and Escape. *Checked by* `shell/Sidebar.test.tsx`, `shell/SidebarDrawer.test.tsx` and `shell/AppShell.test.tsx`.
+- **The Documents page:** the file input, the Search box and the Type select each have a visible label, each delete button is named `Delete <title>`, deleting asks for confirmation in an alert dialog, and load/delete failures appear in a `role="status"` region. *Checked by* `documents/DocumentList.test.tsx` and `documents/DocumentsPage.test.tsx`.
 - **The quality dialog:** the button's text ("Quality", "Quality: PASS", "Quality: FAIL" or "Quality: Not measured") is its name; PASS and FAIL are words next to an `aria-hidden` icon, never colour alone; a configuration mismatch is a `role="status"` warning. *Checked by* `quality/QualityPanel.test.tsx` and `quality/Quality.test.tsx`.
 - **Feedback controls:** "Good answer" and "Bad answer" are named buttons
   with `aria-pressed`; the thumbs-down form is a native `<fieldset>` with a
@@ -183,8 +212,8 @@ for an empty list, so abstentions show no sources without a special case:
   ("Feedback recorded" or a generic failure) is a `role="status"` line.
   *Checked by* `feedback/FeedbackControls.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
-- **Async results are announced:** the upload outcome lives in a
-  `role="status"` / `aria-live="polite"` region.
+- **Async results are announced:** the upload outcome on the Documents
+  page lives in a `role="status"` / `aria-live="polite"` region.
 - **Focus is always visible:** controls use `focus-visible:` outline or
   ring utilities (the kit's buttons have them built in).
 - **Keyboard-only use works:** upload, ask, stop, copy, regenerate and open
@@ -234,15 +263,27 @@ populated thread with `ReadonlyThreadProvider`, or one answer with
     <TextMessagePartProvider text={text} isRunning={false}>
 ```
 
+`useRoute` renders as `chat` on the server, so page-specific markup is
+tested through `AppShell` with an explicit `page`. A component with no
+hooks, like `Sidebar`, can be called as a function; walk the element it
+returns and call a handler with a fake event (`shell/SidebarDrawer.test.tsx`).
+Stub `window` with `vi.stubGlobal` for code that uses the History API
+(`shell/route.test.ts`).
+
 A read-only thread can't run or cancel, so Stop, Copy (the clipboard),
 Regenerate and scrolling are checked by hand in a browser, and so is the
 feedback form (Tab order through Copy, Regenerate, Good, Bad; Enter and
 Space; arrow keys across the reasons; Cancel and Send return focus to the
 Bad button; focus rings; light and dark themes) and the
-documents dialog (open and close, Tab order, focus ring and focus return,
-confirm and cancel, light and dark themes) and the quality dialog (open with
-Enter or Space, Tab to Close, Esc closes, focus returns to the Quality
-button, focus ring, light and dark themes).
+Documents page (Tab order, search and type filter, upload outcome, delete
+confirm and cancel, focus rings, light and dark themes) and the quality
+dialog (open with Enter or Space, Tab to Close, Esc closes, focus returns to
+the Quality button, focus ring, light and dark themes) and the shell: New
+chat clears a conversation, including while an answer streams; going to
+Documents and back leaves the chat unchanged; the drawer opens from the menu
+button, closes on Escape, the backdrop and navigation, and returns focus to
+the menu button; the collapsed state survives a reload; resizing across
+768 px switches between the inline sidebar and the menu button.
 
 **7.2 Network code is tested with a stubbed `fetch`** that returns real
 `Response` objects, so status codes and streaming bodies behave as they do

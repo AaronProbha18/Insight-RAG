@@ -6,7 +6,8 @@ through **connectors**, is chunked and embedded into **Postgres +
 pgvector**, and is answered by a small **LangGraph** graph that runs inside
 the **FastAPI** process. A React + **assistant-ui** chat (the vendored
 styled kit on Tailwind, [ADR 0003](../adr/0003-styled-chat-kit.md)) is
-served from the same origin.
+served from the same origin. It is a small app shell: a sidebar and one
+page at a time, the chat and a Documents page.
 
 ```mermaid
 flowchart LR
@@ -35,7 +36,7 @@ goes:
 | a file connector | its own package, registered under the `plumbline.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/plumbline/connectors/builtin/` |
 | an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
-| a UI component | `frontend/src/chat/` or `frontend/src/upload/`, or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
+| a UI page or component | `frontend/src/chat/`, `documents/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
 | the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`) |
 | answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
@@ -130,6 +131,18 @@ by hand; nothing is added automatically ([evals README](../../evals/README.md#fe
    correctness, faithfulness and abstention must each be ≥ 0.80.
 4. Write the JSON report → **exit 0** (all pass) or **1**. The database is
    always dropped.
+
+### Open a page: `/app/<page>`
+
+The chat is at `/` and Documents at `/app/documents`. The UI owns routing
+(`frontend/src/shell/route.ts`, over the History API), and client pages live
+under `/app/` so they cannot collide with an API path. In production,
+`api/app.py` serves `index.html` for `GET /app/{path}` when
+`PLUMBLINE_UI_DIR` is set, so a reload or a shared page link works; any
+other unknown path still gets the API's own 404. No new endpoint carries
+data: the Documents page uses the same `/documents` routes as before. The
+chat stays in memory while the person moves between pages
+([guide §1.4](../guides/frontend-development-guide.md#1-code-organisation)).
 
 ## Boundary rules
 
