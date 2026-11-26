@@ -12,7 +12,6 @@ columns:
     enum: organization_status
     default: "'ACTIVE'"
     description: Operating state.
-  - {name: ci_scratch, type: text, nullable: true, description: Scratch column to prove CI fails.}
   - {name: effective_from, type: date, description: First day the organization operates.}
   - {name: effective_to, type: date, nullable: true, description: "Last day, if it has ended."}
 checks:
