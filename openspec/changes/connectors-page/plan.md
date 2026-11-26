@@ -1,30 +1,31 @@
 ## Task
-8.1 `backend/tests/test_ui_mount.py`: with the UI directory set, `GET /app/connectors` returns `index.html`, and `GET /connectors` returns the API's JSON, not `index.html` (app-shell scenarios "Shared link in production" and "API paths are not affected")
+8.2 `quality/useQuality.ts`: remove the unused `refresh` (and the `version` state and `useCallback` that only it needs); the hook returns `{ quality, message }` and fetches once on mount (review finding, yagni)
 
 ## Scope
-- Test-only change in `backend/tests/test_ui_mount.py`, using its existing `_client(monkeypatch, ui_dir)` helper (sets `PLUMBLINE_UI_DIR`, reloads the app module).
-- Extend `test_app_path_serves_index`: request `/app/connectors` as well as `/app/documents`, each returning 200 with the `index.html` text. (Same test, a loop over the two paths, so the Connectors URL is named.)
-- Extend `test_api_and_unknown_paths_are_not_index`: with the same client, `GET /connectors` returns the API list (a JSON list of loaded connectors, each with `name`), and the body has no `<title>`. It needs no database: `/connectors` reads the registry only, so no `get_conn` override is required for it; the test already overrides `get_conn` for `/documents`.
-- No production code changes. If a new assertion fails on real behaviour, I stop and report it rather than change the route.
-- Guide read: `docs/guides/backend-development-guide.md` (8 testing; the UI mount rules in `docs/guides/frontend-development-guide.md` §1.4 name this test file as the enforcer).
+- `frontend/src/quality/useQuality.ts`: delete `refresh`, `version`/`setVersion` and the `useCallback` import; the effect keeps its stale guard and runs once (`[]` dependencies); return `{ quality, message }`; update the doc comment ("fetched on mount").
+- Nothing calls `refresh`: `App` passes the hook's result to `AppShell`, which passes `quality.quality` and `quality.message` to the page. Verified by search; no code or test uses `quality.refresh`.
+- The two test helpers that build a `quality` prop for `AppShell` (`shell/AppShell.test.tsx`, `shell/a11y.test.tsx`) pass `refresh: () => {}` inside an object literal typed as the hook's return type. After the change that literal has an extra property, which TypeScript rejects, so both lose that one property.
+- Docs: the frontend guide already says "fetched once in App and passed to the Connectors page", and design.md says the same; no doc change needed.
+- Guide read: `docs/guides/frontend-development-guide.md` (1.1 tree text, 7 tests).
 
 ## Not in scope
-- Any change to `api/app.py`.
-- Other scenarios (all other rows of `verification.md` are covered).
-- Re-running `rag-verify` (the step after this task).
+- `qualityOutcome` and its tests (unchanged).
+- `useDocuments`'s own `refresh` (used by the Documents page upload flow).
+- Any behaviour change: the page already loads `/quality` once on mount.
 
 ## Files
 | File | Change |
 | --- | --- |
-| `backend/tests/test_ui_mount.py` | two existing tests extended |
+| `frontend/src/quality/useQuality.ts` | remove `refresh`, `version`, `useCallback` |
+| `frontend/src/shell/AppShell.test.tsx` | drop `refresh` from the `quality` prop |
+| `frontend/src/shell/a11y.test.tsx` | drop `refresh` from the `quality` prop |
 
 ## Tests
-- "Shared link in production" (spec app-shell): `GET /app/connectors` with `PLUMBLINE_UI_DIR` set returns 200 and the `index.html` content; `/app/documents` still does.
-- "API paths are not affected" (spec app-shell): `GET /connectors` returns the JSON list (contains the built-in `pdf` and `docx`), not `index.html`; `GET /documents` and an unknown path behave as before.
+- No new test: removal of unused code. The existing `qualityOutcome` tests, the `AppShell` and a11y suites and `npm run build` (typecheck) are the evidence; a leftover `refresh` use anywhere would fail the build.
 
 ## Checks to run
-- `cd backend && uv run ruff check . && uv run ruff format --check .`
-- `cd backend && uv run python -m pytest tests/test_ui_mount.py -q`, then `uv run python -m pytest -q` (`uv run pytest` fails here with a uv trampoline error)
+- From `D:\PROJECTS\Plumbline\frontend`: `npm run lint && npm run build && npm test`
+- `grep -rn "quality.refresh\|useQuality" frontend/src` shows no `refresh` use.
 
 ## Risks / Questions
-- `_client` reloads `plumbline.api.app`, which resets the `@cache` on `get_connectors`; `/connectors` then loads the real built-in entry points through `load_connectors()`, which depends on the package being installed in the venv (it is: the existing `test_connectors_api` relies on the same). None otherwise.
+- None. The dev server hot-reloads this file, and nothing visible changes.

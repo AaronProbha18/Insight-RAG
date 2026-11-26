@@ -13,7 +13,7 @@ const render = (page: Page) =>
       chatKey={0}
       onNewChat={() => {}}
       documents={documents}
-      quality={{ quality: null, message: '', refresh: () => {} }}
+      quality={{ quality: null, message: '' }}
     />,
   )
 const THREAD = 'aria-label="Ask a question about your documents"'

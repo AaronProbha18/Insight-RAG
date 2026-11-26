@@ -39,3 +39,4 @@
 ## 8. Verification gap
 
 - [x] 8.1 `backend/tests/test_ui_mount.py`: with the UI directory set, `GET /app/connectors` returns `index.html`, and `GET /connectors` returns the API's JSON, not `index.html` (app-shell scenarios "Shared link in production" and "API paths are not affected")
+- [x] 8.2 `quality/useQuality.ts`: remove the unused `refresh` (and the `version` state and `useCallback` that only it needs); the hook returns `{ quality, message }` and fetches once on mount (review finding, yagni)
