@@ -38,6 +38,8 @@ describe.each([
   ['chat', true],
   ['documents', false],
   ['documents', true],
+  ['connectors', false],
+  ['connectors', true],
 ] as const)('AppShell on %s, collapsed=%s', (page, collapsed) => {
   const html = render(page, collapsed)
 
@@ -45,14 +47,21 @@ describe.each([
     expect(unnamed(html)).toEqual([])
   })
 
-  it('announces the current page once, on Documents only', () => {
+  it('announces the current page: Documents once, Connectors on its link and the Quality link', () => {
     const current = html.match(/aria-current="page"/g) ?? []
-    expect(current.length).toBe(page === 'documents' ? 1 : 0)
+    expect(current.length).toBe({ chat: 0, documents: 1, connectors: 2 }[page])
   })
 })
 
 describe('shell sources', () => {
-  const files = ['Sidebar.tsx', 'SidebarDrawer.tsx', 'AppShell.tsx', '../documents/DocumentsPage.tsx']
+  const files = [
+    'Sidebar.tsx',
+    'SidebarDrawer.tsx',
+    'AppShell.tsx',
+    '../documents/DocumentsPage.tsx',
+    '../connectors/ConnectorCard.tsx',
+    '../connectors/ConnectorsPage.tsx',
+  ]
   const source = (f: string) => readFileSync(fileURLToPath(new URL(f, import.meta.url)), 'utf-8')
 
   it.each(files)('%s never removes the outline without a focus-visible replacement', (f) => {
@@ -63,5 +72,20 @@ describe('shell sources', () => {
   it.each(files)('%s uses tokens, never colour literals or palette classes', (f) => {
     expect(source(f)).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(/)
     expect(source(f)).not.toMatch(/\b(text|bg|border|ring)-(red|amber|blue|green|gray|slate|zinc|neutral|stone|orange|yellow)-\d/)
+  })
+})
+
+describe('keyboard reach on the Connectors page', () => {
+  const html = render('connectors', false)
+
+  it('has only native links: each has an href, none is removed from the tab order or disabled', () => {
+    const links = html.match(/<a\b[^>]*>/g) ?? []
+
+    expect(links.length).toBeGreaterThanOrEqual(4) // Documents, Connectors, Quality, Docs
+    for (const l of links) {
+      expect(l).toContain('href="')
+      expect(l).not.toMatch(/tabindex="-1"|aria-disabled/)
+    }
+    expect(html).not.toContain('aria-disabled')
   })
 })
