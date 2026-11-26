@@ -7,11 +7,11 @@ pgvector**, and is answered by a small **LangGraph** graph that runs inside
 the **FastAPI** process. A React + **assistant-ui** chat (the vendored
 styled kit on Tailwind, [ADR 0003](../adr/0003-styled-chat-kit.md)) is
 served from the same origin. It is a small app shell: a sidebar and one
-page at a time, the chat and a Documents page.
+page at a time: the chat, a Documents page and a Connectors page.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE; POST /feedback; GET /quality| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE; POST /feedback; GET /quality; GET /connectors| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
   ING --> C[connectors via entry points]
@@ -36,8 +36,9 @@ goes:
 | a file connector | its own package, registered under the `plumbline.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/plumbline/connectors/builtin/` |
 | an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
-| a UI page or component | `frontend/src/chat/`, `documents/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
-| the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`) |
+| a UI page or component | `frontend/src/chat/`, `documents/`, `connectors/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
+| the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`); the Connectors page reads it |
+| the list of loaded connectors | `api/app.py` (`GET /connectors`, over the registry) |
 | answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
 
@@ -105,6 +106,15 @@ the `golden.yaml` shape and writes it to `evals/feedback/candidates.yaml`
 (git-ignored). A maintainer reviews it and copies entries into a golden set
 by hand; nothing is added automatically ([evals README](https://github.com/AaronProbha18/Plumbline/blob/main/evals/README.md#feedback-candidates)).
 
+### List connectors: `GET /connectors`
+
+1. The route returns the registry that `get_connectors` loaded at startup. It
+   uses no database and no model.
+2. Each entry has `name`, `extensions`, `contract_version` and `builtin` (true
+   for connectors shipped in this repo, derived from the class's module), sorted by name.
+   A connector the registry skipped (it failed to load, or declares another
+   contract version) is not listed. The names equal the keys of `/quality`.
+
 ### Show the last eval: `GET /quality`
 
 1. The route reads the runner's summary file on every request:
@@ -114,7 +124,9 @@ by hand; nothing is added automatically ([evals README](https://github.com/Aaron
    the file is missing or invalid, the run stopped at the judge gate (exit 2)
    or was sampled. Otherwise it returns allowlisted fields only: PASS/FAIL per
    connector as the runner wrote it, the three gated metrics, run date, model
-   ids and threshold.
+   ids and threshold. Each connector also carries its answerable and
+   unanswerable question counts when the summary has them (the runner writes
+   them; an older summary has none, and the page omits them).
 3. `config_matches` compares the evaluated chat model, embedding model and
    abstain threshold with the running ones; the judge is not compared. The
    route always answers **200**.
@@ -134,13 +146,16 @@ by hand; nothing is added automatically ([evals README](https://github.com/Aaron
 
 ### Open a page: `/app/<page>`
 
-The chat is at `/` and Documents at `/app/documents`. The UI owns routing
+The chat is at `/`, Documents at `/app/documents` and Connectors at
+`/app/connectors`. The UI owns routing
 (`frontend/src/shell/route.ts`, over the History API), and client pages live
 under `/app/` so they cannot collide with an API path. In production,
 `api/app.py` serves `index.html` for `GET /app/{path}` when
 `PLUMBLINE_UI_DIR` is set, so a reload or a shared page link works; any
-other unknown path still gets the API's own 404. No new endpoint carries
-data: the Documents page uses the same `/documents` routes as before. The
+other unknown path still gets the API's own 404. `GET /connectors` is the only new
+endpoint: the Documents page uses the same `/documents` routes as before, and the
+Connectors page joins `/connectors`, `/quality` and `/documents` in the
+browser, by connector name. The
 chat stays in memory while the person moves between pages
 ([guide §1.4](../guides/frontend-development-guide.md#1-code-organisation)).
 

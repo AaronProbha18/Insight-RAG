@@ -33,10 +33,13 @@ class _NoRows:
 def test_app_path_serves_index(monkeypatch, tmp_path):
     (tmp_path / "index.html").write_text("<title>Plumbline</title>")
 
-    response = _client(monkeypatch, tmp_path).get("/app/documents")
+    client = _client(monkeypatch, tmp_path)
 
-    assert response.status_code == 200
-    assert "<title>Plumbline</title>" in response.text
+    for path in ("/app/documents", "/app/connectors"):
+        response = client.get(path)
+
+        assert response.status_code == 200
+        assert "<title>Plumbline</title>" in response.text
 
 
 def test_api_and_unknown_paths_are_not_index(monkeypatch, tmp_path):
@@ -48,6 +51,9 @@ def test_api_and_unknown_paths_are_not_index(monkeypatch, tmp_path):
     documents = client.get("/documents")
     assert documents.json() == []
     assert "<title>" not in documents.text
+    connectors = client.get("/connectors")
+    assert {c["name"] for c in connectors.json()} >= {"pdf", "docx"}
+    assert "<title>" not in connectors.text
 
 
 def test_no_app_route_without_ui_dir(monkeypatch):

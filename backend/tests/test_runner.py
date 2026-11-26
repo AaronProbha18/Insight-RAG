@@ -181,13 +181,15 @@ def test_summary_is_small_and_shareable(evals_dir, tmp_path):
     assert set(summary["host"]) == {"platform", "machine", "cpus", "python"}
     pdf = summary["connectors"]["pdf"]
     assert pdf["questions"] == 40 and pdf["result"] == "PASS"
+    assert pdf["unanswerable_questions"] == len(UNANSWERABLE)
+    assert pdf["answerable_questions"] + pdf["unanswerable_questions"] == 40
     assert set(pdf["metrics"]) == {
         "correctness",
         "faithfulness",
         "abstention",
         "hit_rate",
     }
-    assert "answer" not in json.dumps(summary)  # no per-question text
+    assert '"answer"' not in json.dumps(summary)  # no per-question text
     assert summary["duration_s"] >= 0
 
 

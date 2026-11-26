@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 GATED = ("correctness", "faithfulness", "abstention")
+COUNTS = ("answerable_questions", "unanswerable_questions")
 EVAL_COMMAND = "uv run plumbline-eval"
 NOT_MEASURED = {"state": "not_measured", "eval_command": EVAL_COMMAND}
 
@@ -18,11 +19,16 @@ def _connector(c) -> dict:
         raise ValueError("bad connector")
     if not all(_number(c["metrics"][m]) for m in GATED):
         raise ValueError("bad metrics")
-    return {
+    entry = {
         "result": c["result"],
         "failed": [m for m in GATED if m in c["failed"]],
         "metrics": {m: c["metrics"][m] for m in GATED},
     }
+    # Optional, both or neither: summaries written before the counts existed lack them.
+    counts = [c.get(k) for k in COUNTS]
+    if all(isinstance(n, int) and not isinstance(n, bool) and n >= 0 for n in counts):
+        entry.update(zip(COUNTS, counts, strict=True))
+    return entry
 
 
 def load_quality(path: Path, running: dict) -> dict:

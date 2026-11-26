@@ -28,6 +28,14 @@ describe('pageFor', () => {
     expect(pageFor('/documents')).toBe('chat')
     expect(pageFor('/x')).toBe('chat')
   })
+
+  it('maps /app/connectors to connectors, but not the API path or a sub-path', () => {
+    expect(pageFor('/app/connectors')).toBe('connectors')
+    expect(pageFor('/app/connectors/')).toBe('connectors')
+    expect(pageFor('/connectors')).toBe('chat')
+    expect(pageFor('/app/connectors/x')).toBe('chat')
+    expect(pageFor('/app/constructor')).toBe('chat')
+  })
 })
 
 describe('navigation', () => {
@@ -45,6 +53,16 @@ describe('navigation', () => {
     expect(win.history.pushState).toHaveBeenCalledWith(null, '', '/app/documents')
     expect(currentPage()).toBe('documents')
     expect(listener).toHaveBeenCalledTimes(1)
+  })
+
+  it('navigates to connectors and back to chat on popstate', () => {
+    navigate('/app/connectors')
+    expect(currentPage()).toBe('connectors')
+
+    win.location.pathname = '/'
+    win.dispatchEvent(new Event('popstate'))
+
+    expect(currentPage()).toBe('chat')
   })
 
   it('popstate (back) notifies and returns to chat', () => {

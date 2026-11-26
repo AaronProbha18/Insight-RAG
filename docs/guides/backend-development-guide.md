@@ -78,6 +78,7 @@ code marks this with a `ponytail:` comment.
 | 204 | (also) `POST /feedback` stored the rating, or replaced the earlier one for that answer |
 | 404 | (also) `POST /feedback` for an unknown `answer_id`; the message is always "Answer not found" |
 | 200 | `GET /quality` always; no usable summary is `state: "not_measured"`, never an error |
+| 200 | (also) `GET /connectors` always; a connector that failed to load or declares another contract version is not listed |
 | 415 | no connector handles the file type; the message lists the supported types |
 | 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters) |
 | 500 | anything else; the client never sees internal details |
@@ -107,9 +108,24 @@ fields only: the three gated metrics, PASS/FAIL and `failed` as the runner
 wrote them, the run date, model ids, threshold and a `config_matches` check
 of chat model, embedding model and threshold. `host`, `git_commit`, `report`,
 `reason`, latency and every other summary field are never returned. A missing,
-malformed, sampled or exit-2 summary is `not_measured`. *Enforced by*
-`test_no_internal_fields_leak` in `tests/test_quality.py` and
-`tests/test_quality_api.py`.
+malformed, sampled or exit-2 summary is `not_measured`. Each connector entry
+also carries `answerable_questions` and `unanswerable_questions` when the
+summary has both as non-negative integers (both or neither, and never a
+reason for `not_measured`): the runner writes them, and a summary from
+before that has none. *Enforced by* `test_no_internal_fields_leak` in
+`tests/test_quality.py` and `tests/test_quality_api.py`, and by
+`tests/test_runner.py` for the runner's side.
+
+**2.6 `/connectors` is an allowlist.** The route lists the registry that
+`get_connectors` returns, sorted by name, and builds each entry from four
+named fields: `name`, `extensions`, `contract_version` and `builtin`, which is
+true when the connector class's module is under
+`plumbline.connectors.builtin` (so `pdf` and `docx` are, a third-party
+connector is not). Module paths, entry-point names and every other
+attribute stay out. A connector the
+registry skipped (it failed to load, or declares another contract version)
+is not listed. The names equal the keys of `/quality`, which the Connectors
+page uses to join the two. *Enforced by* `tests/test_connectors_api.py`.
 
 ## 3. Errors
 
