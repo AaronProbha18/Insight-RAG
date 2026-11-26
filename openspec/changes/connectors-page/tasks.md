@@ -11,7 +11,7 @@
 ## 3. Page and shell
 
 - [x] 3.1 `connectors/ConnectorCard.tsx`: name, extensions, document count, three metric bars with the 0.80 mark, Passes / Below bar / Not measured (with eval command), not-current note, run date and models; tests for each state
-- [ ] 3.2 `connectors/ConnectorsPage.tsx`: join `/connectors`, `/quality` and `/documents` by name, load and error states; wire into `App.tsx`; tests
+- [x] 3.2 `connectors/ConnectorsPage.tsx`: join `/connectors`, `/quality` and `/documents` by name, load and error states; wire into `App.tsx`; tests
 - [ ] 3.3 Sidebar: Connectors becomes a link, Quality links to `/app/connectors` with the overall state in words; remove `Quality.tsx` and unused `QualityPanel` code; tests that the dialog is gone
 
 ## 4. Docs and accessibility

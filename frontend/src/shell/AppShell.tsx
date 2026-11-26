@@ -1,6 +1,8 @@
 import { ChatPane } from '../chat/ChatPane'
 import { DocumentsPage } from '../documents/DocumentsPage'
 import type { useDocuments } from '../documents/useDocuments'
+import { ConnectorsPage } from '../connectors/ConnectorsPage'
+import type { useQuality } from '../quality/useQuality'
 import type { Page } from './route'
 import { Sidebar } from './Sidebar'
 import { SidebarDrawer } from './SidebarDrawer'
@@ -12,10 +14,11 @@ type Props = {
   chatKey: number
   onNewChat: () => void
   documents: ReturnType<typeof useDocuments>
+  quality: ReturnType<typeof useQuality>
 }
 
 /** Sidebar plus one page. The chat stays mounted (hidden) while Documents shows, so it survives navigation. */
-export function AppShell({ page, collapsed, onToggleCollapse, chatKey, onNewChat, documents }: Props) {
+export function AppShell({ page, collapsed, onToggleCollapse, chatKey, onNewChat, documents, quality }: Props) {
   const count = documents.documents.length
   return (
     <div className="flex h-dvh">
@@ -38,6 +41,11 @@ export function AppShell({ page, collapsed, onToggleCollapse, chatKey, onNewChat
         {page === 'documents' && (
           <div className="min-h-0 flex-1 overflow-y-auto">
             <DocumentsPage {...documents} />
+          </div>
+        )}
+        {page === 'connectors' && (
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <ConnectorsPage quality={quality.quality} qualityMessage={quality.message} documents={documents.documents} />
           </div>
         )}
       </div>

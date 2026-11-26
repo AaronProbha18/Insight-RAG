@@ -16,6 +16,7 @@ const render = (page: Page, collapsed: boolean) =>
       chatKey={0}
       onNewChat={() => {}}
       documents={documents}
+      quality={{ quality: null, message: '', refresh: () => {} }}
     />,
   )
 

@@ -13,6 +13,7 @@ const render = (page: Page) =>
       chatKey={0}
       onNewChat={() => {}}
       documents={documents}
+      quality={{ quality: null, message: '', refresh: () => {} }}
     />,
   )
 const THREAD = 'aria-label="Ask a question about your documents"'
@@ -34,6 +35,15 @@ describe('AppShell', () => {
     expect(hidden).toBeGreaterThanOrEqual(0)
     expect(html.indexOf(THREAD)).toBeGreaterThan(hidden)
     expect(html.indexOf(THREAD)).toBeLessThan(html.indexOf('<h1'))
+  })
+
+  it('shows the Connectors page, with the chat mounted but hidden, on the connectors page only', () => {
+    const html = render('connectors')
+
+    expect(html).toContain('<h1 class="mb-4 text-xl font-semibold">Connectors</h1>')
+    expect(html.indexOf('<div hidden=""')).toBeGreaterThanOrEqual(0)
+    expect(html.indexOf(THREAD)).toBeLessThan(html.indexOf('<h1'))
+    for (const page of ['chat', 'documents'] as const) expect(render(page)).not.toContain('>Connectors</h1>')
   })
 
   it('hides the inline sidebar below md and offers a menu button there', () => {
