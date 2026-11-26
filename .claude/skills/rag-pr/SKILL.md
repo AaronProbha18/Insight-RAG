@@ -22,6 +22,8 @@ closes it and says how each acceptance criterion was met.
    - "What and why": 2-4 sentences, in terms of the issue's outcome.
    - "Verification": commands and results copied from `verification.md`.
      Never claim a check that wasn't run.
+   - "Review": the `rag-review` verdict, the finding count and how many
+     were fixed, or "not run". If the user proceeded past `CHANGES`, say so.
    - For each acceptance criterion in the issue: the test that covers it,
      or "not covered" and why.
    - Tick only checklist items that are actually true; leave the rest

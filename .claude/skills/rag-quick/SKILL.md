@@ -1,12 +1,12 @@
 ---
 name: rag-quick
-description: Developer loop. For an issue that triage made ready, run plan -> execute -> verify for every task of its OpenSpec change, then draft the PR. Use when the user says "work on issue N" or runs /rag-quick N.
+description: Developer loop. For an issue that triage made ready, run plan -> execute -> verify for every task of its OpenSpec change, review the branch, then draft the PR. Use when the user says "work on issue N" or runs /rag-quick N.
 allowed-tools: Bash(gh:*), Bash(git:*), Bash(openspec:*), Read, Grep, Glob, Skill
 ---
 
 Take ONE triaged issue to a draft PR by chaining the existing skills. This
 skill orchestrates; the work happens in `rag-plan`, `rag-execute`,
-`rag-verify` and `rag-pr`, whose rules all still apply.
+`rag-verify`, `rag-review` and `rag-pr`, whose rules all still apply.
 
 **Input**: an issue number, e.g. `/rag-quick 42`.
 
@@ -51,7 +51,13 @@ skill orchestrates; the work happens in `rag-plan`, `rag-execute`,
 3. **Verify**: `rag-verify <change>`. On FAIL, list the fixes and the tasks
    they belong to, and stop: fixes go back through the loop.
 
-4. **PR**: `rag-pr <N>`.
+4. **Review**: `rag-review`. On `CHANGES`, list the findings and stop: each
+   fix goes back through plan -> execute -> commit, then verify and review
+   again. If the re-review still says `CHANGES`, ask the user. Proceed
+   past `CHANGES` only if the user says so. On the chore path, run it after
+   the last commit.
+
+5. **PR**: `rag-pr <N>`, passing the review verdict.
 
 ## Stop and ask
 

@@ -42,13 +42,14 @@ must be signed in to the repo owner's account.
 | Command | Loop | Edits code? | Does |
 | --- | --- | --- | --- |
 | `/rag-triage <issue#>` | triage | No | Preflight the issue, explore, propose, until `tasks.md` is complete; label it ready |
-| `/rag-quick <issue#>` | developer | Via stages | Preflight (branch, labels), then plan -> execute -> commit per task, verify, PR |
+| `/rag-quick <issue#>` | developer | Via stages | Preflight (branch, labels), then plan -> execute -> commit per task, verify, review, PR |
 | `/rag-plan <change>` | developer | No | Picks the next unchecked task, writes a short plan, waits for approval |
 | `/rag-execute <change>` | developer | Yes | Implements exactly that task, self-reviews, ticks the checkbox |
 | `/rag-verify <change>` | developer | Evidence only | Runs all checks + eval, writes `verification.md` |
+| `/rag-review [PR#\|branch]` | developer | No | Reviews the diff against REVIEW.md, scope, complexity and prose; one line per finding; APPROVE or CHANGES |
 | `/rag-pr <issue#>` | developer | PR only | Drafts the PR from the template; creates a **draft** PR on approval |
 
-`/rag-quick` chains plan -> execute once per checkbox, then verify and PR;
+`/rag-quick` chains plan -> execute once per checkbox, then verify, review and PR;
 the stage skills also work on their own.
 `/opsx:apply` still works for `rag-rapid` changes, where the loop is overkill.
 
@@ -56,7 +57,7 @@ the stage skills also work on their own.
 
 Before reviewing any diff (including with a code-review skill), read
 [REVIEW.md](REVIEW.md) and check the sections for the areas the diff
-touches.
+touches. `/rag-review` does this and adds scope, complexity and prose checks.
 
 ## Guardrails
 
