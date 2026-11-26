@@ -1,56 +1,41 @@
 ## Task
-6.1 Add a small fixture model built inside `tests/` (two Plumbline-shaped tables with a foreign key, a check and `system_columns`), and rebuild `conftest.py`'s `workcopy` on it. Re-point the tests that don't depend on removed features. Delete `models/sample/` (with its `build/`), and delete the tests for migrations, enums and immutable tables, which 6.2 and 6.3 remove from the code. `DEFAULT_MODEL` and the Makefile default become `models/plumbline`. Test: the remaining datamodel suite passes; `validate` and `ddl` run on `models/plumbline` with no `--model`.
+6.2 Remove `migrate.py`, `model.lock.json` handling, `migrations/`, `make migrate` and `make check`, and reword the `datamodel` CI job's `make check test`. (`make check` and the CI wording already moved to 6.1.) Test: the suite passes; the spec scenario "Migration tooling absent" holds (no `migrate.py`, `make migrate` or `make check`).
 
 ## Scope
-- **Fixture:** `datamodel/tests/fixtures/mini/`, Plumbline-shaped so later tasks barely touch it. It has a `model.yaml` with Plumbline's five settings (`id_type: bigserial`, `public_id_check: false`, `updated_at_trigger: false`, `comments: false`, `constraint_names: postgres`), which 6.4 deletes. No enums, immutable tables, uuid ids, `sample_rows` or `business_rules`.
-  - Domain `core` (`load_order: 10`) with tables `account` (prefix `acc`; columns `display_name text` and `first_name text`, `pii: indirect`) and `note` (prefix `nte`, `system_columns: [public_id, created_at]`; `account_id bigint` referencing `account.id`, `on_delete: cascade`; `body text`; one table check `ck_note_body`, `body <> ''`).
-  - Domain `audit` (`load_order: 20`, `depends_on: []`) with table `event` (prefix `evt`, `system_columns: [created_at]`; `kind text`).
-  - Both domains' tables are `status: published`, so the open-CMO-question rule is testable.
-- **`conftest.py`:** `ROOT` and `run_tool` as today. `workcopy` copies `tools/` and `tests/fixtures/mini/` into a temp dir (`dm/models/mini`) and returns the model folder, so existing `workcopy / ...` paths keep their shape. A `MINI` path constant for tests that only read the fixture. The Postgres helpers (`URL`, `_db_url`, `psql`, `apply`, `newdb`) stay in `test_postgres.py`, where `test_drift.py` imports them today.
-- **Delete** `models/sample/` (16 tracked files) and its ignored `build/`.
-- **Default model:** `model.py` `DEFAULT_MODEL = "models/plumbline"`; Makefile `MODEL ?= models/plumbline`.
-- **Makefile and CI (moved here from 6.2):** with `models/plumbline` as default there is no lock file for `make check` to compare, so remove the `check` target now, and the `datamodel` job runs `make validate test` instead of `make check test`. 6.2 still removes `migrate.py` and `make migrate`.
-- Guides read: none apply (datamodel only). I read the five sample-dependent test files and `conftest.py`.
+- Delete `datamodel/tools/migrate.py` (149 lines): the only code that reads or writes `model.lock.json` or `migrations/`, and the only code with `--allow-destructive`. There are no `model.lock.json` or `migrations/` files left to delete (the sample went in 6.1, and `models/plumbline` never had them).
+- `Makefile`: drop `migrate` from `.PHONY`, and delete the `migrate` target with its comment. (`check` went in 6.1.)
+- `tools/ddl.py`: the module docstring says "migrate.py diffs two of them. One source for both keeps migrations honest." Reword it to describe what `build_objects()` is now for (the drift job's DDL), nothing else. `build_objects`, `create_table_sql`, `render_full` and `SET_UPDATED_AT` stay: `render_full` uses them, and `SET_UPDATED_AT` goes in 6.4 with the `updated_at_trigger` setting.
+- `tools/explorer.template.html`, one line: the callout "DDL, migrations and this page are generated from `domains/**/*.yaml`" becomes "DDL and this page are generated". Migrations are no longer generated.
+- A small test file `tests/test_toolkit_scope.py` for the spec scenario "Migration tooling absent": no `tools/migrate.py`, no `migrate:` or `check:` Makefile target, and no `model.lock.json` or `migrations/` under `models/`. 6.3 adds the "Removed field rejected" tests to the same file.
+- Guides read: none apply (datamodel only). I grepped `datamodel/`, `AGENTS.md`, `docs/` and `.github/` for every reference to `migrate`, `model.lock.json`, `--allow-destructive` and `make check`.
 
-## Tests: what happens to each file
-| File | Action |
-| --- | --- |
-| `test_model.py` | Keep `valid` (on the fixture), `long_constraint_name_rejected`, `pii_default_rejected`, `unknown_fk_rejected`, re-pointed to `MINI`. Delete `immutable_trigger_generated`, `diff_safe_and_risky`, `lock_matches_model`. |
-| `test_validate.py` | Re-point to fixture tables. Keep: fk outside `depends_on`, fk not at `id`, 64-byte table and column names, duplicate prefix, default on a pii column, published with an open CMO question, answered without an answer, and the 63-byte cases. Delete: duplicate rule id, the four `sample row` cases. |
-| `test_generate.py` | Keep `system_columns_injected` rewritten for the fixture (bigserial `id`, `public_id` unique, `created_at` last, `event` has no `public_id`) and `ddl_model_flag_writes_into_model_build`. Delete `enum_is_check_not_type`, `migration_written`, `destructive_change_refused_then_approved`. |
-| `test_conventions.py` | Keep the three `system_columns` tests and the four type tests, edited to use `account.yaml`. Delete `no_model_yaml_keeps_lock`, `bigserial_ids_and_bigint_fks`, `public_id_check_off`, `updated_at_trigger_off`, `comments_off`, `unknown_key_rejected` (settings, removed in 6.4). Replace `postgres_constraint_names` with `plumbline_conventions_generated`. |
-| `test_postgres.py` | Keep the helpers. Delete the three tests (immutability, allow-listed update, migrations equal a fresh build). Add `test_fixture_ddl_applies`: the fixture's generated DDL loads into a real Postgres, and the tables exist. |
-| `test_plumbline_model.py`, `test_drift.py` | Unchanged. |
-
-New spec-scenario tests:
-- **Plumbline conventions generated:** `test_conventions.py::test_plumbline_conventions_generated`. The fixture DDL has `id bigserial`, `bigint` foreign keys, no `public_id` CHECK, no `updated_at` trigger or `set_updated_at()`, no `COMMENT ON`, and `_pkey`/`_fkey`/`_key` names with no `pk_`/`fk_`/`uq_`.
-- **Default is Plumbline's model:** a test runs `validate.py` and `ddl.py` as subprocesses with no `--model` and `PLUMBLINE_EMBEDDING_DIM=8`, in a copy of the toolkit, and checks `models/plumbline/build/schema.sql` appears. `workcopy`-style, so the repo's own `build/` isn't touched.
-
-## Checks to run
-- `cd datamodel && PYTHONPATH=tools uv run python -m pytest -q -rs tests`
-- `PYTHONPATH=tools uv run python tools/validate.py` (no `--model`), and `PLUMBLINE_EMBEDDING_DIM=8 uv run python tools/ddl.py` (no `--model`).
-- The suite once more inside a throwaway `pgvector/pgvector:pg18` container with `DATAMODEL_TEST_DATABASE_URL` set, so the Postgres tests really run (as in 4.1).
-- The workflow YAML parses (`yaml.safe_load`), and `make validate test` is the new `datamodel` job command.
-- `git diff --stat` shows only the files in the table below.
+## Not in scope
+- README, `AGENTS.md` (line 159 still lists `migrate`), the overview and ADR 0004: 6.6, the same PR.
+- Enums, immutable tables, uuid ids, `sample_rows`, `business_rules` (6.3) and the `model.yaml` settings (6.4).
+- `docs/architecture/overview.md` lines about Plumbline's own Alembic migrations, and `backend/migrations/`: unrelated to this tool.
 
 ## Files
 | File | Change |
 | --- | --- |
-| `datamodel/models/sample/**` | deleted (16 tracked files) |
-| `datamodel/tests/fixtures/mini/**` | new (`model.yaml`, 2 domains, 3 tables) |
-| `datamodel/tests/conftest.py` | `workcopy` on the fixture; `MINI` |
-| `datamodel/tests/test_model.py`, `test_validate.py`, `test_generate.py`, `test_conventions.py`, `test_postgres.py` | per the table above |
-| `datamodel/tools/model.py` | `DEFAULT_MODEL` |
-| `datamodel/Makefile` | `MODEL ?= models/plumbline`; remove `check` |
-| `.github/workflows/datamodel.yml` | `make validate test` |
+| `datamodel/tools/migrate.py` | deleted |
+| `datamodel/Makefile` | remove the `migrate` target, comment and `.PHONY` entry |
+| `datamodel/tools/ddl.py` | docstring only |
+| `datamodel/tools/explorer.template.html` | one callout sentence |
+| `datamodel/tests/test_toolkit_scope.py` | new |
 
-## Not in scope
-- Removing `migrate.py`, `make migrate`, enums, immutable tables, uuid ids, `sample_rows`, `business_rules`, and the settings: 6.2 to 6.4. Their code stays, untested, until then.
-- README, `AGENTS.md`, overview and ADR text that mention the sample or `make check`: 6.6, the same PR (AGENTS.md rule 7).
-- The stale `datamodel/build/` folder (ignored, pre-#28 leftover).
+## Tests
+- `test_toolkit_scope.py::test_migration_tooling_absent` covers the spec scenario "Migration tooling absent": `tools/migrate.py` does not exist, the Makefile has no `migrate:` or `check:` target, and nothing named `model.lock.json` or `migrations` exists under `models/`.
+- The rest of the suite passes. Nothing else imports `migrate` (checked by grep; the test that imported it was deleted in 6.1).
+- `uv run python tools/explorer.py --model models/plumbline` still works and the rebuilt page contains the new callout text.
+
+## Checks to run
+- `cd datamodel && PYTHONPATH=tools uv run python -m pytest -q -rs tests`
+- `PYTHONPATH=tools uv run python tools/validate.py`
+- `PLUMBLINE_EMBEDDING_DIM=8 PYTHONPATH=tools uv run python tools/ddl.py`, and byte-compare `models/plumbline/build/schema.sql` with the previous commit's (unchanged: only a docstring moved).
+- `PLUMBLINE_EMBEDDING_DIM=768 PYTHONPATH=tools uv run python tools/explorer.py` and grep the output for the new callout.
+- `grep -rn "migrate" datamodel --include=*.py --include=Makefile` finds nothing.
+- Postgres-backed run of the suite in a throwaway container is not needed: no test in this task touches Postgres, and nothing Postgres-related changed.
 
 ## Risks / Questions
-- **Coverage dips until 6.2 to 6.4:** migrations, enums, immutable tables, uuid ids and the `model.yaml` settings have no tests between this task and their removal. That's the point of removing them, but each intermediate commit leaves untested code; the PR is only green at the end of 6.6.
-- **`make check` and the CI wording move from 6.2 to 6.1** because the default model changes. I'll note it when I tick 6.1; `tasks.md` 6.2 keeps its text, and 6.2's "reword CI" part becomes a no-op.
-- **The fixture is also a sample**, just a tiny one in `tests/`. It's what you approved ("small fixture inside tests/"); say so if you'd rather build the YAML in `conftest.py` from strings.
-- **ADR 0004** (Accepted) still describes the sample until 6.6 rewrites it.
+- `AGENTS.md`, the README and ADR 0004 still say `migrate` exists until 6.6. The PR is only coherent after 6.6.
+- The test for an absent file and Makefile targets is a guard against the tool coming back by accident, not a behaviour test. It's the only way to cover the spec scenario; say if you'd rather drop that scenario instead.

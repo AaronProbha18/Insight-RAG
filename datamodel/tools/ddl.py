@@ -1,7 +1,7 @@
 """Generate Postgres DDL from the model.
 
-build_objects() returns a plain dict describing every database object. Full DDL renders it
-whole; migrate.py diffs two of them. One source for both keeps migrations honest.
+build_objects() returns a plain dict describing every database object; render_full() renders it
+as the DDL the plumbline-drift job loads into Postgres.
 """
 from __future__ import annotations
 

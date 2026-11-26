@@ -3,7 +3,7 @@ export PYTHONPATH := tools
 PY ?= uv run python
 MODEL ?= models/plumbline
 
-.PHONY: all validate ddl explorer migrate test clean
+.PHONY: all validate ddl explorer test clean
 
 all: validate ddl explorer
 
@@ -15,10 +15,6 @@ ddl: validate
 
 explorer: validate
 	$(PY) tools/explorer.py --model $(MODEL)
-
-# Writes migrations/NNNN_<name>.sql and advances model.lock.json. Usage: make migrate NAME=add_plan_description
-migrate: validate
-	$(PY) tools/migrate.py --model $(MODEL) $(if $(NAME),--name $(NAME)) $(ARGS)
 
 test:
 	$(PY) -m pytest -q -rs tests

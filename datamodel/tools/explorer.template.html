@@ -117,7 +117,7 @@ function overview(){
   return `<div class="crumb">Overview</div><h2 class="tname">The model at a glance</h2>
   <div class="stats">${[[D.domains.length,"Domains"],[D.tables.length,"Tables"],[D.enums.length,"Enums"],[samples,"Sample rows"],[rules,"Business rules"],[openQ.length,"Open questions"]]
     .map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("")}</div>
-  <div class="callout"><div class="lbl">The rule above all others</div>The YAML is the model. DDL, migrations and this page are generated from <code>domains/**/*.yaml</code>. A column that exists in the database but not in a table.yaml is a defect.</div>
+  <div class="callout"><div class="lbl">The rule above all others</div>The YAML is the model. DDL and this page are generated from <code>domains/**/*.yaml</code>. A column that exists in the database but not in a table.yaml is a defect.</div>
   <h3 class="sec">Domains</h3>
   ${tbl(["Domain","Layer","Load order","Tables","Depends on"], D.domains.map(d=>`<tr><td class="m">${esc(d.domain)}</td><td>${esc(d.layer)}</td><td class="m">${d.load_order}</td><td>${D.tables.filter(t=>t.domain===d.domain).length}</td><td class="m muted small">${esc(d.depends_on.join(", ")||"—")}</td></tr>`))}
   ${D.domains.map(d=>`<h3 class="sec">${esc(d.title)}</h3><p class="small">${esc(d.description)}</p><p class="small mono muted">${D.tables.filter(t=>t.domain===d.domain).map(t=>link(t.name)).join(" · ")}</p>`).join("")}`;
