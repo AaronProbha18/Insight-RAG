@@ -1,6 +1,6 @@
 ## Checks Run
 
-All run in this session, on branch `feat/34-connectors-page` (20 commits ahead of `main`) at `b43045d`. This is the second run: the first run (FAIL) found two scenarios without tests; task 8.1 added them.
+All run in this session, on branch `feat/34-connectors-page` (23 commits ahead of `main`) at `d1aad67`, working tree clean. This is the third run. Run 1 was FAIL: two scenarios had no test (task 8.1 added them). Run 2 was PASS. After `rag-review` raised one non-blocking finding (unused `refresh` in `useQuality`), task 8.2 removed it, and this run re-checks the final commit.
 
 | Command | Result |
 | --- | --- |
@@ -51,7 +51,7 @@ Notes on the commands:
 
 ## Manual check
 
-After `rag-review` raised the REVIEW.md rule "Look at it", the dev stack was run (`npm run dev`; backend restarted on commit `b43045d` with a demo eval summary: pdf below the bar on correctness with 30 and 10 question counts, docx passing, models differing from the running configuration). The user opened `/app/connectors` and reported "all working". Light and dark themes, keyboard order and phone width were on the checklist given to the user; the report did not itemise them. The "Not measured" card state was not viewed in the browser (static tests only). The demo summary is synthetic, not eval output.
+After `rag-review` raised the REVIEW.md rule "Look at it", the dev stack was run (`npm run dev`; backend restarted on commit `b43045d` with a demo eval summary: pdf below the bar on correctness with 30 and 10 question counts, docx passing, models differing from the running configuration). The user opened `/app/connectors` and reported "all working". That check was made at commit `b43045d`; the later commit `d1aad67` (task 8.2) only removes unused code from `useQuality` and changes nothing visible. Light and dark themes, keyboard order and phone width were on the checklist given to the user; the report did not itemise them. The "Not measured" card state was not viewed in the browser (static tests only). The demo summary is synthetic, not eval output.
 
 ## Eval Results
 
@@ -81,4 +81,4 @@ Every command passed, every spec scenario maps to a test, and eval is N/A per ev
 - The count fields were checked by the runner's own test, not on real model output.
 - The two absolute GitHub links on the page are not covered by the link checker.
 - The explainer's wording ("still works, but its answers are less reliable") awaits your product review.
-- During this session the working tree was briefly switched to another branch (`feat/48-mkdocs-netlify-docs`) and back; this run is on `feat/34-connectors-page` at `b43045d`.
+- During this session the working tree was briefly switched to another branch (`feat/48-mkdocs-netlify-docs`) and back; this run is on `feat/34-connectors-page` at `d1aad67`.
