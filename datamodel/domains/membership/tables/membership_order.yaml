@@ -1,0 +1,18 @@
+table: membership_order
+domain: membership
+status: draft
+public_id_prefix: ord
+immutable: true
+mutable_columns: [order_status]
+description: A member's purchase of a plan. Content is frozen; only the status moves.
+columns:
+  - {name: person_id, type: uuid, references: org_person.id, description: Who bought.}
+  - {name: selected_plan_id, type: uuid, references: org_membership_plan.id, description: The plan chosen.}
+  - {name: billing_frequency, type: text, enum: billing_frequency, description: How the member pays.}
+  - {name: selected_plan_amount, type: "numeric(10,2)", description: "Price agreed at purchase, copied from the plan."}
+  - {name: order_status, type: text, enum: order_status, default: "'PENDING'", description: Lifecycle state.}
+indexes:
+  - {columns: [person_id]}
+business_rules:
+  - {id: BR-MEMBERSHIP_ORDER-001, text: Only order_status may change after insert., enforced_by: db}
+  - {id: BR-MEMBERSHIP_ORDER-002, text: The agreed amount is copied at purchase and never recalculated., enforced_by: service}

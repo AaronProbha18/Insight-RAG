@@ -1,0 +1,3 @@
+enum: consent_decision
+description: What the person decided on a consent policy.
+values: [GRANTED, DECLINED, REVOKED]

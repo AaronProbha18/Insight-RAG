@@ -1,0 +1,29 @@
+table: organization
+domain: organization
+status: published
+public_id_prefix: org
+description: A tenant of the platform. Every configuration and runtime row belongs to one.
+columns:
+  - {name: display_name, type: text, description: Name shown in the product.}
+  - {name: legal_name, type: text, description: Registered legal name.}
+  - {name: npi, type: varchar(10), nullable: true, description: "National Provider Identifier, ten digits."}
+  - name: status
+    type: text
+    enum: organization_status
+    default: "'ACTIVE'"
+    description: Operating state.
+  - {name: effective_from, type: date, description: First day the organization operates.}
+  - {name: effective_to, type: date, nullable: true, description: "Last day, if it has ended."}
+checks:
+  - {name: ck_organization_npi_shape, expr: "npi IS NULL OR npi ~ '^[0-9]{10}$'", description: Shape only; the Luhn check digit is not verified here.}
+  - {name: ck_organization_dates, expr: "effective_to IS NULL OR effective_to >= effective_from"}
+unique: [[legal_name]]
+business_rules:
+  - {id: BR-ORGANIZATION-001, text: "An NPI, when present, is exactly ten digits."}
+  - {id: BR-ORGANIZATION-002, text: effective_to cannot precede effective_from.}
+open_questions:
+  - id: OQ-ORGANIZATION-001
+    owner: CTO
+    text: status and effective dates can contradict each other. Is status authoritative, or derived from the dates?
+sample_rows:
+  - {display_name: Example Wellness, legal_name: Example Wellness LLC, npi: "1234567890", status: ACTIVE, effective_from: "2026-01-01"}

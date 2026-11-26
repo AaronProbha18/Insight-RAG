@@ -1,6 +1,6 @@
 ## 1. Port
 
-- [ ] 1.1 Copy the owner-supplied `modelkit` into `datamodel/` unchanged (tools, template, tests, sample domains/enums, `0001_baseline.sql`, `model.lock.json`, `.gitignore`); add `datamodel/pyproject.toml` (uv; pydantic, pyyaml; dev pytest; pytest `pythonpath = ["tools"]`) and `uv.lock`; Makefile `PY ?= uv run python`. Test: `make check test` passes (7 prototype tests); `make all` writes `build/schema.sql` and `build/explorer.html`.
+- [x] 1.1 Copy the owner-supplied `modelkit` into `datamodel/` unchanged (tools, template, tests, sample domains/enums, `0001_baseline.sql`, `model.lock.json`, `.gitignore`); add `datamodel/pyproject.toml` (uv; pydantic, pyyaml; dev pytest; pytest `pythonpath = ["tools"]`) and `uv.lock`; Makefile `PY ?= uv run python`. Test: `make check test` passes (7 prototype tests); `make all` writes `build/schema.sql` and `build/explorer.html`.
 
 ## 2. Validator gaps
 

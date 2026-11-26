@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Model Explorer</title>
+<style>
+:root{--bg:#f6f7f8;--panel:#fff;--fg:#1c2024;--muted:#6b7480;--faint:#8b9298;--line:#e4e8ec;--line2:#eef1f4;
+--accent:#2f7d6a;--soft:#e7f2ef;--code:#0f5c4a;--chip:#f0f3f5;--warn:#8a5a2f;--warnbg:#fdf4e8;
+--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--side:272px}
+:root[data-theme=dark]{--bg:#131619;--panel:#191d21;--fg:#e6eaee;--muted:#98a2ac;--faint:#79838d;--line:#272c32;
+--line2:#21262b;--accent:#5fb8a0;--soft:#16302a;--code:#7fd3bb;--chip:#20262c;--warn:#e0b07f;--warnbg:#2a2118}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#131619;--panel:#191d21;--fg:#e6eaee;
+--muted:#98a2ac;--faint:#79838d;--line:#272c32;--line2:#21262b;--accent:#5fb8a0;--soft:#16302a;--code:#7fd3bb;
+--chip:#20262c;--warn:#e0b07f;--warnbg:#2a2118}}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{display:flex;background:var(--bg);color:var(--fg);font:14.5px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent);text-decoration:none;cursor:pointer}code,.mono{font-family:var(--mono)}
+button{font:inherit;cursor:pointer}
+#side{width:var(--side);flex:0 0 var(--side);height:100vh;overflow-y:auto;background:var(--panel);border-right:1px solid var(--line)}
+.brand{padding:1.1rem 1.1rem .4rem}.brand h1{font-size:1rem;margin:0 0 .15rem}
+.ver{font:.68rem var(--mono);color:var(--faint);letter-spacing:.04em}
+#q{width:calc(100% - 2.2rem);margin:.5rem 1.1rem .7rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:6px;
+background:var(--bg);color:var(--fg);font:.8rem var(--mono)}
+.navsec{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);padding:.5rem 1.1rem .25rem;font-weight:600}
+.dgroup{padding:.5rem 1.1rem .1rem;margin-top:.4rem;font:.7rem var(--mono);letter-spacing:.05em;text-transform:uppercase;
+color:var(--muted);border-left:3px solid var(--accent)}
+.item,.ov{display:flex;align-items:center;gap:.4rem;padding:.22rem 1.1rem .22rem 1.35rem;font:.79rem var(--mono);color:var(--fg);
+border-left:3px solid transparent}
+.ov{font:.85rem inherit;font-family:inherit;padding-left:1.1rem;justify-content:space-between}
+.item:hover,.ov:hover{background:var(--line2)}
+.item.on,.ov.on{background:var(--soft);color:var(--code);border-left-color:var(--accent);font-weight:600}
+.dot{width:.5rem;height:.5rem;border-radius:50%;flex:none;background:var(--line)}.dot.pub{background:var(--accent)}
+.badge{font:.66rem var(--mono);background:var(--chip);color:var(--muted);border-radius:9px;padding:0 .35rem}
+.badge.hot{background:var(--warnbg);color:var(--warn);font-weight:700}
+#bar{position:fixed;top:.7rem;right:1.1rem;z-index:5;display:flex;gap:.2rem;background:var(--panel);border:1px solid var(--line);
+border-radius:9px;padding:.2rem}
+#bar button{border:0;background:none;color:var(--muted);border-radius:6px;padding:.2rem .5rem;font-size:.75rem}
+#bar button.on{background:var(--soft);color:var(--code);font-weight:700}
+#main{flex:1;min-width:0;height:100vh;overflow-y:auto}
+.pane{max-width:1060px;margin:0 auto;padding:2.2rem 2rem 6rem}
+.crumb{font:.7rem var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin-bottom:.5rem}
+h2.tname{font:1.8rem var(--mono);margin:0 0 .8rem;letter-spacing:-.02em}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:1.2rem}
+.chip{border:1px solid var(--line);border-radius:6px;padding:.25rem .6rem;font:.78rem var(--mono);color:var(--muted);background:var(--panel)}
+.chip.k{background:var(--soft);border-color:transparent;color:var(--code);font-weight:600}
+.chip.imm{background:var(--warnbg);border-color:transparent;color:var(--warn);font-weight:600}
+.callout{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+padding:.9rem 1.2rem;margin-bottom:1.2rem}
+.lbl{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:.4rem;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.7rem;margin:1.1rem 0 1.8rem}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:.8rem .9rem}
+.stat b{display:block;font:1.5rem var(--mono)}.stat span{font-size:.72rem;color:var(--faint);letter-spacing:.06em;text-transform:uppercase}
+h3.sec{font-size:.7rem;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);margin:1.7rem 0 .6rem;font-weight:600}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:.84rem;background:var(--panel)}
+th{text-align:left;padding:.5rem .7rem;background:var(--chip);color:var(--muted);font-size:.7rem;letter-spacing:.06em;
+text-transform:uppercase;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--line)}
+td{padding:.45rem .7rem;border-bottom:1px solid var(--line2);vertical-align:top}tr:last-child td{border-bottom:0}
+td.m{font-family:var(--mono)}.null{color:var(--faint);font-style:italic}.muted{color:var(--muted)}.small{font-size:.85rem}
+.pill{font-size:.66rem;background:var(--soft);color:var(--code);border-radius:3px;padding:.05rem .3rem;margin-left:.3rem;font-weight:600}
+.pill.p{background:var(--warnbg);color:var(--warn)}
+tr.sys td{color:var(--faint)}
+.tabs{display:flex;gap:.15rem;border-bottom:1px solid var(--line);margin:0 0 1.3rem}
+.tab{border:0;background:none;color:var(--muted);padding:.5rem .85rem;border-bottom:2px solid transparent;font-size:.85rem}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab .n{font:.68rem var(--mono);background:var(--chip);border-radius:99px;padding:.02rem .32rem;margin-left:.3rem}
+.oq{background:var(--warnbg);border-left:3px solid var(--warn);padding:.8rem 1rem;margin:.6rem 0;border-radius:0 8px 8px 0}
+.oq.done{background:var(--soft);border-left-color:var(--accent)}
+.oq .id{font:700 .85rem var(--mono)}.oq p{margin:.3rem 0 0;font-size:.9rem}
+.hidden{display:none!important}
+@media(max-width:820px){#side{display:none}.pane{padding:1.2rem}}
+</style></head><body>
+<div id="bar"><button data-t="light">Light</button><button data-t="dark">Dark</button><button data-t="system">System</button></div>
+<nav id="side"></nav><main id="main"></main>
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const T = Object.fromEntries(D.tables.map(t => [t.name, t]));
+const openQ = D.tables.flatMap(t => t.questions.filter(q => q.status === "open").map(q => ({...q, table: t.name})));
+const allQ = D.tables.flatMap(t => t.questions.map(q => ({...q, table: t.name})));
+
+// theme
+function theme(v){ if(v==="system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.dataset.theme=v;
+  try{localStorage.setItem("theme",v)}catch(e){} document.querySelectorAll("#bar button").forEach(b=>b.classList.toggle("on",b.dataset.t===v)); }
+document.querySelectorAll("#bar button").forEach(b=>b.onclick=()=>theme(b.dataset.t));
+let saved="system"; try{saved=localStorage.getItem("theme")||"system"}catch(e){} theme(saved);
+
+// sidebar
+function side(filter=""){
+  const f = filter.trim().toLowerCase();
+  const match = t => !f || t.name.includes(f) || t.columns.some(c => c.name.includes(f));
+  let h = `<div class="brand"><h1>Data model</h1><div class="ver">${esc(D.build.version)} · built ${esc(D.build.at)}</div></div>
+  <input id="q" placeholder="Search tables and columns   /" value="${esc(filter)}" autocomplete="off">
+  <div class="navsec">Overview</div>
+  <a class="ov" href="#overview" data-r="overview">The model at a glance</a>
+  <a class="ov" href="#openq" data-r="openq">Open questions <span class="badge ${openQ.length?"hot":""}">${openQ.length}</span></a>
+  <a class="ov" href="#enums" data-r="enums">Enums <span class="badge">${D.enums.length}</span></a>
+  <div class="navsec">Tables <span class="badge">${D.tables.length}</span></div>`;
+  for (const d of D.domains) {
+    const ts = D.tables.filter(t => t.domain === d.domain && match(t));
+    if (!ts.length) continue;
+    h += `<div class="dgroup">${esc(d.title)}</div>` + ts.map(t =>
+      `<a class="item" href="#t-${esc(t.name)}" data-r="t-${esc(t.name)}"><span class="dot ${t.status==="published"?"pub":""}" title="${esc(t.status)}"></span><span>${esc(t.name)}</span></a>`).join("");
+  }
+  $("#side").innerHTML = h;
+  const q = $("#q"); q.oninput = () => { const v=q.value; side(v); $("#q").focus(); $("#q").setSelectionRange(v.length,v.length); };
+  mark();
+}
+function mark(){ const r=location.hash.slice(1)||"overview"; document.querySelectorAll("#side [data-r]").forEach(a=>a.classList.toggle("on",a.dataset.r===r)); }
+
+// views
+const tbl = (head, rows) => `<div class="scroll"><table><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+const link = n => T[n] ? `<a href="#t-${esc(n)}">${esc(n)}</a>` : esc(n);
+
+function overview(){
+  const rules = D.tables.reduce((n,t)=>n+t.rules.length,0), samples = D.tables.reduce((n,t)=>n+t.samples.length,0);
+  return `<div class="crumb">Overview</div><h2 class="tname">The model at a glance</h2>
+  <div class="stats">${[[D.domains.length,"Domains"],[D.tables.length,"Tables"],[D.enums.length,"Enums"],[samples,"Sample rows"],[rules,"Business rules"],[openQ.length,"Open questions"]]
+    .map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("")}</div>
+  <div class="callout"><div class="lbl">The rule above all others</div>The YAML is the model. DDL, migrations and this page are generated from <code>domains/**/*.yaml</code>. A column that exists in the database but not in a table.yaml is a defect.</div>
+  <h3 class="sec">Domains</h3>
+  ${tbl(["Domain","Layer","Load order","Tables","Depends on"], D.domains.map(d=>`<tr><td class="m">${esc(d.domain)}</td><td>${esc(d.layer)}</td><td class="m">${d.load_order}</td><td>${D.tables.filter(t=>t.domain===d.domain).length}</td><td class="m muted small">${esc(d.depends_on.join(", ")||"—")}</td></tr>`))}
+  ${D.domains.map(d=>`<h3 class="sec">${esc(d.title)}</h3><p class="small">${esc(d.description)}</p><p class="small mono muted">${D.tables.filter(t=>t.domain===d.domain).map(t=>link(t.name)).join(" · ")}</p>`).join("")}`;
+}
+
+function colRow(t, c){
+  const ref = c.references ? `<span class="pill">FK</span> ${link(c.references.split(".")[0])}` : "";
+  const typ = esc(c.type) + (c.enum ? ` <span class="pill">${esc(c.enum)}</span>` : "");
+  return `<tr class="${c.system?"sys":""}"><td class="m">${esc(c.name)}${c.unique?'<span class="pill">unique</span>':""}${c.pii!=="none"?`<span class="pill p">${esc(c.pii)}</span>`:""}</td>
+  <td class="m">${typ}</td><td>${c.nullable?"yes":"no"}</td><td class="m">${c.default?esc(c.default):'<span class="null">—</span>'}</td><td>${esc(c.description)} ${ref}</td></tr>`;
+}
+
+function question(q, showTable){
+  return `<div class="oq ${q.status!=="open"?"done":""}"><span class="id">${esc(q.id)}</span> <span class="chip">${esc(q.status)}</span> <span class="chip">owner ${esc(q.owner)}</span>
+  ${showTable?` <a href="#t-${esc(q.table)}">${esc(q.table)}</a>`:""}<p>${esc(q.text)}</p>${q.answer?`<p><b>Answer:</b> ${esc(q.answer)}</p>`:""}</div>`;
+}
+
+let tab = "columns";
+function table(name){
+  const t = T[name]; if(!t) return `<div class="pane"><h2 class="tname">Not found</h2></div>`;
+  const refsTo = D.tables.filter(o=>o.columns.some(c=>c.references&&c.references.startsWith(name+".")));
+  const tabs = [["columns","Columns",t.columns.length],["rules","Rules",t.rules.length],["samples","Samples",t.samples.length],["questions","Questions",t.questions.length],["constraints","Constraints",t.checks.length+t.unique.length+t.indexes.length]];
+  const body = {
+    columns: () => tbl(["Column","Type","Null","Default","Description"], t.columns.map(c=>colRow(t,c))),
+    rules: () => t.rules.length ? tbl(["ID","Rule","Enforced by"], t.rules.map(r=>`<tr><td class="m">${esc(r.id)}</td><td>${esc(r.text)}</td><td>${esc(r.enforced_by)}</td></tr>`)) : `<p class="muted small">No rules recorded.</p>`,
+    samples: () => t.samples.length ? (()=>{const keys=[...new Set(t.samples.flatMap(r=>Object.keys(r)))];
+      return tbl(keys, t.samples.map(r=>`<tr>${keys.map(k=>`<td class="m">${k in r?esc(r[k]):'<span class="null">—</span>'}</td>`).join("")}</tr>`))})() : `<p class="muted small">No sample rows. Synthetic data only.</p>`,
+    questions: () => t.questions.length ? t.questions.map(q=>question({...q,table:name},false)).join("") : `<p class="muted small">No open questions.</p>`,
+    constraints: () => `<div class="lbl">Checks</div>${t.checks.length?tbl(["Name","Expression"],t.checks.map(c=>`<tr><td class="m">${esc(c.name)}</td><td class="m">${esc(c.expr)}</td></tr>`)):'<p class="muted small">None.</p>'}
+      <h3 class="sec">Unique</h3>${t.unique.length?`<p class="mono small">${t.unique.map(u=>esc(u.join(", "))).join("<br>")}</p>`:'<p class="muted small">None.</p>'}
+      <h3 class="sec">Indexes</h3>${t.indexes.length?`<p class="mono small">${t.indexes.map(i=>esc(i.columns.join(", ")+(i.unique?" (unique)":"")+(i.where?" where "+i.where:""))).join("<br>")}</p>`:'<p class="muted small">None.</p>'}`
+  };
+  return `<div class="crumb">${esc(t.domain)}</div><h2 class="tname">${esc(t.name)}</h2>
+  <div class="chips"><span class="chip k">${esc(t.status)}</span><span class="chip">public_id ${esc(t.prefix)}_…</span>
+   ${t.immutable?`<span class="chip imm">immutable${t.mutable_columns.length?" · mutable: "+esc(t.mutable_columns.join(", ")):""}</span>`:""}
+   ${refsTo.length?`<span class="chip">referenced by ${refsTo.map(o=>link(o.name)).join(", ")}</span>`:""}</div>
+  <div class="callout"><div class="lbl">What it is</div>${esc(t.description)}</div>
+  <div class="tabs">${tabs.map(([k,l,n])=>`<button class="tab ${k===tab?"on":""}" data-tab="${k}">${l}<span class="n">${n}</span></button>`).join("")}</div>
+  ${body[tab]()}`;
+}
+
+function enums(){
+  return `<div class="crumb">Overview</div><h2 class="tname">Enums</h2><p class="small muted">Implemented as CHECK constraints, not Postgres ENUM types, so adding a value is a constraint change in a migration.</p>
+  ${tbl(["Enum","Values","Used by"], D.enums.map(e=>`<tr><td class="m">${esc(e.enum)}</td><td class="m">${e.values.map(esc).join(", ")}</td><td class="m small">${D.tables.flatMap(t=>t.columns.filter(c=>c.enum===e.enum).map(c=>link(t.name)+"."+esc(c.name))).join(", ")||'<span class="null">unused</span>'}</td></tr>`))}`;
+}
+
+function openq(){
+  return `<div class="crumb">Overview</div><h2 class="tname">Open questions</h2>
+  <p class="small muted">A decision the model cannot make for itself. Answer it in the table's YAML (status, answer) and rebuild.</p>
+  ${["CTO","CMO","Product","CEO","Business Tech Review"].map(o=>{const qs=allQ.filter(q=>q.owner===o);return qs.length?`<h3 class="sec">${esc(o)} (${qs.length})</h3>`+qs.map(q=>question(q,true)).join(""):""}).join("")||'<p class="muted">None.</p>'}`;
+}
+
+function route(){
+  const r = location.hash.slice(1) || "overview";
+  let h;
+  if (r === "overview") h = overview(); else if (r === "enums") h = enums(); else if (r === "openq") h = openq();
+  else if (r.startsWith("t-")) h = table(r.slice(2)); else h = overview();
+  $("#main").innerHTML = `<section class="pane">${h}</section>`;
+  document.querySelectorAll(".tab").forEach(b => b.onclick = () => { tab = b.dataset.tab; route(); });
+  $("#main").scrollTop = 0; mark();
+}
+addEventListener("hashchange", () => { tab = "columns"; route(); });
+addEventListener("keydown", e => { if (e.key === "/" && document.activeElement.tagName !== "INPUT") { e.preventDefault(); $("#q").focus(); } });
+side(); route();
+</script></body></html>

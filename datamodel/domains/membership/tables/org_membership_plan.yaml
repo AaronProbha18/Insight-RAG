@@ -1,0 +1,20 @@
+table: org_membership_plan
+domain: membership
+status: published
+public_id_prefix: plan
+description: A membership tier an organization sells.
+columns:
+  - {name: organization_id, type: uuid, references: organization.id, description: Owning organization.}
+  - {name: plan_name, type: text, description: Name shown to the member.}
+  - {name: annual_price, type: "numeric(10,2)", description: Price for one year.}
+  - {name: currency, type: varchar(3), default: "'USD'", description: ISO 4217 code.}
+  - {name: is_active, type: bool, default: "true", description: Whether the plan can be bought.}
+checks:
+  - {name: ck_org_membership_plan_price, expr: "annual_price >= 0"}
+unique: [[organization_id, plan_name]]
+open_questions:
+  - id: OQ-ORG_MEMBERSHIP_PLAN-001
+    owner: Product
+    text: Does a plan need versioning so past prices can be recovered?
+sample_rows:
+  - {organization_id: "(organization.display_name=Example Wellness)", plan_name: Essential, annual_price: 1200.00, currency: USD}
