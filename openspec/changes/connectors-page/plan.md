@@ -1,45 +1,33 @@
 ## Task
-4.2 Accessibility pass: labels not by colour alone, 4.5:1 contrast in both themes (extend `design-tokens.test.ts` for new pairs), keyboard reach for every link
+5.1 `builtin` on `GET /connectors` (true when the connector class module is under `plumbline.connectors.builtin`); update `test_connectors_api.py`: built-ins true, a third-party fake false, still exactly four fields
 
 ## Scope
-This is an audit with guards, not new UI. Findings from reading the code on this branch:
-
-- **Contrast:** the Connectors page and card use only existing tokens, and each text/background pair they produce is already in `PAIRS` in `design-tokens.test.ts`:
-  - `text-foreground` on `--background` (card body, h1);
-  - `text-muted-foreground` on `--background` (extensions line, run line, sidebar group labels);
-  - `text-destructive` on `--background` (Below bar, not-current note, error messages);
-  - the sidebar's current-item `bg-muted` under foreground text (`--foreground` on `--muted`);
-  - metric bars: fill and 0.80 marker are `bg-foreground` on a `bg-muted` track (`--foreground` on `--muted`, already ≥ 4.5:1, so it also clears the 3:1 non-text rule).
-  So **no new token and no new pair**. I'll document that in `PAIRS` with comments naming the new users (no assertion changes), rather than add a duplicate pair. If you want an explicit bar pair line anyway, it's one line.
-- **Not by colour alone:** already structural in 3.1 and 3.3 (word plus `aria-hidden` icon, bar `aria-hidden`, value as text); I add a guard that spans the whole page, below.
-- **Keyboard:** every new link is a native `<a href>` (Connectors, Quality), so it's in the tab order with the existing `focus-visible` ring from the sidebar's `item` class; nothing uses `tabindex` or a click-only element. The cards contain no interactive controls.
-
-Changes:
-1. `shell/a11y.test.tsx`: add `['connectors', false]` and `['connectors', true]` to the `describe.each` (every control named; the "announces the current page" check becomes: Documents page has 1 `aria-current`, Connectors page has 2 — the Connectors and Quality links — chat has 0); add `../connectors/ConnectorCard.tsx`, `../connectors/ConnectorsPage.tsx` to the `files` list so the outline-needs-focus-visible and no-colour-literal source scans cover them.
-2. `shell/a11y.test.tsx`: one new test: in the connectors-page markup, every `<a>` has an `href` and none has `tabindex="-1"` (keyboard reach), and no link is `aria-disabled` (the old Coming-soon span is gone).
-3. `design-tokens.test.ts`: comments on the existing `PAIRS` lines listing the Connectors page uses; no behaviour change.
-
-Guides read: `docs/guides/frontend-development-guide.md` §5 accessibility and §6 styling (every text/background pair ≥ 4.5:1 in both themes; tokens only; keep tests next to code), §7.1 (focus order and themes are checked by hand).
+- In `backend/src/plumbline/api/app.py`, add one key to each entry of the `/connectors` response: `"builtin": type(c).__module__.startswith("plumbline.connectors.builtin.")`, as in design.md "`builtin` on `GET /connectors`". Name, extensions, contract version and the sort stay as they are.
+- `FileConnector` instances come from `registry.load_connectors()`, which instantiates the class from the entry point, so `type(c).__module__` is the class's defining module. Verified for the built-ins: `pyproject.toml` registers `plumbline.connectors.builtin.pdf:PdfConnector` and `...docx:DocxConnector`. For the test fake it is `fake_connectors`, so it is not built in.
+- Update `backend/tests/test_connectors_api.py`; this guard is the "still four fields" check.
+- Guide read: `docs/guides/backend-development-guide.md` (routes stay thin, 1.1; the response is an allowlist built from named fields, as `/quality` is, 2.5; tests sit with the code, 8).
 
 ## Not in scope
-- New colour tokens or restyling; none needed.
-- Screen-reader testing with real assistive tech.
-- Guide text: §5 and §7.1 already describe the Connectors page (task 4.1).
+- The frontend type and the card's "Built-in" text (6.1, 6.2).
+- Guide text for the fourth field (7.1). Until then the backend guide's rule 2.6 says three fields; it is stale for one task, fixed in 7.1.
+- A registry change or a hard-coded name list (rejected in design.md).
+- Starting or restarting the dev backend; I'll restart it myself only if you ask.
 
 ## Files
 | File | Change |
 | --- | --- |
-| `frontend/src/shell/a11y.test.tsx` | connectors cases, source scan files, link reach test |
-| `frontend/src/design-tokens.test.ts` | comments on `PAIRS` only |
+| `backend/src/plumbline/api/app.py` | add the `builtin` key |
+| `backend/tests/test_connectors_api.py` | built-ins true; third-party false; exactly four keys |
 
 ## Tests
-- The new a11y cases above (spec "Themes and keyboard": Passes and Below bar not by colour alone, text meets 4.5:1, every link reachable).
-- Existing `design-tokens.test.ts` already asserts all pairs in both themes; it must still pass unchanged.
+- Built-ins (spec "Built-in connectors"): the existing test's expected list gains `"builtin": True` for `docx` and `pdf`, which also proves exactly four keys (it compares whole dicts).
+- Third-party (spec "Third-party connector"): with the registry patched to `GoodConnector` from `fake_connectors` (`_install`, as the existing failed-connector test does), `/connectors` returns one entry with `builtin` false and exactly `{name, extensions, contract_version, builtin}`.
+- The existing failed-connector and name-match tests keep passing unchanged.
 
 ## Checks to run
-- From `D:\PROJECTS\Plumbline\frontend`: `npm run lint && npm run build && npm test`
-- Manual, in a browser (this is the part I can't verify from tests; I will not tick it for you): `npm run dev`, open `/app/connectors` in light and dark OS themes; Tab through the sidebar to Connectors and Quality, Enter opens the page, focus ring visible on each; read the card states. Tell me the result, or I record it as "not checked by hand" in `verification.md`.
+- `cd backend && uv run ruff check . && uv run ruff format --check .`
+- `cd backend && uv run python -m pytest -q` (`uv run pytest` fails on this machine with a uv trampoline error; `python -m pytest` works).
 
 ## Risks / Questions
-- The manual keyboard and theme check can't be done by static tests. The task ends with the automated guards green and the manual step either done by you or recorded as unchecked.
-- Measured contrast is only as good as the existing token test's OKLCH math; I'm relying on it as for earlier pages.
+- A third-party connector whose package is also named `plumbline.connectors.builtin.*` would read as built-in; that namespace belongs to this repo, so I accept it.
+- None otherwise.

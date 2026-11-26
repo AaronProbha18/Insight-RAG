@@ -21,7 +21,7 @@
 
 ## 5. Backend additions (scope change after 4.2)
 
-- [ ] 5.1 `builtin` on `GET /connectors` (true when the connector class module is under `plumbline.connectors.builtin`); update `test_connectors_api.py`: built-ins true, a third-party fake false, still exactly four fields
+- [x] 5.1 `builtin` on `GET /connectors` (true when the connector class module is under `plumbline.connectors.builtin`); update `test_connectors_api.py`: built-ins true, a third-party fake false, still exactly four fields
 - [ ] 5.2 Runner summary writes `answerable_questions` and `unanswerable_questions` per connector; `quality.load_quality` passes them through as optional non-negative integers (absent or invalid: left out, result otherwise unchanged); tests in `test_runner.py`, `test_quality.py`, `test_quality_api.py`, including a summary without the counts
 
 ## 6. Page, cards and sidebar to the design

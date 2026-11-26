@@ -125,6 +125,7 @@ def connectors(
             "name": c.name,
             "extensions": list(c.extensions),
             "contract_version": c.contract_version,
+            "builtin": type(c).__module__.startswith("plumbline.connectors.builtin."),
         }
         for c in sorted(connectors.values(), key=lambda c: c.name)
     ]

@@ -21,8 +21,26 @@ def test_built_ins_listed_sorted_with_allowlisted_fields(client):
 
     assert r.status_code == 200
     assert r.json() == [
-        {"name": "docx", "extensions": [".docx"], "contract_version": 1},
-        {"name": "pdf", "extensions": [".pdf"], "contract_version": 1},
+        {
+            "name": "docx",
+            "extensions": [".docx"],
+            "contract_version": 1,
+            "builtin": True,
+        },
+        {"name": "pdf", "extensions": [".pdf"], "contract_version": 1, "builtin": True},
+    ]
+
+
+def test_third_party_connector_is_not_builtin(client, monkeypatch):
+    _install(monkeypatch, "GoodConnector")
+
+    assert client.get("/connectors").json() == [
+        {
+            "name": "good",
+            "extensions": [".txt"],
+            "contract_version": 1,
+            "builtin": False,
+        }
     ]
 
 
