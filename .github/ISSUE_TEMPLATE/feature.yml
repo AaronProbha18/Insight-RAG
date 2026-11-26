@@ -61,3 +61,14 @@ body:
         - "Not sure"
     validations:
       required: true
+  - type: dropdown
+    id: db-change
+    attributes:
+      label: DB change?
+      description: Adds or changes an Alembic revision. "Yes" means datamodel/models/plumbline is updated in the same PR and the plumbline-drift CI job must pass.
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true

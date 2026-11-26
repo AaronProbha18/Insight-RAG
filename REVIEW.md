@@ -42,7 +42,8 @@ Rules: [backend guide](docs/guides/backend-development-guide.md).
 - [ ] `/chat` events changed? Then `frontend/src/chat/adapter.ts` changed
       in the same diff (§2.4).
 - [ ] Schema changed? It's a **new** migration revision, not an edit to an
-      applied one (§7).
+      applied one (§7). The matching `datamodel/models/plumbline/` YAML
+      changed in the same diff, and the `plumbline-drift` CI job passes.
 - [ ] New code that can fail has a test for the failure path (§8.4).
 
 ## `frontend/`

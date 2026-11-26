@@ -31,8 +31,10 @@ skill orchestrates; the work happens in `rag-plan`, `rag-execute`,
      `status:in-progress` (`gh issue edit <N> --remove-label
      status:ready-for-dev --add-label status:in-progress`), and
      `bash scripts/board.sh <N> "In Progress"`.
-   - The issue has `answer-quality`? Then this run must end with an eval
+   - The issue has `answer-quality-change`? Then this run must end with an eval
      result in `verification.md`. Say so now, so the model setup is ready.
+   - The issue has `db-change`? Then this run must end with the drift check
+     recorded in `verification.md`. Say so now.
 
 2. **Loop, once per unchecked `tasks.md` checkbox, in order**
    1. `rag-plan <change>`, then **wait for the user's approval** of
