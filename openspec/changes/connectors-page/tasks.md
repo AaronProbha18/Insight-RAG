@@ -35,3 +35,7 @@
 
 - [x] 7.1 Update the backend guide (`/connectors` has four fields; `/quality` counts), frontend guide (folder tree, sidebar and page accessibility text, checklist) and the architecture overview; remove the Quality-link wording added in 4.1
 - [x] 7.2 Accessibility re-check: one current-page link on the Connectors page (a11y test), status pills are words plus icon, new link text is named, 4.5:1 test still passes with no new token; by-hand light/dark and keyboard check noted in `verification.md`
+
+## 8. Verification gap
+
+- [x] 8.1 `backend/tests/test_ui_mount.py`: with the UI directory set, `GET /app/connectors` returns `index.html`, and `GET /connectors` returns the API's JSON, not `index.html` (app-shell scenarios "Shared link in production" and "API paths are not affected")
