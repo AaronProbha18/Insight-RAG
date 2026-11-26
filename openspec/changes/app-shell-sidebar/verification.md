@@ -1,6 +1,6 @@
 ## Checks Run
 
-All run in this session, on branch `feat/33-app-shell-sidebar` at `290f230`.
+All run in this session, on branch `feat/33-app-shell-sidebar` at `867fd43` (re-run after the review fix).
 
 | Command | Result |
 | --- | --- |
