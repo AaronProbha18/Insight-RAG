@@ -47,6 +47,8 @@ it back to the issue. Never edit code.
    `--schema rag-rapid` if routed there). The proposal's first line is
    `Issue: #<N>`. Every acceptance criterion from the issue becomes a spec
    scenario (rag-standard) or a task (rag-rapid).
+   **Database change:** if the change adds an Alembic revision, the same
+   task in `tasks.md` also updates `datamodel/models/plumbline/` (ADR 0004).
 
 5. **Until tasks.md is complete**: `openspec status --change <name>`
    shows every artifact up to `tasks` done, and `openspec validate <name>`
@@ -58,9 +60,10 @@ it back to the issue. Never edit code.
    - Labels (all defined in `.github/labels.yml`):
      `gh issue edit <N> --remove-label status:needs-triage --add-label
      status:ready-for-dev,area:<…>`, plus
-     `answer-quality` if the form said "Yes" or the route is
-     `rag-standard`. If triage itself is stuck on a decision, add
-     `status:blocked` and say what it's waiting for.
+     `answer-quality-change` if the form said "Yes" or the route is
+     `rag-standard`, and `db-change` if the form said "Yes" or "Not sure",
+     or the change adds an Alembic revision. If triage itself is stuck on a
+     decision, add `status:blocked` and say what it's waiting for.
    - Board: `bash scripts/board.sh <N> Ready`.
    - Commit the change's planning artifacts on a branch
      `triage/<N>-<slug>` with message `docs(openspec): plan #<N> <title>`.

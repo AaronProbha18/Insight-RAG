@@ -19,7 +19,10 @@ Implement ONE planned task. Nothing beyond its stated scope.
    follows those rules; if a rule is wrong, stop and say so rather than
    break it.
 3. Implement the plan's Files table. Write the tests from its Tests
-   section alongside the code.
+   section alongside the code. **Database change:** update
+   `datamodel/models/plumbline/` in the same task as the Alembic revision,
+   then run `validate --model models/plumbline` and the drift check
+   (`datamodel/README.md`). Never leave the two disagreeing.
 4. Run every command in "Checks to run". On failure: fix if the cause is
    inside this task's scope; otherwise pause and report.
 5. Self-review the diff against the plan:
