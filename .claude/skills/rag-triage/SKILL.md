@@ -47,6 +47,8 @@ it back to the issue. Never edit code.
    `--schema rag-rapid` if routed there). The proposal's first line is
    `Issue: #<N>`. Every acceptance criterion from the issue becomes a spec
    scenario (rag-standard) or a task (rag-rapid).
+   **Database change:** if the change adds an Alembic revision, the same
+   task in `tasks.md` also updates `datamodel/models/plumbline/` (ADR 0004).
 
 5. **Until tasks.md is complete**: `openspec status --change <name>`
    shows every artifact up to `tasks` done, and `openspec validate <name>`

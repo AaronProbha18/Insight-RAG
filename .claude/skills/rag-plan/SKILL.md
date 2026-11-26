@@ -25,6 +25,11 @@ it, otherwise ask.
    - `frontend/` → `docs/guides/frontend-development-guide.md`
    - `backend/` → `docs/guides/backend-development-guide.md`
    - a connector, or `connectors/` → `docs/guides/connector-development-guide.md`
+   - a database change (a new revision in `backend/migrations/`) → also the
+     "Plumbline's model and the drift rule" section of `datamodel/README.md`.
+     The Files table lists the matching `datamodel/models/plumbline/` YAML,
+     and "Checks to run" includes the drift check, so Alembic and the YAML
+     change in the same task.
 
    Also read `docs/architecture/overview.md` when the task crosses
    modules. Name the guides you read in the plan's Scope section.
