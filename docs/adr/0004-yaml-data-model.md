@@ -1,82 +1,71 @@
-# ADR 0004: YAML data model with generated DDL and migrations
+# ADR 0004: YAML mirror of Plumbline's schema, with a drift gate
 
 ## Status
 
-Accepted. Introduced by the `datamodel-system` change (issue #21), extended
-by `datamodel-plumbline-mirror` (issue #28).
+Accepted. Introduced by the `datamodel-system` change (issue #21), revised by
+`datamodel-plumbline-mirror` (issue #28).
 Architecture and technical sign-off: business tech review.
+
+Revision note: this ADR was revised in the same PR that accepted it (issue
+#28, before any release). The toolkit was trimmed to what Plumbline's mirror
+needs, and the sample model, migration generator, enums, immutable tables,
+uuid ids, sample rows, business rules and per-model settings were removed.
 
 ## Context
 
 Data models were maintained by hand, so DDL, migrations and review docs
-drifted. A prototype (`modelkit`) generates all three from YAML. It lives
-in `datamodel/` and never touches Plumbline's own database or reads
-`backend/`. Plumbline's own schema keeps its Alembic migrations, and
-`datamodel/` also holds a YAML mirror of it so the two can't drift unseen.
+drifted. A prototype (`modelkit`) generated all three from YAML. Plumbline's
+own schema, though, is Alembic's: hand-written SQL in `backend/migrations/`.
+`datamodel/` therefore holds a YAML description of that schema and the tools
+that check it and render it. It never touches Plumbline's database outside
+the CI job below, and it never reads `backend/`.
 
 ## Decision
 
-- **YAML is the model.** `datamodel/models/<name>/domains/**` and
-  `datamodel/models/<name>/enums/*` are the only source; `build/schema.sql`,
-  `migrations/*.sql`, `model.lock.json` and `build/explorer.html` are
-  generated. For a model whose YAML is the source (`models/sample`), a
-  column in the database but not in a `table.yaml` is a defect.
-- **Models live under `datamodel/models/<name>/`.** Every tool takes
-  `--model <dir>` (relative to `datamodel/`, default `models/sample`) and
-  `make` takes `MODEL=`. Each model has its own `build/`, and, when it
-  generates migrations, its own `migrations/` and `model.lock.json`.
-- **System columns are injected**, never written in YAML: `id` (internal
-  primary key, never leaves the backend), then `public_id` (unique,
-  `^<prefix>_[0-9A-Za-z]+$`), `created_at`, and `updated_at` (unless the
-  table is fully immutable). A table's `system_columns` can list a subset
-  of the three optional ones; the default is all three. Foreign keys point
-  at `id`.
-- **Conventions are per-model settings** in an optional `model.yaml`, with
-  defaults that keep the sample unchanged: `id_type` (`uuid` or
-  `bigserial`), `public_id_check`, `updated_at_trigger`, `comments` and
-  `constraint_names` (`generated` or Postgres's own names).
-- **Types** beyond the basics: `char(n)`, `double precision`, `vector(n)`
-  and `vector({embedding_dim})`, where `{embedding_dim}` is filled from
-  `PLUMBLINE_EMBEDDING_DIM` when DDL or the explorer is generated.
-- **Alembic stays the source for Plumbline's schema.** `models/plumbline/`
-  mirrors it, and the `plumbline-drift` job in
-  `.github/workflows/datamodel.yml` fails when the schema generated from the
-  YAML differs from Alembic head in columns, types, nullability, defaults,
-  constraint definitions, indexes or triggers. It ignores object names,
-  comments, column order and `alembic_version`. A Plumbline schema change
-  updates Alembic and the YAML in the same PR.
-- **Enums are CHECK constraints**, not Postgres ENUM types.
-- **Migrations are a snapshot diff** of generated objects against
-  `model.lock.json`, committed together. Destructive changes are refused
-  without `--allow-destructive`, which is recorded in the file. No renames,
-  data or down migrations; revisit (e.g. Atlas) if renames become common.
-- **Explorer is one static HTML file**, data embedded as JSON, vanilla JS,
-  no network. A deliberate deviation from the React + Vite default: a
-  review page doesn't justify a toolchain.
-- **Explorer is local only**: built by `make explorer` and opened from
-  disk; not hosted and not uploaded by CI.
-- **Commands** are `make` targets calling `uv run`.
+- **Alembic stays the source of Plumbline's schema. The YAML mirrors it.**
+  `datamodel/models/plumbline/` describes the four tables, and the
+  `plumbline-drift` job in `.github/workflows/datamodel.yml` fails when the
+  schema generated from the YAML differs from Alembic head in columns,
+  types, nullability, defaults, constraint definitions, indexes or
+  triggers. It ignores object names, comments, column order and
+  `alembic_version`, and labels each difference `alembic` or `yaml`. A
+  Plumbline schema change updates Alembic and the YAML in the same PR.
+- **Models live under `datamodel/models/<name>/`**: `domains/` holds the
+  YAML, and `build/` (git-ignored) holds `schema.sql` and `explorer.html`.
+  Every tool takes `--model <dir>` (relative to `datamodel/`, default
+  `models/plumbline`) and `make` takes `MODEL=`.
+- **System columns are injected**, never written in YAML: `id bigserial`
+  (the internal primary key, never leaves the backend), and, per table's
+  `system_columns`, a subset of `public_id` (unique, prefixed, opaque),
+  `created_at` and `updated_at`. Foreign keys are `bigint` and point at `id`.
+- **One set of conventions**, Plumbline's: no `public_id` CHECK, no
+  `updated_at` trigger, no comments, and Postgres's own constraint names
+  (`<t>_pkey`, `<t>_<c>_fkey`, `<t>_<cols>_key`). There is no `model.yaml`.
+- **Types** are the ones Plumbline's tables use: `text`, `int`, `bigint`,
+  `bool`, `timestamptz`, `jsonb`, `char(n)`, `double precision`,
+  `vector(n)` and `vector({embedding_dim})`, where `{embedding_dim}` is
+  filled from `PLUMBLINE_EMBEDDING_DIM` when DDL or the explorer is
+  generated.
+- **The explorer is one static HTML file**, data embedded as JSON, vanilla
+  JS, no network. A deliberate deviation from the React + Vite default: a
+  review page doesn't justify a toolchain. It is local only: built by
+  `make explorer` and opened from disk, not hosted and not uploaded by CI.
+- **Commands** are `make` targets calling `uv run`: `validate`, `ddl`,
+  `explorer`, `test`.
 
 ## Alternatives
 
-- SQL/Alembic first, document after: standard tooling, docs rot.
-- A modelling tool: UI, but opaque and hard to review in PRs.
-- Postgres ENUM types: stronger typing, but removing a value is hard.
-- Alembic autogenerate or Atlas: understand renames, but need a live DB.
-- React explorer: matches the product stack, adds a build chain.
 - For Plumbline's schema, YAML as the source with generated migrations: a
   cutover on a live schema, and `vector(N)` has no clean home in it.
 - For Plumbline's schema, docs only with no gate: it drifts, which is the
   problem this ADR exists to fix.
+- Keep the migration generator, the sample model and per-model settings
+  from #21: code and a model Plumbline never uses.
+- A modelling tool: UI, but opaque and hard to review in PRs.
+- A React explorer: matches the product stack, adds a build chain.
 
 ## Consequences
 
-- We own a small generator and its tests.
-- Migrated column order differs from a fresh build (`ADD COLUMN`
-  appends); equivalence checks ignore column order.
-- Removing an enum value replaces its CHECK and fails on rows still using
-  it; the migrator does not flag it as destructive.
-- Anyone reviewing the model builds the explorer themselves.
 - Every Plumbline schema change is written twice, in Alembic and in the
   YAML. Forgetting the YAML fails the drift job.
 - The drift job is not a required check (a path-filtered required check
@@ -84,3 +73,7 @@ in `datamodel/` and never touches Plumbline's own database or reads
   see it green.
 - The drift job doesn't compare trigger function bodies, sequences or
   extensions.
+- The toolkit is smaller than #21 first delivered: no migration generator,
+  enums, immutable tables or per-model conventions. A feature that comes
+  back needs a reason.
+- Anyone reviewing the model builds the explorer themselves.

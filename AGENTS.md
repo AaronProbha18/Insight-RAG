@@ -154,9 +154,9 @@ uv run --no-project --with reportlab --with python-docx python evals/generate_co
 
 # datamodel (from datamodel/; see datamodel/README.md)
 uv sync
-make check test                    # CI gate; Postgres tests need DATAMODEL_TEST_DATABASE_URL
-make validate MODEL=models/plumbline   # any target takes MODEL= (default models/sample)
-PYTHONPATH=tools uv run python tools/validate.py   # without make; same for ddl, explorer, migrate
+make validate test                 # CI gate; Postgres tests need DATAMODEL_TEST_DATABASE_URL
+make validate MODEL=models/plumbline   # any target takes MODEL= (default models/plumbline)
+PYTHONPATH=tools uv run python tools/validate.py   # without make; same for ddl, explorer
 uv run pytest -q -rs
 
 # openspec

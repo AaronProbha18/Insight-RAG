@@ -174,8 +174,8 @@ The exported candidates file holds the same text.
 - Retrieval is an exact scan today. An HNSW index is a later migration,
   added when corpus size makes the scan slow.
 
-`datamodel/` is a separate toolkit: a YAML data model that generates DDL,
-migrations and an explorer
+`datamodel/` is a separate toolkit: a YAML description of Plumbline's schema that
+checks and generates DDL and an explorer
 ([ADR 0004](../adr/0004-yaml-data-model.md),
 [datamodel/README.md](../../datamodel/README.md)). Alembic remains the
 source of Plumbline's schema; `datamodel/models/plumbline/` mirrors it, and
