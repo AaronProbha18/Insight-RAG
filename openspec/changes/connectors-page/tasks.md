@@ -29,7 +29,7 @@
 - [x] 6.1 Types: `Connector.builtin` in `connectors/api.ts`; optional counts on `ConnectorQuality` in `quality/api.ts`; fixtures and tests follow
 - [x] 6.2 `connectors/ConnectorCard.tsx` redesign: icon, name, subtitle "Built-in · .pdf · N documents", status pill (Passes / Below bar / Not measured, icon plus text), metric rows, footer with date, question counts when present, chat and judge models; keep Not measured with the eval command and the not-current note; existing tokens only; tests for each state
 - [x] 6.3 `connectors/ConnectorsPage.tsx` redesign: title "Connectors and quality", intro, 0.80 explainer with a "How it's measured" link, card grid, "Build your own" card linking to the connector guide, no Planned cards; links are `main` on `AaronProbha18/Plumbline`; keep load, error and empty states; tests
-- [ ] 6.4 Sidebar: one item "Connectors and quality" in Knowledge; remove the Quality item, the Insights group, the `quality` prop (Sidebar, SidebarDrawer, AppShell) and `quality/label.ts` with its test; `App` keeps `useQuality` for the page; update Sidebar, SidebarDrawer, AppShell and a11y tests
+- [x] 6.4 Sidebar: one item "Connectors and quality" in Knowledge; remove the Quality item, the Insights group, the `quality` prop (Sidebar, SidebarDrawer, AppShell) and `quality/label.ts` with its test; `App` keeps `useQuality` for the page; update Sidebar, SidebarDrawer, AppShell and a11y tests
 
 ## 7. Docs and accessibility again
 

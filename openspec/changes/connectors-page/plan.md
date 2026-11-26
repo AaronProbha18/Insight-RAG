@@ -1,44 +1,44 @@
 ## Task
-6.3 `connectors/ConnectorsPage.tsx` redesign: title "Connectors and quality", intro, 0.80 explainer with a "How it's measured" link, card grid, "Build your own" card linking to the connector guide, no Planned cards; links are `main` on `AaronProbha18/Plumbline`; keep load, error and empty states; tests
+6.4 Sidebar: one item "Connectors and quality" in Knowledge; remove the Quality item, the Insights group, the `quality` prop (Sidebar, SidebarDrawer, AppShell) and `quality/label.ts` with its test; `App` keeps `useQuality` for the page; update Sidebar, SidebarDrawer, AppShell and a11y tests
 
 ## Scope
-Markup change in `ConnectorsView` (the pure part of the page); `ConnectorsPage` (the hook wrapper), props and data flow stay as built in 3.2.
-- **Frame, always shown** (also while loading and on errors): `<h1>Connectors and quality</h1>`; the intro "A connector reads one file type and turns it into passages Plumbline can cite. Each one is checked against its own question set."; and the explainer line: a small `aria-hidden` vertical mark, then "The bar is 0.80 on correctness, faithfulness and abstention. A connector below it still works, but its answers are less reliable.", then a link "How it's measured" to `https://github.com/AaronProbha18/Plumbline/blob/main/evals/README.md` (opens in a new tab with `rel="noreferrer"`, like the sidebar's Docs link; visible focus ring).
-- **Status line:** the existing `role="status"` region keeps the loading, error and "No connectors loaded." messages, now under the explainer.
-- **Cards:** the same `ConnectorCard`s in a responsive grid (`grid-cols-[repeat(auto-fit,minmax(21rem,1fr))]`, gap 5), instead of the single-column stack; wider page container (`max-w-6xl`) to match the design.
-- **"Build your own" card** after the grid, shown only when the page has loaded (no message, connectors and quality present, empty list included): a `<section aria-label="Build your own">` with the heading "Build your own", "Connectors are Python plug-ins. Each must pass the conformance kit and the 0.80 bar.", and a link "Connector guide" to `https://github.com/AaronProbha18/Plumbline/blob/main/docs/guides/connector-development-guide.md`. Its copy is the design's; I have not checked "conformance kit" against the guide (done below).
-- **Not built:** the design's "Coming next" Planned cards (issue non-goal).
-- Colours only through existing tokens; the card's footer-style small text uses `text-muted-foreground`. Links use `font-medium underline`, in `text-foreground`.
-- Guides read: `docs/guides/frontend-development-guide.md` (1.4 real links, 3.2 generic messages, 5 accessibility, 6 tokens only, 7.1 static markup tests), and `docs/guides/connector-development-guide.md` to check the "Build your own" copy.
+- `shell/Sidebar.tsx`: the Connectors link's text becomes "Connectors and quality" (and so its collapsed tooltip and screen-reader text; same `PlugIcon`, same link to `/app/connectors`, `aria-current` on its page). Remove the Quality link and the whole Insights group, the `quality?` prop, the `qualityLabel` and `Quality` imports, the `qualityText`/`QualityIcon` code and the four icons only they used (`ChartNoAxesColumnIcon`, `CircleCheckIcon`, `CircleHelpIcon`, `CircleXIcon`). `pageLink` stays, now used twice.
+- `shell/SidebarDrawer.tsx`: remove the `quality` prop and the `Quality` import.
+- `shell/AppShell.tsx`: stop passing `quality.quality` to `Sidebar` and `SidebarDrawer`. The `quality` prop of `AppShell` itself stays: the Connectors page still takes it.
+- `App.tsx`: unchanged (`useQuality()` still feeds the page).
+- Delete `quality/label.ts` and `quality/label.test.ts`.
+- Result, top to bottom: logo and collapse; New chat; Knowledge: Documents, Connectors and quality; Docs.
+- Guides read: `docs/guides/frontend-development-guide.md` (1.4 real links with plain-click handling; 5 sidebar accessibility; 7.1 `Sidebar` is called as a function in `SidebarDrawer.test.tsx`, so the anchors must stay in `Sidebar`'s own element tree, which `pageLink` keeps).
 
 ## Not in scope
-- Card internals (6.2, done), sidebar (6.4), guide text (7.1).
-- Hooks, `useConnectors`, `App`, `AppShell` wiring: unchanged.
-- Verifying the two GitHub URLs resolve on the remote `main` (the link checker covers in-repo links only).
+- Page, cards, `useQuality`, `App` (unchanged).
+- Guide text for the sidebar (7.1) and the accessibility re-check wording (7.2). The frontend guide's sidebar bullet and folder tree are stale until 7.1.
+- A sidebar quality indicator of any kind (decided: page only).
 
 ## Files
 | File | Change |
 | --- | --- |
-| `frontend/src/connectors/ConnectorsPage.tsx` | frame, grid, "Build your own", two link constants |
-| `frontend/src/connectors/ConnectorsPage.test.tsx` | update and extend |
-| `frontend/src/shell/AppShell.test.tsx` | the connectors `<h1>` assertions follow the new title |
+| `frontend/src/shell/Sidebar.tsx` | merge to one item; remove Quality item, Insights group, prop, imports |
+| `frontend/src/shell/SidebarDrawer.tsx` | remove the prop |
+| `frontend/src/shell/AppShell.tsx` | stop passing quality to the sidebar and drawer |
+| `frontend/src/quality/label.ts`, `label.test.ts` | delete |
+| `frontend/src/shell/Sidebar.test.tsx` | update |
+| `frontend/src/shell/a11y.test.tsx` | current-page count on the connectors page becomes 1; link-count comment |
+| `frontend/src/shell/SidebarDrawer.test.tsx`, `AppShell.test.tsx` | only if they fail to compile or assert old text |
 
 ## Tests
-Static markup:
-- Page frame (spec "Page frame"): h1 "Connectors and quality", the intro sentence, the explainer with its link; present while loading and on an error too.
-- Link targets: the "How it's measured" and "Connector guide" `href`s are exactly the two URLs; both have `rel="noreferrer"`.
-- Cards (spec "Cards for each connector", "Subtitle"): one card per connector, in order, and the PDF card reads "Built-in · .pdf · 3 documents"; the docx card "0 documents". Joined quality and Not measured cases as before.
-- "Build your own" (spec "Page frame"): present when loaded, with an empty list too, absent while loading and on either error; no "Planned" and no "Coming next" text anywhere.
-- No card for a connector that isn't in the list: a quality entry for a name `/connectors` doesn't list renders no card (the card list comes from `/connectors` only).
-- `AppShell` `page='connectors'`: shows the new h1 and keeps the chat mounted but hidden; other pages don't contain it.
-- Existing a11y guards (`a11y.test.tsx`): every control named; the two external links have `href`; source scans cover this file. They must still pass.
+- Order (spec "Open Connectors and quality from the sidebar"): logo, New chat, Knowledge, "Documents (3)", "Connectors and quality", then Docs; the words "Insights" and "Quality" as an item are absent (the title text "Connectors and quality" contains "quality", so I assert on `>Quality<` and `Insights`).
+- One link to `/app/connectors` (spec "Quality opens its dialog": no Quality item, exactly one link goes to the page), with `aria-current="page"` only on the connectors page.
+- Quality prop gone: `Sidebar` renders with no `quality` argument (the existing `render` helper drops it), and no "Quality: ..." text appears for any state.
+- Collapsed: "Connectors and quality" kept as `sr-only` text; tooltip triggers drop from 6 to 5 (expand, New chat, Documents, Connectors and quality, Docs); expanded 0.
+- Dialog still gone and the removed files stay removed: `existsSync` list gains `label.ts`.
+- `a11y.test.tsx`: connectors page announces `aria-current` once (Documents page once, chat zero); every control named; the keyboard-reach test still has four links or more (Documents, Connectors and quality, Docs, "How it's measured").
+- `SidebarDrawer.test.tsx` callbacks tests still pass (the anchor is still reachable in `Sidebar`'s tree).
 
 ## Checks to run
 - From `D:\PROJECTS\Plumbline\frontend`: `npm run lint && npm run build && npm test`
-- `python scripts/check_links.py` (unchanged docs; sanity)
-- By eye after 6.4: the whole page in the running app.
+- `grep -rn "qualityLabel\|quality/label" frontend/src` returns nothing.
 
 ## Risks / Questions
-- "Each must pass the conformance kit and the 0.80 bar" is the design's wording. I'll confirm against the connector guide while executing; if the guide says something different (for example that the 0.80 bar is not required of third-party connectors), I'll reword the sentence to match the guide and tell you, not ship a claim the repo doesn't make.
-- The explainer's "still works, but its answers are less reliable" is the design's wording for a Below bar result; it is a product claim, so I'll keep it verbatim and flag it for your product review.
-- The URLs point at GitHub `main`: UNVERIFIED that they resolve once published (the repo is where the sidebar's Docs link already points).
+- With the Insights group gone the sidebar loses its only "Insights" heading; the design keeps the heading for its Unanswered page, which isn't built (out of scope), so there is nothing to put under it.
+- None otherwise.

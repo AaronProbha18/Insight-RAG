@@ -26,7 +26,6 @@ export function AppShell({ page, collapsed, onToggleCollapse, chatKey, onNewChat
         <Sidebar
           page={page}
           documentCount={count}
-          quality={quality.quality}
           collapsed={collapsed}
           onToggleCollapse={onToggleCollapse}
           onNewChat={onNewChat}
@@ -34,7 +33,7 @@ export function AppShell({ page, collapsed, onToggleCollapse, chatKey, onNewChat
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="border-b border-border p-1 md:hidden">
-          <SidebarDrawer page={page} documentCount={count} quality={quality.quality} onNewChat={onNewChat} />
+          <SidebarDrawer page={page} documentCount={count} onNewChat={onNewChat} />
         </div>
         <div hidden={page !== 'chat'} className="min-h-0 flex-1">
           <ChatPane key={chatKey} />

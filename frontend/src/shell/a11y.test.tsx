@@ -47,9 +47,9 @@ describe.each([
     expect(unnamed(html)).toEqual([])
   })
 
-  it('announces the current page: Documents once, Connectors on its link and the Quality link', () => {
+  it('announces the current page once, on Documents or on Connectors and quality', () => {
     const current = html.match(/aria-current="page"/g) ?? []
-    expect(current.length).toBe({ chat: 0, documents: 1, connectors: 2 }[page])
+    expect(current.length).toBe({ chat: 0, documents: 1, connectors: 1 }[page])
   })
 })
 
@@ -81,7 +81,7 @@ describe('keyboard reach on the Connectors page', () => {
   it('has only native links: each has an href, none is removed from the tab order or disabled', () => {
     const links = html.match(/<a\b[^>]*>/g) ?? []
 
-    expect(links.length).toBeGreaterThanOrEqual(4) // Documents, Connectors, Quality, Docs
+    expect(links.length).toBeGreaterThanOrEqual(4) // Documents, Connectors and quality, Docs, How it's measured
     for (const l of links) {
       expect(l).toContain('href="')
       expect(l).not.toMatch(/tabindex="-1"|aria-disabled/)

@@ -2,14 +2,13 @@ import { Dialog } from '@base-ui/react/dialog'
 import { MenuIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import type { Quality } from '../quality/api'
 import type { Page } from './route'
 import { Sidebar } from './Sidebar'
 
-type Props = { page: Page; documentCount: number; quality?: Quality | null; onNewChat: () => void }
+type Props = { page: Page; documentCount: number; onNewChat: () => void }
 
 /** Below md: a menu button that opens the sidebar as a drawer. Both are hidden from md up. */
-export function SidebarDrawer({ page, documentCount, quality, onNewChat }: Props) {
+export function SidebarDrawer({ page, documentCount, onNewChat }: Props) {
   const [open, setOpen] = useState(false)
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -23,7 +22,6 @@ export function SidebarDrawer({ page, documentCount, quality, onNewChat }: Props
           <Sidebar
             page={page}
             documentCount={documentCount}
-            quality={quality}
             collapsed={false}
             onNewChat={onNewChat}
             onNavigate={() => setOpen(false)}
