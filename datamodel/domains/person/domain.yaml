@@ -1,0 +1,6 @@
+domain: person
+title: Person
+layer: runtime
+load_order: 60
+depends_on: [organization]
+description: An individual known to the platform and the consent decisions they have made.

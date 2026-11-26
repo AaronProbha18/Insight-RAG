@@ -1,0 +1,3 @@
+enum: sex_at_birth
+description: Sex recorded at birth.
+values: [FEMALE, MALE, INTERSEX, UNKNOWN]

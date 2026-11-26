@@ -1,0 +1,6 @@
+domain: organization
+title: Organization
+layer: configuration
+load_order: 10
+depends_on: []
+description: The tenant and the sites it delivers care from.

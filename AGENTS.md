@@ -47,6 +47,7 @@ frontend/                  Vite + React + assistant-ui + Tailwind v4
 evals/                     eval DATA only: corpus-src/, connectors/<name>/{corpus,golden.yaml},
                            judge/labelled.yaml, reports/ (gitignored scratch),
                            baselines/<change>/ (committed eval summaries)
+datamodel/                 YAML data model toolkit, own uv project; not Plumbline's schema (ADR 0004)
 scripts/smoke.sh           full-stack smoke test
 docs/adr/                  architecture decision records - why things are the way they are
 docs/architecture/         overview.md: components, flows, boundary rules, data model
@@ -148,6 +149,12 @@ uv run plumbline-eval [--connectors pdf] [--sample N]
 
 # fixture corpus (from repo root, after editing evals/corpus-src/)
 uv run --no-project --with reportlab --with python-docx python evals/generate_corpus.py
+
+# datamodel (from datamodel/; see datamodel/README.md)
+uv sync
+make check test                    # CI gate; Postgres tests need DATAMODEL_TEST_DATABASE_URL
+PYTHONPATH=tools uv run python tools/validate.py   # without make; same for ddl, explorer, migrate
+uv run pytest -q -rs
 
 # openspec
 openspec list                      # active changes

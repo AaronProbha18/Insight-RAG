@@ -1,0 +1,23 @@
+table: org_person
+domain: person
+status: draft
+public_id_prefix: per
+description: An individual known to the platform. Synthetic data only in this repo.
+columns:
+  - {name: organization_id, type: uuid, references: organization.id, description: Owning organization.}
+  - {name: first_name, type: text, pii: direct, description: Given name.}
+  - {name: last_name, type: text, pii: direct, description: Family name.}
+  - {name: email, type: text, pii: direct, description: Login and contact email.}
+  - {name: birth_date, type: date, nullable: true, pii: direct, description: Date of birth.}
+  - {name: sex_at_birth, type: text, nullable: true, enum: sex_at_birth, pii: phi, description: Sex recorded at birth.}
+unique: [[organization_id, email]]
+indexes:
+  - {columns: [organization_id]}
+business_rules:
+  - {id: BR-ORG_PERSON-001, text: An email is unique within its organization.}
+open_questions:
+  - id: OQ-ORG_PERSON-001
+    owner: CTO
+    text: Do the address columns live inline here or in a person_address table?
+sample_rows:
+  - {organization_id: "(organization.display_name=Example Wellness)", first_name: Test, last_name: Member, email: test.member@example.invalid}

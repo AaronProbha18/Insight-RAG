@@ -1,0 +1,46 @@
+name: datamodel
+
+on:
+  push:
+    branches: [main]
+    paths: ["datamodel/**", ".github/workflows/datamodel.yml"]
+  pull_request:
+    paths: ["datamodel/**", ".github/workflows/datamodel.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: datamodel-${{ github.ref }}
+  cancel-in-progress: true
+
+# Not a required check on main: a path-filtered required check would block
+# every PR that doesn't touch datamodel/ (#21, task 4.1).
+jobs:
+  datamodel:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: datamodel
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: datamodel # throwaway CI credential
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATAMODEL_TEST_DATABASE_URL: postgresql://postgres:datamodel@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      # The runner's pg_dump is newer than the 16 server, which pg_dump supports;
+      # both sides of the equivalence test are dumped by the same binary.
+      - run: pg_dump --version
+      - run: uv sync --locked
+      - run: make check test
