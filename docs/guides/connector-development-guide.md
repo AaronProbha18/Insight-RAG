@@ -143,5 +143,5 @@ listed as **supported**, it must also show its answers can be trusted:
    least 20% of them unanswerable from the corpus. Copy the shape from
    `evals/connectors/pdf/golden.yaml`.
 3. Run `uv run plumbline-eval --connectors <name>` (see
-   [evals/README.md](../../evals/README.md)). Correctness, faithfulness and
+   [evals/README.md](https://github.com/AaronProbha18/Plumbline/blob/main/evals/README.md)). Correctness, faithfulness and
    abstention must each reach **0.80**.
