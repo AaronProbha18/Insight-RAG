@@ -7,13 +7,13 @@ import difflib
 import os
 import shutil
 import subprocess
-import sys
 import uuid
 from itertools import groupby
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 import pytest
+from conftest import run_tool
 
 ROOT = Path(__file__).resolve().parent.parent
 URL = os.environ.get("DATAMODEL_TEST_DATABASE_URL")
@@ -127,11 +127,8 @@ def _dump(url):
     return _normalise(r.stdout)
 
 
-def test_migrations_equal_fresh_build(newdb, tmp_path):
-    work = tmp_path / "dm"
-    for d in ("domains", "enums", "tools", "migrations"):
-        shutil.copytree(ROOT / d, work / d, ignore=shutil.ignore_patterns("__pycache__"))
-    shutil.copy(ROOT / "model.lock.json", work)
+def test_migrations_equal_fresh_build(newdb, workcopy):
+    work = workcopy
 
     # A YAML change: a nullable column (ADD COLUMN) and an enum value (constraint drop + add).
     org = work / "domains/organization/tables/organization.yaml"
@@ -143,10 +140,8 @@ def test_migrations_equal_fresh_build(newdb, tmp_path):
     enum = work / "enums/order_status.yaml"
     enum.write_text(enum.read_text().replace("EXPIRED]", "EXPIRED, REFUNDED]"))
 
-    env = {**os.environ, "PYTHONPATH": str(work / "tools")}
     for args in (["migrate.py", "--name", "test_change"], ["ddl.py"]):
-        r = subprocess.run([sys.executable, str(work / "tools" / args[0]), *args[1:]],
-                           capture_output=True, text=True, env=env, cwd=work)
+        r = run_tool(work, *args)
         assert r.returncode == 0, r.stdout + r.stderr
     assert (work / "migrations/0002_test_change.sql").exists()
 

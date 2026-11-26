@@ -6,6 +6,8 @@
 
 - [x] 2.1 Identifier length: table and column names (incl. system columns) over 63 bytes fail, naming table and column. One table-driven test `test_validate.py` covering each validator AC as a (broken model -> expected error) case, including 64- vs 63-byte names. Test: `make test` passes.
 
+- [x] 2.2 Generator and migrate CLI tests (gaps found by verify): `tests/test_generate.py` asserts injected system columns (and no `updated_at` on a fully immutable table), enum columns as `ck_<t>_<c>_enum` CHECKs with no `CREATE TYPE`, `migrate.py --name x` on a temp copy writing `NNNN_x.sql` plus an updated lock, and a destructive change exiting 2 without `--allow-destructive` and writing the `RISKY, approved` header with it. Test: `make test` passes without Postgres.
+
 ## 3. Postgres 16 and explorer
 
 - [x] 3.1 `tests/test_postgres.py` (marker `pg`, `DATAMODEL_TEST_DATABASE_URL`): immutability triggers (DELETE rejected, UPDATE outside allow-list rejected, allow-listed UPDATE succeeds and advances `updated_at`); baseline + incremental vs fresh build compared via `pg_dump -s`, column order normalised. Test: passes against a local or CI Postgres 16; skipped without the URL.
