@@ -17,16 +17,19 @@ skill orchestrates; the work happens in `rag-plan`, `rag-execute`,
    - `gh issue view <N> --json number,title,labels,state,url`. The issue is
      open and has `status:ready-for-dev`. If not, stop and suggest
      `/rag-triage <N>`.
-   - `gh pr list --search "<N> in:body" --state open`. If an open PR
-     already references the issue, stop and show it.
+   - `gh pr list --search "<N> in:body" --state open --json number,headRefName`.
+     An open draft PR from the issue's own branch (`<type>/<N>-<slug>`,
+     opened by triage) is expected: continue on that branch and PR. Any
+     other open PR referencing the issue: stop and show it.
    - Find the change: `grep -rl "Issue: #<N>" openspec/changes
      --include=proposal.md`, outside `archive/`. Exactly one means use it.
      None, plus a "chore" triage comment on the issue, means the chore
      path (below). Anything else: stop and ask.
    - Sync and branch: `git fetch origin`, then
      `git switch -c <feat|fix|chore>/<N>-<slug> origin/main`, with the type
-     from the issue's `type:*` label. If the branch exists, switch to it
-     and continue where the tasks left off.
+     from the issue's `type:*` label. If the branch exists (locally or on
+     `origin`, as triage leaves it), switch to it and continue where the
+     tasks left off. One branch per issue: never a second one.
    - Tell the user, then swap `status:ready-for-dev` for
      `status:in-progress` (`gh issue edit <N> --remove-label
      status:ready-for-dev --add-label status:in-progress`), and
