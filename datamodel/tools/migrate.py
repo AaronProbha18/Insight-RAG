@@ -41,7 +41,8 @@ def diff(old: dict, new: dict) -> tuple[list[str], list[str]]:
             if "NOT NULL" in c["def"] and "DEFAULT" not in c["def"]:
                 bad.append(f"{name}.{cn}: NOT NULL column with no default fails on a table that has rows")
             stmts.append(f"ALTER TABLE {name} ADD COLUMN {c['def']};")
-            stmts.append(f"COMMENT ON COLUMN {name}.{cn} IS '{c['comment'].replace(chr(39), chr(39)*2)}';")
+            if c["comment"] is not None:
+                stmts.append(f"COMMENT ON COLUMN {name}.{cn} IS '{c['comment'].replace(chr(39), chr(39)*2)}';")
         for cn in o["columns"].keys() - n["columns"].keys():
             bad.append(f"drop column {name}.{cn}")
             stmts.append(f"ALTER TABLE {name} DROP COLUMN {cn};  -- DESTRUCTIVE")
@@ -60,7 +61,7 @@ def diff(old: dict, new: dict) -> tuple[list[str], list[str]]:
                 if ot_["default"] != nt_["default"]:
                     stmts.append(f"ALTER TABLE {name} ALTER COLUMN {cn} "
                                  + (f"SET DEFAULT {nt_['default']};" if nt_["default"] else "DROP DEFAULT;"))
-            if o["columns"][cn]["comment"] != n["columns"][cn]["comment"]:
+            if n["columns"][cn]["comment"] not in (None, o["columns"][cn]["comment"]):
                 stmts.append(f"COMMENT ON COLUMN {name}.{cn} IS "
                              f"'{n['columns'][cn]['comment'].replace(chr(39), chr(39)*2)}';")
         # constraints: changed = drop + add (enum value changes land here)

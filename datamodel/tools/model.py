@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 import yaml
 
-from schema import Column, Domain, EnumDef, Table
+from schema import Column, Domain, EnumDef, Settings, Table
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # the toolkit; models live under models/<name>/
 DEFAULT_MODEL = "models/sample"
@@ -16,11 +16,14 @@ def model_dir(name: str = DEFAULT_MODEL) -> pathlib.Path:
     return ROOT / name  # an absolute name wins over ROOT
 
 
-def system_columns(t: Table) -> list[Column]:
+def system_columns(t: Table, id_type: str = "uuid") -> list[Column]:
     """Columns every table gets, so no YAML can forget them or contradict the standard."""
+    pk = Column(name="id", type="uuid", default="gen_random_uuid()",
+                description="Internal primary key. Never leaves the backend.")
+    if id_type == "bigserial":  # a key-only pseudo-type, deliberately not a YAML column type
+        pk = pk.model_copy(update={"type": "bigserial", "default": None})
     cols = [
-        Column(name="id", type="uuid", default="gen_random_uuid()",
-               description="Internal primary key. Never leaves the backend."),
+        pk,
         Column(name="public_id", type="text", unique=True,
                description=f"Opaque external identifier, prefixed '{t.public_id_prefix}_'."),
         Column(name="created_at", type="timestamptz", default="now()",
@@ -32,8 +35,18 @@ def system_columns(t: Table) -> list[Column]:
     return cols
 
 
-def all_columns(t: Table) -> list[Column]:
-    return system_columns(t) + t.columns
+def all_columns(t: Table, id_type: str = "uuid") -> list[Column]:
+    return system_columns(t, id_type) + t.columns
+
+
+def con_name(s: Settings, kind: str, table: str, cols: list[str]) -> str:
+    """Constraint name per model.yaml constraint_names: ours (pk_/fk_/uq_/ck_) or Postgres's defaults."""
+    c = "_".join(cols)
+    if s.constraint_names == "postgres":
+        return {"pk": f"{table}_pkey", "fk": f"{table}_{c}_fkey", "uq": f"{table}_{c}_key",
+                "enum": f"{table}_{c}_check"}[kind]
+    return {"pk": f"pk_{table}", "fk": f"fk_{table}_{c}", "uq": f"uq_{table}_{c}",
+            "enum": f"ck_{table}_{c}_enum"}[kind]
 
 
 @dataclass
@@ -41,6 +54,7 @@ class Model:
     domains: dict[str, Domain] = field(default_factory=dict)
     tables: dict[str, Table] = field(default_factory=dict)
     enums: dict[str, EnumDef] = field(default_factory=dict)
+    settings: Settings = field(default_factory=Settings)
 
     def ordered_tables(self) -> list[Table]:
         """Domain load order first, then FK dependency order inside a domain, then name."""
@@ -73,6 +87,8 @@ def _yaml(path: pathlib.Path):
 def load(root: pathlib.Path | None = None) -> Model:
     root = root or model_dir()
     m = Model()
+    if (root / "model.yaml").exists():
+        m.settings = Settings(**(_yaml(root / "model.yaml") or {}))
     for p in sorted((root / "domains").glob("*/domain.yaml")):
         d = Domain(**_yaml(p))
         m.domains[d.domain] = d

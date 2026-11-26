@@ -108,6 +108,15 @@ class Domain(Strict):
     description: str
 
 
+class Settings(Strict):
+    """model.yaml: per-model conventions. Every default is the sample model's behaviour."""
+    id_type: Literal["uuid", "bigserial"] = "uuid"
+    public_id_check: bool = True
+    updated_at_trigger: bool = True
+    comments: bool = True
+    constraint_names: Literal["generated", "postgres"] = "generated"
+
+
 class EnumDef(Strict):
     enum: str
     description: str

@@ -5,7 +5,7 @@ import argparse
 import re
 import sys
 
-from model import DEFAULT_MODEL, Model, all_columns, load, model_dir
+from model import DEFAULT_MODEL, Model, all_columns, con_name, load, model_dir
 
 PG_IDENT_MAX = 63  # Postgres silently truncates longer identifiers, so the model stops matching the database.
 RESERVED = {"user", "order", "group", "table", "column", "check", "default", "end", "select"}
@@ -13,21 +13,25 @@ RESERVED = {"user", "order", "group", "table", "column", "check", "default", "en
 
 def constraint_names(m: Model):
     """Yield (table, kind, generated_name) for everything the DDL generator names."""
+    s = m.settings
     for t in m.tables.values():
-        yield t.table, "pk", f"pk_{t.table}"
-        yield t.table, "check", f"ck_{t.table}_public_id"
-        yield t.table, "trigger", f"tg_{t.table}_updated_at"
+        names = {c.name for c in all_columns(t, s.id_type)}
+        yield t.table, "pk", con_name(s, "pk", t.table, [])
+        if s.public_id_check and "public_id" in names:
+            yield t.table, "check", f"ck_{t.table}_public_id"
+        if s.updated_at_trigger and "updated_at" in names:
+            yield t.table, "trigger", f"tg_{t.table}_updated_at"
         if t.immutable:
             yield t.table, "trigger", f"trg_{t.table}_immutable"
-        for c in all_columns(t):
+        for c in all_columns(t, s.id_type):
             if c.references:
-                yield t.table, "fk", f"fk_{t.table}_{c.name}"
+                yield t.table, "fk", con_name(s, "fk", t.table, [c.name])
             if c.enum:
-                yield t.table, "enum check", f"ck_{t.table}_{c.name}_enum"
+                yield t.table, "enum check", con_name(s, "enum", t.table, [c.name])
             if c.unique:
-                yield t.table, "unique", f"uq_{t.table}_{c.name}"
+                yield t.table, "unique", con_name(s, "uq", t.table, [c.name])
         for cols in t.unique:
-            yield t.table, "unique", f"uq_{t.table}_{'_'.join(cols)}"
+            yield t.table, "unique", con_name(s, "uq", t.table, cols)
         for ix in t.indexes:
             yield t.table, "index", f"ix_{t.table}_{'_'.join(ix.columns)}"
         for ck in t.checks:
@@ -65,14 +69,14 @@ def validate(m: Model) -> list[str]:
 
         if len(t.table.encode()) > PG_IDENT_MAX:
             e(f"{where}: table name is {len(t.table.encode())} bytes; Postgres truncates at {PG_IDENT_MAX}")
-        for c in all_columns(t):
+        for c in all_columns(t, m.settings.id_type):
             if len(c.name.encode()) > PG_IDENT_MAX:
                 e(f"{where}.{c.name}: column name is {len(c.name.encode())} bytes; Postgres truncates at {PG_IDENT_MAX}")
 
-        names = [c.name for c in all_columns(t)]
+        names = [c.name for c in all_columns(t, m.settings.id_type)]
         for n in {n for n in names if names.count(n) > 1}:
             e(f"{where}: duplicate or system-reserved column {n}")
-        cols = {c.name: c for c in all_columns(t)}
+        cols = {c.name: c for c in all_columns(t, m.settings.id_type)}
 
         for c in t.columns:
             if c.pii in ("direct", "phi") and c.default:
@@ -92,8 +96,9 @@ def validate(m: Model) -> list[str]:
                     continue
                 if rc != "id":
                     e(f"{where}.{c.name}: foreign keys point at the internal id, not {rc}")
-                if c.type != "uuid":
-                    e(f"{where}.{c.name}: foreign key column must be uuid")
+                fk_type = "bigint" if m.settings.id_type == "bigserial" else "uuid"
+                if c.type != fk_type:
+                    e(f"{where}.{c.name}: foreign key column must be {fk_type}")
                 if c.on_delete == "set null" and not c.nullable:
                     e(f"{where}.{c.name}: on_delete 'set null' needs a nullable column")
                 rd = m.tables[rt].domain

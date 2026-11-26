@@ -14,7 +14,7 @@ def payload(m: Model) -> dict:
     tables = []
     for t in m.ordered_tables():
         cols = []
-        for c in all_columns(t):
+        for c in all_columns(t, m.settings.id_type):
             cols.append({"name": c.name, "type": c.type, "nullable": c.nullable, "pii": c.pii,
                          "default": c.default, "enum": c.enum, "references": c.references,
                          "unique": c.unique, "description": c.description,

@@ -1,44 +1,58 @@
 ## Task
-1.1 Move the sample model (domains, enums, migrations, `model.lock.json`) to `datamodel/models/sample/` with `git mv`. Add `--model` to every tool, and `model_dir()` in `model.py`. Add `MODEL ?= models/sample` to the Makefile; `build/` goes inside the model folder. Update tests and the `conftest.py` `workcopy` fixture. Test: the existing suite passes unchanged in what it asserts; `make check` prints no unmigrated changes; a test runs `ddl.py --model` on a temp copy and checks the output lands in that copy's `build/`.
+2.1 `model.yaml` loading with defaults (`id_type`, `public_id_check`, `updated_at_trigger`, `comments`, `constraint_names`), applied in `ddl.py`; FK type follows `id_type` in `validate.py`. Test: the sample's DDL is byte-identical to before; one test per setting on a temp model.
 
 ## Scope
-- `git mv datamodel/{domains,enums,migrations,model.lock.json} datamodel/models/sample/`.
-- `model.py`: `ROOT` stays the toolkit root. Add `DEFAULT_MODEL = "models/sample"` and
-  `model_dir(name=DEFAULT_MODEL) -> ROOT / name` (absolute paths pass through, because `ROOT / abs` returns `abs`).
-  `load(root=None)` uses `model_dir()` when `root` is None.
-- Each tool's `main()` takes `--model` (default `DEFAULT_MODEL`), loads from `model_dir(args.model)`, and writes to
-  `<model>/build/`. `migrate.py`: `LOCK`/`MIG` become per-model paths derived inside `main()`.
-  `validate.py`, `ddl.py` and `explorer.py` gain a small argparse (`migrate.py` already has one).
-  `explorer.py` still reads its template from `ROOT/tools`.
-- Makefile: `MODEL ?= models/sample`, passed as `--model $(MODEL)` to every tool target; `clean` removes `$(MODEL)/build`.
-- Guides read: none apply (`datamodel/` is not backend/frontend/connector). I read ADR 0004 via design.md and `datamodel/Makefile`.
+- `schema.py`: a strict `Settings` model with the defaults in design.md:
+  `id_type: uuid|bigserial = uuid`, `public_id_check = true`, `updated_at_trigger = true`,
+  `comments = true`, `constraint_names: generated|postgres = generated`. Unknown keys are rejected.
+- `model.py`: `Model.settings` (default `Settings()`), and `load()` reads `<model>/model.yaml` if it exists.
+  - `system_columns`/`all_columns` take `id_type`. `bigserial` gives `id bigserial` with no default; `uuid` behaves as today.
+  - One shared helper `con_name(settings, kind, table, cols)` returns the name.
+    - `generated` keeps today's `pk_`/`fk_`/`uq_`/`ck_..._enum` names.
+    - `postgres` gives `<t>_pkey`, `<t>_<c>_fkey`, `<t>_<cols>_key` and `<t>_<c>_check`.
+    - YAML `checks` keep their written name in both modes, so the author picks it. Index names stay `ix_...` (the drift gate ignores names).
+- `ddl.py build_objects`:
+  - The `public_id` CHECK is added only if `public_id_check` is on.
+  - The `tg_<t>_updated_at` trigger is added only if `updated_at_trigger` is on.
+  - Constraint names come from `con_name`.
+  - When `comments: false`, table and column comments are `None`.
+- `ddl.py create_table_sql` skips `None` comments. `render_full` emits `set_updated_at()` only if some table has a `tg_*_updated_at` trigger; the sample does, so its output is unchanged.
+- `migrate.py` skips `COMMENT ON` for `None` comments (two spots), so `comments: false` models still migrate.
+- `validate.py`:
+  - A FK column's type must be `uuid` for `id_type: uuid`, or `bigint` for `bigserial`. The error names the expected type.
+  - `constraint_names()` uses `con_name` and only yields the CHECK and trigger names that will actually be generated.
+- Call sites of `all_columns` in `explorer.py` and `validate.py` pass `m.settings.id_type`.
+- Guides read: none apply (datamodel is outside backend/frontend/connector). I read design.md and the spec's "Per-model conventions" requirement.
 
 ## Not in scope
-- `model.yaml`, `system_columns`, new types (2.x), the Plumbline model (3.1), drift (4.x), README/ADR/docs (5.1).
-- `.github/workflows/datamodel.yml`: it runs `make check test` with the default MODEL, so it needs no change now.
+- `system_columns` per table (2.2), new types and `vector` (2.3), `models/plumbline` (3.1).
+- Verifying Postgres's own check-constraint naming: `<t>_<c>_check` for a column-level enum check is still UNVERIFIED (design.md); task 3.1/4.x confirm it against a real database. The gate ignores names either way.
+- The `pgcrypto` extension line stays unconditional (harmless for `bigserial`; dropping it would change the sample's DDL).
 
 ## Files
 | File | Change |
 | --- | --- |
-| `datamodel/{domains,enums,migrations,model.lock.json}` | `git mv` to `datamodel/models/sample/` |
-| `datamodel/tools/model.py` | `DEFAULT_MODEL`, `model_dir()`, default `load()` root |
-| `datamodel/tools/validate.py`, `ddl.py`, `explorer.py` | `--model` arg; output to `<model>/build/` |
-| `datamodel/tools/migrate.py` | `--model` arg; lock/migrations paths per model |
-| `datamodel/Makefile` | `MODEL ?= models/sample`; pass `--model`; `clean` path |
-| `datamodel/tests/conftest.py` | `workcopy` copies `tools/` to `work/tools` and `models/sample` to `work/models/sample`; returns the **model dir**; `run_tool` resolves tools from `work.parent.parent / "tools"`, with cwd at the toolkit copy |
-| `datamodel/tests/test_postgres.py` | `migrated()` default root becomes `model_dir()` |
-| `datamodel/tests/test_generate.py` | new `test_ddl_model_flag_writes_into_model_build` |
+| `datamodel/tools/schema.py` | `Settings` model |
+| `datamodel/tools/model.py` | `Model.settings`, read `model.yaml`, `id_type` in `system_columns`/`all_columns`, `con_name()` |
+| `datamodel/tools/ddl.py` | apply the four settings; conditional `set_updated_at()`; skip `None` comments |
+| `datamodel/tools/migrate.py` | skip `None` comments |
+| `datamodel/tools/validate.py` | FK type follows `id_type`; `constraint_names()` via `con_name` |
+| `datamodel/tools/explorer.py` | pass `id_type` to `all_columns` |
+| `datamodel/tests/test_conventions.py` | new |
 
-The `workcopy` return value is the model dir, so existing paths such as `workcopy / "domains/..."` and `work / "build/schema.sql"` keep working unchanged.
-
-## Tests
-- Existing suite unchanged in what it asserts (spec: sample model behaviour preserved).
-- New: copy `models/sample` to a tmp dir, run `ddl.py --model <tmp>`, assert `<tmp>/build/schema.sql` exists and equals the default model's DDL. This covers the "model selection" scenario.
+## Tests (`test_conventions.py`; each one writes `model.yaml` into a `workcopy` model)
+- No `model.yaml`: `render_full` of the sample equals the committed `build/schema.sql` produced before this task (captured from the 1.1 commit with `git show`), and `migrate --dry-run` says "no changes". Covers *No model.yaml keeps today's output*.
+- `id_type: bigserial`: `id` is `id bigserial NOT NULL`; the sample's uuid FKs fail validation naming `bigint`; changing them to `bigint` passes. Covers *bigserial keys*.
+- `public_id_check: false`: there's no `ck_<t>_public_id`.
+- `updated_at_trigger: false`: there's no `tg_*_updated_at` and no `set_updated_at()` in the DDL. (The sample's immutable-table triggers stay.)
+- `comments: false`: `COMMENT ON` doesn't appear in the DDL.
+- `constraint_names: postgres`: `organization_pkey`, `<t>_<c>_fkey` and `<t>_<c>_key` appear, and no `pk_`/`fk_`/`uq_` names are left. Together with the three tests above, this covers *Conventions switched off*.
+- An unknown key in `model.yaml` fails to load, naming the key.
 
 ## Checks to run
-- `cd datamodel && make check test` (`pg` tests run if the local pgvector/PG URL is set, otherwise they're skipped; I report which)
-- `cd datamodel && make all` (artifacts land in `models/sample/build/`)
+- `cd datamodel && uv run python -m pytest -q -rs tests` (the targets of `make check test`, run directly because `make` isn't installed in this shell)
+- `uv run python tools/validate.py && uv run python tools/migrate.py --dry-run` prints "no changes"
 
 ## Risks / Questions
-- Before this change, `make ddl` wrote to `datamodel/build/`. A stale `datamodel/build/` stays (gitignored), and `make clean` no longer removes it. Harmless.
-- ADR 0004 and README mention the old paths; they're fixed in 5.1, not here.
+- `validate.py`'s Postgres identifier-length check now runs on `postgres`-style names too. That's correct, but it's new coverage.
+- I'm assuming that, in `postgres` mode, YAML `checks` keep the author-written name rather than becoming `<t>_check`. Design.md marks Postgres's own unnamed-check naming as UNVERIFIED and says names "only matter for readable DDL", so keeping the written name is the safe, explicit option.
