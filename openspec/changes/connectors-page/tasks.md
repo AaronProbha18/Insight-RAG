@@ -1,6 +1,6 @@
 ## 1. Backend
 
-- [ ] 1.1 `GET /connectors` in `api/app.py` over `get_connectors()`: name, extensions, contract version, sorted by name; tests for the built-ins, no extra fields, and a failed connector not listed; confirm `/quality` connector keys equal `FileConnector.name`
+- [x] 1.1 `GET /connectors` in `api/app.py` over `get_connectors()`: name, extensions, contract version, sorted by name; tests for the built-ins, no extra fields, and a failed connector not listed; confirm `/quality` connector keys equal `FileConnector.name`
 
 ## 2. Data and routing
 

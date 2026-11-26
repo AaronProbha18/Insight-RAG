@@ -116,6 +116,20 @@ def quality() -> dict:
     )
 
 
+@app.get("/connectors")
+def connectors(
+    connectors: Annotated[dict[str, FileConnector], Depends(get_connectors)],
+) -> list[dict]:
+    return [
+        {
+            "name": c.name,
+            "extensions": list(c.extensions),
+            "contract_version": c.contract_version,
+        }
+        for c in sorted(connectors.values(), key=lambda c: c.name)
+    ]
+
+
 @app.post("/documents", status_code=201)
 def upload_document(
     file: UploadFile,
