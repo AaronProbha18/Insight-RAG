@@ -43,11 +43,15 @@ Notes on the commands:
 | quality-panel: No valid run | `connectors/ConnectorCard.test.tsx` "shows Not measured with the command and no numbers…"; `ConnectorsPage.test.tsx` "shows Not measured on every card…"; `tests/test_quality.py::test_not_measured` (exit2, missing, malformed) |
 | quality-panel: Sampled run | `tests/test_quality.py::test_not_measured[sampled]` (backend gives `not_measured`) plus the card tests above (the card renders `not_measured` as Not measured) |
 | quality-panel: Different configuration | `connectors/ConnectorCard.test.tsx` "says the result is not current when the configuration differs" |
-| quality-panel: Themes and keyboard | `design-tokens.test.ts` (4.5:1 pairs, light and dark); `shell/a11y.test.tsx` ("the loaded Connectors page", "keyboard reach on the Connectors page", "Connectors page sources"). **The by-hand light/dark and keyboard check was not done** (needs a browser). |
+| quality-panel: Themes and keyboard | `design-tokens.test.ts` (4.5:1 pairs, light and dark); `shell/a11y.test.tsx` ("the loaded Connectors page", "keyboard reach on the Connectors page", "Connectors page sources"). The by-hand check was done by the user after `rag-review` (see Manual check below). |
 | quality-panel: Summary fields only | `tests/test_quality_api.py::test_measured_has_summary_fields_only`, `test_question_counts_are_in_the_entry_and_nothing_else_new` |
 | quality-panel: Counts passed through | `tests/test_quality.py::test_question_counts_pass_through`; `tests/test_quality_api.py::test_question_counts_are_in_the_entry_and_nothing_else_new` |
 | quality-panel: Counts absent or invalid | `tests/test_quality.py::test_invalid_count_leaves_both_out_and_stays_measured` (five invalid cases) |
 | quality-panel: Counts in the summary | `tests/test_runner.py::test_summary_is_small_and_shareable` |
+
+## Manual check
+
+After `rag-review` raised the REVIEW.md rule "Look at it", the dev stack was run (`npm run dev`; backend restarted on commit `b43045d` with a demo eval summary: pdf below the bar on correctness with 30 and 10 question counts, docx passing, models differing from the running configuration). The user opened `/app/connectors` and reported "all working". Light and dark themes, keyboard order and phone width were on the checklist given to the user; the report did not itemise them. The "Not measured" card state was not viewed in the browser (static tests only). The demo summary is synthetic, not eval output.
 
 ## Eval Results
 
@@ -73,7 +77,7 @@ From design and specs, all decided in the session (issue #34 and the OpenSpec ch
 **PASS**
 
 Every command passed, every spec scenario maps to a test, and eval is N/A per eval-plan. Caveats that do not change the verdict:
-- The by-hand light/dark and keyboard check of `/app/connectors` was **not done** (no browser run); only the static accessibility and contrast tests back "Themes and keyboard".
+- The by-hand check was done by the user, and the result is recorded under Manual check. It is a one-line report, not an itemised record.
 - The count fields were checked by the runner's own test, not on real model output.
 - The two absolute GitHub links on the page are not covered by the link checker.
 - The explainer's wording ("still works, but its answers are less reliable") awaits your product review.
