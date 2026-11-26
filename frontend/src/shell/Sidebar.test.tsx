@@ -1,12 +1,33 @@
+/// <reference types="node" />
+import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import type { Quality } from '../quality/api'
 import type { Page } from './route'
 import { Sidebar } from './Sidebar'
 
-const render = (page: Page = 'chat', collapsed = false) =>
+const render = (page: Page = 'chat', collapsed = false, quality: Quality | null = null) =>
   renderToStaticMarkup(
-    <Sidebar page={page} documentCount={3} collapsed={collapsed} onToggleCollapse={() => {}} onNewChat={() => {}} />,
+    <Sidebar
+      page={page}
+      documentCount={3}
+      quality={quality}
+      collapsed={collapsed}
+      onToggleCollapse={() => {}}
+      onNewChat={() => {}}
+    />,
   )
+const measured = (result: 'PASS' | 'FAIL'): Quality => ({
+  state: 'measured',
+  result,
+  run_at: '2026-11-25T09:00:00+00:00',
+  models: { chat: 'c', embeddings: 'e', judge: 'j' },
+  threshold: 0.3,
+  config_matches: true,
+  config_differences: [],
+  connectors: {},
+})
+const links = (html: string, href: string) => html.match(new RegExp(`<a[^>]*href="${href}"[^>]*>`, 'g')) ?? []
 
 describe('Sidebar', () => {
   it('lists logo, New chat, Knowledge, Insights and Docs in order', () => {
@@ -17,7 +38,7 @@ describe('Sidebar', () => {
     expect(at.every((i) => i >= 0)).toBe(true)
     expect(at).toEqual([...at].sort((a, b) => a - b))
     expect(html).toContain('aria-label="Main"')
-    expect(html).toContain('Coming soon')
+    expect(html).not.toContain('Coming soon')
   })
 
   it('marks Documents as the current page only on that page', () => {
@@ -27,11 +48,26 @@ describe('Sidebar', () => {
     expect(link(render('chat'))).not.toContain('aria-current')
   })
 
-  it('does not make Connectors a link', () => {
-    const html = render()
+  it('makes Connectors a real link, current only on its page', () => {
+    expect(links(render(), '/app/connectors')).toHaveLength(2) // Connectors and Quality
+    expect(render()).not.toContain('aria-disabled')
+    expect(links(render('connectors'), '/app/connectors').every((l) => l.includes('aria-current="page"'))).toBe(true)
+    expect(links(render('chat'), '/app/connectors').some((l) => l.includes('aria-current'))).toBe(false)
+  })
 
-    expect(html).toMatch(/<span[^>]*aria-disabled="true"/)
-    expect(html.match(/<a[^>]*>/g)?.length).toBe(2) // Documents and Docs only
+  it('names the Quality link by the overall state, in words', () => {
+    expect(render()).toContain('>Quality<')
+    expect(render('chat', false, { state: 'not_measured', eval_command: 'x' })).toContain('Quality: Not measured')
+    expect(render('chat', false, measured('PASS'))).toContain('Quality: Passes')
+    expect(render('chat', false, measured('FAIL'))).toContain('Quality: Below bar')
+    expect(render('chat', false, measured('FAIL'))).not.toContain('FAIL')
+    expect(render('chat', true, measured('PASS'))).toContain('<span class="sr-only">Quality: Passes</span>')
+  })
+
+  it('has no quality dialog any more', () => {
+    expect(render()).not.toMatch(/aria-haspopup|data-slot="dialog/)
+    for (const f of ['Quality.tsx', 'QualityPanel.tsx'])
+      expect(existsSync(new URL(`../quality/${f}`, import.meta.url))).toBe(false)
   })
 
   it('collapsed keeps every name as screen-reader text and offers Expand', () => {
@@ -39,7 +75,7 @@ describe('Sidebar', () => {
 
     expect(html).toContain('aria-label="Expand sidebar"')
     expect(html).toContain('aria-expanded="false"')
-    for (const name of ['Plumbline', 'New chat', 'Documents (3)', 'Docs'])
+    for (const name of ['Plumbline', 'New chat', 'Documents (3)', 'Connectors', 'Quality', 'Docs'])
       expect(html).toContain(`<span class="sr-only">${name}</span>`)
   })
 
