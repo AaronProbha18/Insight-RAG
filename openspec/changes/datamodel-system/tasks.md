@@ -9,7 +9,8 @@
 ## 3. Postgres 16 and explorer
 
 - [x] 3.1 `tests/test_postgres.py` (marker `pg`, `DATAMODEL_TEST_DATABASE_URL`): immutability triggers (DELETE rejected, UPDATE outside allow-list rejected, allow-listed UPDATE succeeds and advances `updated_at`); baseline + incremental vs fresh build compared via `pg_dump -s`, column order normalised. Test: passes against a local or CI Postgres 16; skipped without the URL.
-- [ ] 3.2 Audit `explorer.template.html`: every interpolation of YAML text goes through `esc()`; fix any that don't. Test: by hand - `make explorer`, open `build/explorer.html` locally from disk with a description containing `<script>` and `</script>`; renders, text shown literally, no console errors; recorded in `verification.md`.
+- [x] 3.2 Audit `explorer.template.html`: every interpolation of YAML text goes through `esc()`; fix any that don't. Test: by hand - `make explorer`, open `build/explorer.html` locally from disk with a description containing `<script>` and `</script>`; renders, text shown literally, no console errors; recorded in `verification.md`.
+  - Result 2026-11-26: audit found every YAML-text interpolation already escaped (sidebar included); no fix. Description `Test <script>alert(1)</script> & "quotes" </script><!--`: built payload holds `<\/script>`/`<\!--`; opened from disk (`file:///`) by the owner: no alert, text literal, console clear.
 
 ## 4. CI and docs
 
