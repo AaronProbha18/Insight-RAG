@@ -10,7 +10,7 @@ and column names (only generated constraint/index/trigger names are
 checked), any test against a real Postgres, and any explorer render test.
 Plumbline's repo uses uv, ruff, and a `ci.yml` with a pgvector Postgres;
 `main` requires green CI. Decisions that outlive this change:
-[ADR 0004](../../../docs/adr/0004-yaml-data-model.md).
+[ADR 0004](../../../../docs/adr/0004-yaml-data-model.md).
 
 ## Decisions
 
