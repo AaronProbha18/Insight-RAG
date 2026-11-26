@@ -12,7 +12,7 @@
 - [x] 3.1 `documents/DocumentsPage.tsx`: upload area (reusing `Upload`'s input and outcome), title search, type filter, list with delete confirm; tests for search, filter, upload refresh and delete
 - [x] 3.2 `shell/Sidebar.tsx`: logo, collapse button (persisted in `localStorage`), New chat, Knowledge (Documents count, Connectors coming soon), Insights (Quality dialog), docs link, `aria-current`; tests
 - [x] 3.3 Responsive: below `md` the sidebar opens as a drawer from a menu button and closes on navigation; test
-- [ ] 3.4 `App.tsx`: shell layout and page switch with `Thread` kept mounted, New chat resets the thread (confirm the runtime API first), upload bar and `Documents.tsx` removed; tests that the chat survives navigation, New chat clears it, and the bar is gone
+- [x] 3.4 `App.tsx`: shell layout and page switch with `Thread` kept mounted, New chat resets the thread (confirm the runtime API first), upload bar and `Documents.tsx` removed; tests that the chat survives navigation, New chat clears it, and the bar is gone
 
 ## 4. Docs and accessibility
 
