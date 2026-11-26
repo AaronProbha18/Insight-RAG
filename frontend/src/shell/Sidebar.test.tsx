@@ -43,6 +43,28 @@ describe('Sidebar', () => {
       expect(html).toContain(`<span class="sr-only">${name}</span>`)
   })
 
+  it('collapsed keeps the logo and reveals the expand button over it on hover or focus', () => {
+    const html = render('chat', true)
+    const button = html.match(/<button[^>]*aria-label="Expand sidebar"[^>]*>/)?.[0] ?? ''
+
+    expect(html).toContain('<img src="/favicon.svg" alt="" class="size-5 shrink-0"')
+    expect(button).toContain('opacity-0')
+    expect(button).toContain('group-hover/head:opacity-100')
+    expect(button).toContain('group-has-[:focus-visible]/head:opacity-100') // keyboard focus reveals it; mouse focus after a click must not
+    expect(button).not.toContain('hidden')
+  })
+
+  it('expanded shows the collapse button with no hover trick', () => {
+    expect(render('chat', false).match(/<button[^>]*aria-label="Collapse sidebar"[^>]*>/)?.[0]).not.toContain('opacity-0')
+  })
+
+  it('has tooltips on the icon-only items, and only when collapsed', () => {
+    const triggers = (html: string) => html.match(/data-slot="tooltip-trigger"/g)?.length ?? 0
+
+    expect(triggers(render('chat', true))).toBe(6) // expand, New chat, Documents, Connectors, Quality, Docs
+    expect(triggers(render('chat', false))).toBe(0)
+  })
+
   it('expanded offers Collapse', () => {
     expect(render()).toContain('aria-label="Collapse sidebar"')
   })

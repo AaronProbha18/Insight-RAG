@@ -17,4 +17,4 @@
 ## 4. Docs and accessibility
 
 - [x] 4.1 Update the frontend guide (code organisation, routing, `/app/` prefix) and the architecture overview's UI section
-- [ ] 4.2 Accessibility pass: keyboard-only walk-through, focus rings, 4.5:1 contrast in both themes (extend `design-tokens.test.ts` if new colour pairs appear)
+- [x] 4.2 Accessibility pass: keyboard-only walk-through, focus rings, 4.5:1 contrast in both themes (extend `design-tokens.test.ts` if new colour pairs appear)

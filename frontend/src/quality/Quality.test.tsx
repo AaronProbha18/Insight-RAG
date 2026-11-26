@@ -51,3 +51,15 @@ describe('Quality compact', () => {
     expect(html).toContain('<span class="sr-only">Quality</span>')
   })
 })
+
+describe('Quality as a sidebar item', () => {
+  it('uses the item class instead of the outlined button, with an icon and the full label', () => {
+    const html = renderToStaticMarkup(<Quality initial={measured('PASS')} itemClassName="sidebar-item" />)
+
+    expect(html).toMatch(/<button[^>]*class="[^"]*sidebar-item/)
+    expect(html).not.toContain('border-border bg-background') // the outline variant's look
+    expect(html).toContain('<svg')
+    expect(html).toContain('Quality: PASS')
+    expect(html).not.toContain('sr-only')
+  })
+})
