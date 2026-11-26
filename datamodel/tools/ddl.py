@@ -5,11 +5,12 @@ whole; migrate.py diffs two of them. One source for both keeps migrations honest
 """
 from __future__ import annotations
 
+import argparse
 import json
 import pathlib
 import sys
 
-from model import ROOT, Model, all_columns, load
+from model import DEFAULT_MODEL, Model, all_columns, load, model_dir
 
 HEADER = "-- GENERATED from domains/**/*.yaml. Do not edit. Change the YAML and run `make ddl`.\n"
 
@@ -127,12 +128,15 @@ def render_full(objs: dict) -> str:
 
 
 def main() -> int:
-    m = load()
-    out = ROOT / "build" / "schema.sql"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default=DEFAULT_MODEL)
+    md = model_dir(ap.parse_args().model)
+    m = load(md)
+    out = md / "build" / "schema.sql"
     out.parent.mkdir(exist_ok=True)
     objs = build_objects(m)
     out.write_text(render_full(objs))
-    print(f"wrote {out.relative_to(ROOT)} ({len(objs['tables'])} tables)")
+    print(f"wrote {out} ({len(objs['tables'])} tables)")
     return 0
 
 

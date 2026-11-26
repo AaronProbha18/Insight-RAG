@@ -55,6 +55,6 @@ def test_diff_safe_and_risky():
 
 def test_lock_matches_model():
     import json
-    lock = json.loads((pathlib.Path(__file__).resolve().parent.parent / "model.lock.json").read_text())
+    lock = json.loads((pathlib.Path(__file__).resolve().parent.parent / "models/sample/model.lock.json").read_text())
     stmts, bad = migrate.diff(lock, ddl.build_objects(load()))
     assert stmts == [] and bad == []

@@ -1,6 +1,6 @@
 ## 1. Model selection
 
-- [ ] 1.1 Move the sample model (domains, enums, migrations, `model.lock.json`) to `datamodel/models/sample/` with `git mv`. Add `--model` to every tool, and `model_dir()` in `model.py`. Add `MODEL ?= models/sample` to the Makefile; `build/` goes inside the model folder. Update tests and the `conftest.py` `workcopy` fixture. Test: the existing suite passes unchanged in what it asserts; `make check` prints no unmigrated changes; a test runs `ddl.py --model` on a temp copy and checks the output lands in that copy's `build/`.
+- [x] 1.1 Move the sample model (domains, enums, migrations, `model.lock.json`) to `datamodel/models/sample/` with `git mv`. Add `--model` to every tool, and `model_dir()` in `model.py`. Add `MODEL ?= models/sample` to the Makefile; `build/` goes inside the model folder. Update tests and the `conftest.py` `workcopy` fixture. Test: the existing suite passes unchanged in what it asserts; `make check` prints no unmigrated changes; a test runs `ddl.py --model` on a temp copy and checks the output lands in that copy's `build/`.
 
 ## 2. Conventions and types
 

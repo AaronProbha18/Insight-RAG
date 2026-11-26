@@ -8,7 +8,12 @@ import yaml
 
 from schema import Column, Domain, EnumDef, Table
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # the toolkit; models live under models/<name>/
+DEFAULT_MODEL = "models/sample"
+
+
+def model_dir(name: str = DEFAULT_MODEL) -> pathlib.Path:
+    return ROOT / name  # an absolute name wins over ROOT
 
 
 def system_columns(t: Table) -> list[Column]:
@@ -65,7 +70,8 @@ def _yaml(path: pathlib.Path):
         return yaml.safe_load(f)
 
 
-def load(root: pathlib.Path = ROOT) -> Model:
+def load(root: pathlib.Path | None = None) -> Model:
+    root = root or model_dir()
     m = Model()
     for p in sorted((root / "domains").glob("*/domain.yaml")):
         d = Domain(**_yaml(p))

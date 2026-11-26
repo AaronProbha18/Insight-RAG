@@ -1,12 +1,13 @@
 """Render the model as one self-contained static HTML page (data embedded as JSON, no network)."""
 from __future__ import annotations
 
+import argparse
 import datetime
 import json
 import subprocess
 import sys
 
-from model import ROOT, Model, all_columns, load
+from model import DEFAULT_MODEL, ROOT, Model, all_columns, load, model_dir
 
 
 def payload(m: Model) -> dict:
@@ -45,15 +46,18 @@ def version() -> str:
 
 
 def main() -> int:
-    data = payload(load())
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default=DEFAULT_MODEL)
+    md = model_dir(ap.parse_args().model)
+    data = payload(load(md))
     data["build"] = {"version": version(),
                      "at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%MZ")}
     blob = json.dumps(data).replace("</", "<\\/").replace("<!--", "<\\!--")
     html = (ROOT / "tools" / "explorer.template.html").read_text().replace("/*__DATA__*/null", blob)
-    out = ROOT / "build" / "explorer.html"
+    out = md / "build" / "explorer.html"
     out.parent.mkdir(exist_ok=True)
     out.write_text(html)
-    print(f"wrote {out.relative_to(ROOT)} ({len(html) // 1024} KB)")
+    print(f"wrote {out} ({len(html) // 1024} KB)")
     return 0
 
 

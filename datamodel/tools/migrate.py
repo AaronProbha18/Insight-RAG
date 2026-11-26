@@ -16,10 +16,7 @@ import re
 import sys
 
 from ddl import SET_UPDATED_AT, build_objects, create_table_sql, render_full
-from model import ROOT, load
-
-LOCK = ROOT / "model.lock.json"
-MIG = ROOT / "migrations"
+from model import DEFAULT_MODEL, load, model_dir
 
 
 def diff(old: dict, new: dict) -> tuple[list[str], list[str]]:
@@ -108,9 +105,12 @@ def main() -> int:
     ap.add_argument("--name", default=None, help="slug for the migration file")
     ap.add_argument("--allow-destructive", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--model", default=DEFAULT_MODEL)
     a = ap.parse_args()
+    md = model_dir(a.model)
+    LOCK, MIG = md / "model.lock.json", md / "migrations"
 
-    new = build_objects(load())
+    new = build_objects(load(md))
     old = json.loads(LOCK.read_text()) if LOCK.exists() else {}
     stmts, bad = diff(old, new)
     if not stmts:
@@ -140,7 +140,7 @@ def main() -> int:
         return 0
     path.write_text(head + "BEGIN;\n" + body + "COMMIT;\n")
     LOCK.write_text(json.dumps(new, indent=1, sort_keys=True) + "\n")
-    print(f"wrote {path.relative_to(ROOT)}; updated {LOCK.name}")
+    print(f"wrote {path}; updated {LOCK.name}")
     return 0
 
 

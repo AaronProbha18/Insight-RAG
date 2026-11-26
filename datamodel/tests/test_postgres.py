@@ -70,7 +70,7 @@ def newdb():
         psql(URL, f"DROP DATABASE IF EXISTS {name} WITH (FORCE)")
 
 
-def migrated(newdb, root=ROOT):
+def migrated(newdb, root=ROOT / "models" / "sample"):
     url = newdb()
     for f in sorted((root / "migrations").glob("[0-9][0-9][0-9][0-9]_*.sql")):
         apply(url, f)

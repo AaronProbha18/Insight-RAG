@@ -1,5 +1,6 @@
 """DDL generation and the migrate CLI, without Postgres."""
 import json
+import shutil
 
 import ddl
 from conftest import run_tool
@@ -62,3 +63,12 @@ def test_destructive_change_refused_then_approved(workcopy):
     sql = (workcopy / "migrations/0002_drop_x.sql").read_text()
     assert "-- RISKY, approved with --allow-destructive:" in sql
     assert "ALTER TABLE org_clinic_location DROP COLUMN phone;  -- DESTRUCTIVE" in sql
+
+
+def test_ddl_model_flag_writes_into_model_build(workcopy, tmp_path):
+    other = tmp_path / "other"
+    shutil.copytree(workcopy, other)
+    r = run_tool(workcopy, "ddl.py", "--model", str(other))
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert not (workcopy / "build").exists()
+    assert (other / "build/schema.sql").read_text() == ddl.render_full(ddl.build_objects(load()))

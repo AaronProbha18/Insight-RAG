@@ -1,10 +1,11 @@
 """Cross-reference and standards checks. Exits non-zero on any error."""
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 
-from model import Model, all_columns, load
+from model import DEFAULT_MODEL, Model, all_columns, load, model_dir
 
 PG_IDENT_MAX = 63  # Postgres silently truncates longer identifiers, so the model stops matching the database.
 RESERVED = {"user", "order", "group", "table", "column", "check", "default", "end", "select"}
@@ -159,7 +160,9 @@ def validate(m: Model) -> list[str]:
 
 
 def main() -> int:
-    m = load()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default=DEFAULT_MODEL)
+    m = load(model_dir(ap.parse_args().model))
     errs = validate(m)
     for x in errs:
         print("ERROR", x, file=sys.stderr)
