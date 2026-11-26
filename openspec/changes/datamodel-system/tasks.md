@@ -4,7 +4,7 @@
 
 ## 2. Validator gaps
 
-- [ ] 2.1 Identifier length: table and column names (incl. system columns) over 63 bytes fail, naming table and column. One table-driven test `test_validate.py` covering each validator AC as a (broken model -> expected error) case, including 64- vs 63-byte names. Test: `make test` passes.
+- [x] 2.1 Identifier length: table and column names (incl. system columns) over 63 bytes fail, naming table and column. One table-driven test `test_validate.py` covering each validator AC as a (broken model -> expected error) case, including 64- vs 63-byte names. Test: `make test` passes.
 
 ## 3. Postgres 16 and explorer
 

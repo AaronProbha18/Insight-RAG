@@ -62,6 +62,12 @@ def validate(m: Model) -> list[str]:
         if not re.fullmatch(r"[a-z]{2,6}", t.public_id_prefix):
             e(f"{where}: public_id_prefix must be 2 to 6 lowercase letters")
 
+        if len(t.table.encode()) > PG_IDENT_MAX:
+            e(f"{where}: table name is {len(t.table.encode())} bytes; Postgres truncates at {PG_IDENT_MAX}")
+        for c in all_columns(t):
+            if len(c.name.encode()) > PG_IDENT_MAX:
+                e(f"{where}.{c.name}: column name is {len(c.name.encode())} bytes; Postgres truncates at {PG_IDENT_MAX}")
+
         names = [c.name for c in all_columns(t)]
         for n in {n for n in names if names.count(n) > 1}:
             e(f"{where}: duplicate or system-reserved column {n}")
