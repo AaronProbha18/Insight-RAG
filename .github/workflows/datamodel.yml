@@ -39,10 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
-      - name: Postgres 16 client (pg_dump must match the server)
-        run: |
-          sudo apt-get install -y postgresql-client-16 || true
-          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+      # The runner's pg_dump is newer than the 16 server, which pg_dump supports;
+      # both sides of the equivalence test are dumped by the same binary.
       - run: pg_dump --version
       - run: uv sync --locked
       - run: make check test
