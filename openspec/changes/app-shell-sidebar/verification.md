@@ -1,6 +1,6 @@
 ## Checks Run
 
-All run in this session, on branch `feat/33-app-shell-sidebar` at `867fd43` (re-run after the review fix).
+All run in this session, on branch `feat/33-app-shell-sidebar` at `184b385` (re-run after the review fix and the cleanup that followed the re-review).
 
 | Command | Result |
 | --- | --- |
@@ -9,9 +9,10 @@ All run in this session, on branch `feat/33-app-shell-sidebar` at `867fd43` (re-
 | `cd backend && uv run python -m pytest -q -rs` | 202 passed, 1 skipped (`tests/test_models.py:66`, needs Ollama on localhost:11434). `uv run pytest` itself fails here with "uv trampoline failed to canonicalize script path", so `python -m pytest` was used |
 | `cd frontend && npm run lint` | oxlint: no warnings or errors |
 | `cd frontend && npm run build` | `tsc -b` and Vite build succeeded (Vite's chunk-size notice only) |
-| `cd frontend && npm test` (from `D:\`) | 24 files, 128 tests passed |
+| `cd frontend && npm test` (from `D:\`) | 24 files, 129 tests passed |
 | `openspec validate app-shell-sidebar` | Change 'app-shell-sidebar' is valid |
 | `openspec validate --all` | 12 passed, 0 failed |
+| `python scripts/check_links.py` | links ok (129 files) |
 | Vite dev, `GET /app/documents` (run during task 3.4) | HTTP 200 with the app's `index.html`, no config |
 
 Not run: `scripts/smoke.sh` and `docker compose up --build` (no stack started for verification), and the datamodel and drift checks (no `db-change` label, no Alembic revision, no `datamodel/` change in the diff).
