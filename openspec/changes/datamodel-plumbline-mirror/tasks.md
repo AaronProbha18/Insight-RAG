@@ -15,7 +15,7 @@
 ## 4. Drift gate
 
 - [x] 4.1 `tools/drift.py <url-a> <url-b>`: a `pg_catalog` snapshot via `psql -At` (columns, `format_type`, not-null, default; `pg_get_constraintdef` sets; name-stripped index defs; triggers), excluding `alembic_version`; readable diff, exit 1 on drift. Test, `pg`-marked on pgvector: same structure with different names and comments -> 0; an extra column -> 1 naming it; a nullability change -> 1.
-- [ ] 4.2 `plumbline-drift` job in `.github/workflows/datamodel.yml` (pgvector `pg18` service, `PLUMBLINE_EMBEDDING_DIM=8`, paths add `backend/migrations/**`): alembic head into one DB, generated DDL into another, `drift.py`. Not a required check. Test: green on the PR; a scratch commit making one YAML column nullable fails the job, naming the column (then reverted).
+- [x] 4.2 `plumbline-drift` job in `.github/workflows/datamodel.yml` (pgvector `pg18` service, `PLUMBLINE_EMBEDDING_DIM=8`, paths add `backend/migrations/**`): alembic head into one DB, generated DDL into another, `drift.py`. Not a required check. Test: green on the PR; a scratch commit making one YAML column nullable fails the job, naming the column (then reverted).
 
 ## 5. Docs
 

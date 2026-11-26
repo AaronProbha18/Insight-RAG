@@ -10,8 +10,8 @@ columns:
   - {name: comment, type: text, nullable: true, description: "Free-text comment, at most 2000 characters."}
 checks:
   - {name: feedback_rating_check, expr: "rating IN ('up', 'down')"}
-  - {name: feedback_reason_check, expr: "reason IS NULL OR reason IN ('wrong', 'incomplete', 'wrong_source', 'should_have_answered', 'other')"}
-  - {name: feedback_comment_check, expr: "comment IS NULL OR char_length(comment) <= 2000"}
+  - {name: feedback_reason_check, expr: "reason IN ('wrong', 'incomplete', 'wrong_source', 'should_have_answered', 'other')"}
+  - {name: feedback_comment_check, expr: "char_length(comment) <= 2000"}
   - {name: feedback_check, expr: "reason IS NULL OR rating = 'down'"}
 sample_rows:
   - {rating: up}
