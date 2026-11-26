@@ -1,0 +1,12 @@
+table: chunks
+domain: rag
+status: published
+system_columns: []
+description: A piece of a document with its locator and embedding. Retrieval reads only this table.
+columns:
+  - {name: document_id, type: bigint, references: documents.id, on_delete: cascade, description: "The document this chunk belongs to. Chunks go when the document is deleted."}
+  - {name: ordinal, type: int, description: "Position of the chunk within its document."}
+  - {name: text, type: text, description: "The chunk text."}
+  - {name: locator, type: text, description: "Where in the document the chunk came from, shown in citations."}
+  - {name: embedding, type: "vector({embedding_dim})", description: "Embedding of the text. The dimension comes from PLUMBLINE_EMBEDDING_DIM."}
+unique: [[document_id, ordinal]]

@@ -1,0 +1,6 @@
+# Mirrors Plumbline's Alembic schema (backend/migrations). Change Alembic and this model in the same PR.
+id_type: bigserial
+public_id_check: false
+updated_at_trigger: false
+constraint_names: postgres
+comments: false

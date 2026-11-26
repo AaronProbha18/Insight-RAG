@@ -1,0 +1,21 @@
+table: answers
+domain: rag
+status: draft
+public_id_prefix: ans
+system_columns: [public_id, created_at]
+description: One row per answer or abstention that /chat returned.
+columns:
+  - {name: question, type: text, description: "The question that was asked."}
+  - {name: answer, type: text, description: "The answer text, or the abstention message."}
+  - {name: abstained, type: bool, description: "True when Plumbline said the documents do not cover the question."}
+  - {name: citations, type: jsonb, description: "Citations copied at answer time (document_id, title, filename, locator), so a later document delete does not lose them."}
+  - {name: chat_model, type: text, description: "Chat model that produced the answer."}
+  - {name: embedding_model, type: text, description: "Embedding model used for retrieval."}
+  - {name: abstain_threshold, type: double precision, description: "Retrieval score threshold below which Plumbline abstains."}
+open_questions:
+  - id: OQ-ANSWERS-001
+    owner: CMO
+    text: question, answer and feedback comments are free text a member could type health details into. Should they be classed pii indirect, and what retention applies?
+sample_rows:
+  - {public_id: ans_EXAMPLE0001, question: "What is the example policy?", answer: The example policy covers example topics., abstained: false, chat_model: example-chat, embedding_model: example-embed, abstain_threshold: 0.5}
+  - {public_id: ans_EXAMPLE0002, question: "What is not covered?", answer: The documents do not cover that., abstained: true, chat_model: example-chat, embedding_model: example-embed, abstain_threshold: 0.5}

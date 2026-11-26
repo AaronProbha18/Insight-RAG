@@ -10,7 +10,7 @@
 
 ## 3. Plumbline model
 
-- [ ] 3.1 `models/plumbline/` with `model.yaml` and `documents`, `chunks`, `answers`, `feedback` YAML matching Alembic head (descriptions from `docs/architecture/overview.md`, synthetic sample rows only). Test: `make validate MODEL=models/plumbline` exits 0; a test asserts the four tables and their column names equal the Alembic SQL's.
+- [x] 3.1 `models/plumbline/` with `model.yaml` and `documents`, `chunks`, `answers`, `feedback` YAML matching Alembic head (descriptions from `docs/architecture/overview.md`, synthetic sample rows only). Test: `make validate MODEL=models/plumbline` exits 0; a test asserts the generated tables and their column lists (equality with Alembic is the drift gate, 4.x).
 
 ## 4. Drift gate
 
