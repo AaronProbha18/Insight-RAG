@@ -6,7 +6,7 @@
 
 - [x] 2.1 `connectors/api.ts` (`listConnectors`) and `/connectors` in the Vite dev proxy, with tests
 - [x] 2.2 `quality/useQuality.ts`: one hook for `/quality`, with tests
-- [ ] 2.3 `shell/route.ts`: `connectors` page at `/app/connectors`, with tests
+- [x] 2.3 `shell/route.ts`: `connectors` page at `/app/connectors`, with tests
 
 ## 3. Page and shell
 
