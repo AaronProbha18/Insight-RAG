@@ -24,7 +24,7 @@ check: validate
 	$(PY) tools/migrate.py --dry-run | grep -q '^no changes' || (echo "model has unmigrated changes: run make migrate" && exit 1)
 
 test:
-	$(PY) -m pytest -q tests
+	$(PY) -m pytest -q -rs tests
 
 clean:
 	rm -rf build
