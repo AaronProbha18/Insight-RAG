@@ -53,6 +53,7 @@ docs/adr/                  architecture decision records - why things are the wa
 docs/architecture/         overview.md: components, flows, boundary rules, data model
 docs/guides/               backend, frontend and connector development guides
 docs/brand/                Plumbline logos and icons (source files; README has usage)
+mkdocs.yml                 docs site config (MkDocs Material, reads docs/); docs-requirements.txt pins the tooling; netlify.toml deploys it
 openspec/                  specs (living), changes (in flight), schemas (our workflow)
 .claude/                   Claude Code skills, commands, hooks; launch.json (dev servers for Desktop preview)
 Dockerfile                 one image: built UI + API
@@ -159,6 +160,10 @@ make validate test                 # CI gate; Postgres tests need DATAMODEL_TEST
 make validate MODEL=models/plumbline   # any target takes MODEL= (default models/plumbline)
 PYTHONPATH=tools uv run python tools/validate.py   # without make; same for ddl, explorer
 uv run pytest -q -rs
+
+# docs site (from repo root; tooling in docs-requirements.txt, see docs/guides/docs-site.md)
+pip install -r docs-requirements.txt
+mkdocs build --strict           # CI gate; a broken link fails it
 
 # openspec
 openspec list                      # active changes

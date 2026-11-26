@@ -1,0 +1,7 @@
+[build]
+  command = "pip install -r docs-requirements.txt && mkdocs build --strict"
+  publish = "site"
+
+[build.environment]
+  # UNVERIFIED: confirm PYTHON_VERSION is honoured by Netlify's build image.
+  PYTHON_VERSION = "3.12"
