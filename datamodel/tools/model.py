@@ -1,41 +1,63 @@
-"""Load domains/**/*.yaml and enums/*.yaml into one in-memory Model."""
+"""Load domains/**/*.yaml into one in-memory Model."""
 from __future__ import annotations
 
+import os
 import pathlib
 from dataclasses import dataclass, field
 
 import yaml
 
-from schema import Column, Domain, EnumDef, Table
+from schema import Column, Domain, Table
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # the toolkit; models live under models/<name>/
+DEFAULT_MODEL = "models/plumbline"
+
+
+def model_dir(name: str = DEFAULT_MODEL) -> pathlib.Path:
+    return ROOT / name  # an absolute name wins over ROOT
 
 
 def system_columns(t: Table) -> list[Column]:
     """Columns every table gets, so no YAML can forget them or contradict the standard."""
-    cols = [
-        Column(name="id", type="uuid", default="gen_random_uuid()",
-               description="Internal primary key. Never leaves the backend."),
-        Column(name="public_id", type="text", unique=True,
-               description=f"Opaque external identifier, prefixed '{t.public_id_prefix}_'."),
-        Column(name="created_at", type="timestamptz", default="now()",
-               description="When the row was written."),
-    ]
-    if not t.immutable or t.mutable_columns:
+    # bigserial is a key-only pseudo-type, deliberately not a YAML column type, so skip validation.
+    cols = [Column.model_construct(name="id", type="bigserial",
+                                   description="Internal primary key. Never leaves the backend.")]
+    if "public_id" in t.system_columns:
+        cols.append(Column(name="public_id", type="text", unique=True,
+                           description=f"Opaque external identifier, prefixed '{t.public_id_prefix}_'."))
+    if "created_at" in t.system_columns:
+        cols.append(Column(name="created_at", type="timestamptz", default="now()",
+                           description="When the row was written."))
+    if "updated_at" in t.system_columns:
         cols.append(Column(name="updated_at", type="timestamptz", default="now()",
                            description="When the row last changed."))
     return cols
+
+
+def column_type(c: Column) -> str:
+    """The SQL type, with {embedding_dim} filled from PLUMBLINE_EMBEDDING_DIM (same rule as backend migration 0001)."""
+    if "{embedding_dim}" not in c.type:
+        return c.type
+    value = os.environ.get("PLUMBLINE_EMBEDDING_DIM", "")
+    if not value.isdigit() or int(value) == 0:
+        raise ValueError(f"{c.name}: PLUMBLINE_EMBEDDING_DIM must be set to a positive integer; got {value!r}")
+    return c.type.replace("{embedding_dim}", value)
 
 
 def all_columns(t: Table) -> list[Column]:
     return system_columns(t) + t.columns
 
 
+def con_name(kind: str, table: str, cols: list[str]) -> str:
+    """Postgres's own constraint names, as Alembic's plain SQL gets them."""
+    c = "_".join(cols)
+    return {"pk": f"{table}_pkey", "fk": f"{table}_{c}_fkey", "uq": f"{table}_{c}_key"}[kind]
+
+
 @dataclass
 class Model:
     domains: dict[str, Domain] = field(default_factory=dict)
     tables: dict[str, Table] = field(default_factory=dict)
-    enums: dict[str, EnumDef] = field(default_factory=dict)
 
     def ordered_tables(self) -> list[Table]:
         """Domain load order first, then FK dependency order inside a domain, then name."""
@@ -65,8 +87,12 @@ def _yaml(path: pathlib.Path):
         return yaml.safe_load(f)
 
 
-def load(root: pathlib.Path = ROOT) -> Model:
+def load(root: pathlib.Path | None = None) -> Model:
+    root = root or model_dir()
     m = Model()
+    if (root / "model.yaml").exists():
+        raise ValueError(f"{root / 'model.yaml'}: model.yaml is no longer supported; "
+                         "the toolkit has one set of conventions")
     for p in sorted((root / "domains").glob("*/domain.yaml")):
         d = Domain(**_yaml(p))
         m.domains[d.domain] = d
@@ -77,7 +103,4 @@ def load(root: pathlib.Path = ROOT) -> Model:
         if t.table in m.tables:
             raise ValueError(f"duplicate table {t.table}")
         m.tables[t.table] = t
-    for p in sorted((root / "enums").glob("*.yaml")):
-        e = EnumDef(**_yaml(p))
-        m.enums[e.enum] = e
     return m

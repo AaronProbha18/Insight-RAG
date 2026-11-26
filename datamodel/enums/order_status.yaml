@@ -1,3 +1,0 @@
-enum: order_status
-description: Lifecycle of a membership order.
-values: [PENDING, PAID, CANCELLED, EXPIRED]

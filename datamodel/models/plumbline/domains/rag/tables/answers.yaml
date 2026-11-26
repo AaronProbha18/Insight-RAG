@@ -1,0 +1,18 @@
+table: answers
+domain: rag
+status: published
+public_id_prefix: ans
+system_columns: [public_id, created_at]
+description: One row per answer or abstention that /chat returned.
+columns:
+  - {name: question, type: text, description: "The question that was asked."}
+  - {name: answer, type: text, description: "The answer text, or the abstention message."}
+  - {name: abstained, type: bool, description: "True when Plumbline said the documents do not cover the question."}
+  - {name: citations, type: jsonb, description: "Citations copied at answer time (document_id, title, filename, locator), so a later document delete does not lose them."}
+  - {name: chat_model, type: text, description: "Chat model that produced the answer."}
+  - {name: embedding_model, type: text, description: "Embedding model used for retrieval."}
+  - {name: abstain_threshold, type: double precision, description: "Retrieval score threshold below which Plumbline abstains."}
+open_questions:
+  - id: OQ-ANSWERS-001
+    owner: Business Tech Review
+    text: question, answer and feedback comments are free text a user could type personal or health details into. Should they be classed pii indirect, and what retention applies?

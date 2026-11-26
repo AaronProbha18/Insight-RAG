@@ -3,9 +3,9 @@ name: datamodel
 on:
   push:
     branches: [main]
-    paths: ["datamodel/**", ".github/workflows/datamodel.yml"]
+    paths: ["datamodel/**", "backend/migrations/**", ".github/workflows/datamodel.yml"]
   pull_request:
-    paths: ["datamodel/**", ".github/workflows/datamodel.yml"]
+    paths: ["datamodel/**", "backend/migrations/**", ".github/workflows/datamodel.yml"]
 
 permissions:
   contents: read
@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 # Not a required check on main: a path-filtered required check would block
-# every PR that doesn't touch datamodel/ (#21, task 4.1).
+# every PR that doesn't touch datamodel/ (#21, task 4.1). Same for plumbline-drift.
 jobs:
   datamodel:
     runs-on: ubuntu-latest
@@ -43,4 +43,47 @@ jobs:
       # both sides of the equivalence test are dumped by the same binary.
       - run: pg_dump --version
       - run: uv sync --locked
-      - run: make check test
+      - run: make validate test
+
+  # Alembic head vs the schema generated from datamodel/models/plumbline. Fails when they
+  # disagree: change Alembic and the YAML in the same PR (#28).
+  plumbline-drift:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_PASSWORD: datamodel # throwaway CI credential
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      PLUMBLINE_EMBEDDING_DIM: 8
+      ADMIN_URL: postgresql://postgres:datamodel@localhost:5432/postgres
+      ALEMBIC_URL: postgresql://postgres:datamodel@localhost:5432/alembic
+      GENERATED_URL: postgresql://postgres:datamodel@localhost:5432/generated
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -c "CREATE DATABASE alembic"
+      - run: psql "$ADMIN_URL" -v ON_ERROR_STOP=1 -c "CREATE DATABASE generated"
+      - name: Alembic head
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.ALEMBIC_URL }}
+        run: |
+          uv sync --locked
+          uv run alembic upgrade head
+      - name: Generated schema
+        working-directory: datamodel
+        run: |
+          uv sync --locked
+          make ddl MODEL=models/plumbline
+          psql "$GENERATED_URL" -v ON_ERROR_STOP=1 -c "CREATE EXTENSION vector" -f models/plumbline/build/schema.sql
+      - name: Drift
+        working-directory: datamodel
+        run: uv run python tools/drift.py "$ALEMBIC_URL" "$GENERATED_URL" --label-a alembic --label-b yaml

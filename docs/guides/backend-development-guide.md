@@ -225,6 +225,10 @@ means a new migration and re-ingestion (ADR 0002).
 **7.4 One default database location:** `db.database_url()`. Don't
 hard-code a URL anywhere else.
 
+**7.5 A new revision also updates `datamodel/models/plumbline/`** in the
+same PR. The `plumbline-drift` CI job applies Alembic head and the generated
+YAML schema to two databases and fails when they differ (ADR 0004).
+
 ## 8. Testing
 
 **8.1 Fakes, not mocks.** Small hand-written stand-ins that behave like
@@ -273,5 +277,6 @@ before a change can pass.
 | Log exceptions; send a generic message | Send stack traces or hostnames to clients |
 | Add a provider as a `pyproject` extra | Import a provider SDK in core code |
 | Add a new migration revision | Edit an applied one |
+| Update `datamodel/models/plumbline/` with the revision | Merge a revision the YAML doesn't mirror |
 | Run evals after prompt or threshold changes | Edit golden answers to pass |
 | Use fakes and the `db` / `llm` markers | Call real models in unit tests |
