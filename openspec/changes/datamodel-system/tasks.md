@@ -8,7 +8,7 @@
 
 ## 3. Postgres 16 and explorer
 
-- [ ] 3.1 `tests/test_postgres.py` (marker `pg`, `DATAMODEL_TEST_DATABASE_URL`): immutability triggers (DELETE rejected, UPDATE outside allow-list rejected, allow-listed UPDATE succeeds and advances `updated_at`); baseline + incremental vs fresh build compared via `pg_dump -s`, column order normalised. Test: passes against a local or CI Postgres 16; skipped without the URL.
+- [x] 3.1 `tests/test_postgres.py` (marker `pg`, `DATAMODEL_TEST_DATABASE_URL`): immutability triggers (DELETE rejected, UPDATE outside allow-list rejected, allow-listed UPDATE succeeds and advances `updated_at`); baseline + incremental vs fresh build compared via `pg_dump -s`, column order normalised. Test: passes against a local or CI Postgres 16; skipped without the URL.
 - [ ] 3.2 Audit `explorer.template.html`: every interpolation of YAML text goes through `esc()`; fix any that don't. Test: by hand - `make explorer`, open `build/explorer.html` locally from disk with a description containing `<script>` and `</script>`; renders, text shown literally, no console errors; recorded in `verification.md`.
 
 ## 4. CI and docs
