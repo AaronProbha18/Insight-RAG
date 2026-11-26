@@ -86,4 +86,4 @@ jobs:
           psql "$GENERATED_URL" -v ON_ERROR_STOP=1 -c "CREATE EXTENSION vector" -f models/plumbline/build/schema.sql
       - name: Drift
         working-directory: datamodel
-        run: uv run python tools/drift.py "$ALEMBIC_URL" "$GENERATED_URL"
+        run: uv run python tools/drift.py "$ALEMBIC_URL" "$GENERATED_URL" --label-a alembic --label-b yaml

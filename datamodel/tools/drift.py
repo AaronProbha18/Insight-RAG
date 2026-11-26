@@ -2,7 +2,8 @@
 
 Used by the plumbline-drift CI job: Alembic head in one database, the schema generated from
 models/plumbline in the other. Object names, comments, column order and alembic_version are ignored.
-Usage: drift.py <url-a> <url-b>   (exit 0 same, 1 drift, 2 psql failed)
+Usage: drift.py <url-a> <url-b> [--label-a alembic --label-b yaml]
+(exit 0 same, 1 drift, 2 psql failed). The labels name the sides in the output; default a and b.
 """
 from __future__ import annotations
 
@@ -66,26 +67,27 @@ def snapshot(url: str) -> dict:
     return snap
 
 
-def diff(a: dict, b: dict) -> list[str]:
+def diff(a: dict, b: dict, label_a: str = "a", label_b: str = "b") -> list[str]:
     out: list[str] = []
     for name in sorted(a.keys() - b.keys()):
-        out.append(f"table {name}: only in a")
+        out.append(f"table {name}: only in {label_a}")
     for name in sorted(b.keys() - a.keys()):
-        out.append(f"table {name}: only in b")
+        out.append(f"table {name}: only in {label_b}")
     for name in sorted(a.keys() & b.keys()):
         ta, tb = a[name], b[name]
         for col in sorted(ta["columns"].keys() - tb["columns"].keys()):
-            out.append(f"table {name}: column {col} only in a {ta['columns'][col]}")
+            out.append(f"table {name}: column {col} only in {label_a} {ta['columns'][col]}")
         for col in sorted(tb["columns"].keys() - ta["columns"].keys()):
-            out.append(f"table {name}: column {col} only in b {tb['columns'][col]}")
+            out.append(f"table {name}: column {col} only in {label_b} {tb['columns'][col]}")
         for col in sorted(ta["columns"].keys() & tb["columns"].keys()):
             if ta["columns"][col] != tb["columns"][col]:
-                out.append(f"table {name}: column {col} differs: a={ta['columns'][col]} b={tb['columns'][col]}")
+                out.append(f"table {name}: column {col} differs: "
+                           f"{label_a}={ta['columns'][col]} {label_b}={tb['columns'][col]}")
         for kind in ("constraints", "indexes", "triggers"):
             for d in sorted(set(ta[kind]) - set(tb[kind])):
-                out.append(f"table {name}: {kind[:-1]} only in a: {d}")
+                out.append(f"table {name}: {kind[:-1]} only in {label_a}: {d}")
             for d in sorted(set(tb[kind]) - set(ta[kind])):
-                out.append(f"table {name}: {kind[:-1]} only in b: {d}")
+                out.append(f"table {name}: {kind[:-1]} only in {label_b}: {d}")
     return out
 
 
@@ -93,9 +95,11 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("url_a")
     ap.add_argument("url_b")
+    ap.add_argument("--label-a", default="a")
+    ap.add_argument("--label-b", default="b")
     args = ap.parse_args()
     try:
-        lines = diff(snapshot(args.url_a), snapshot(args.url_b))
+        lines = diff(snapshot(args.url_a), snapshot(args.url_b), args.label_a, args.label_b)
     except PsqlError as e:
         print(f"psql failed: {e}", file=sys.stderr)
         return 2

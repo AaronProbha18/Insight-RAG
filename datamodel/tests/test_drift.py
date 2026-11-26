@@ -95,3 +95,26 @@ def test_nullability_change_is_drift(newdb):
     psql(b, "ALTER TABLE t ALTER COLUMN y SET NOT NULL")
     r = _drift(a, b)
     assert r.returncode == 1 and "column y" in r.stdout
+
+
+def test_labels_name_the_sides():
+    a, b = copy.deepcopy(BASE), copy.deepcopy(BASE)
+    b["t"]["columns"]["y"] = ["int", False, None]
+    a["t"]["constraints"].append("CHECK ((x <> ''::text))")
+    a["t"]["columns"]["x"] = ["text", True, None]
+    a["only_a"] = BASE["t"]
+    out = drift.diff(a, b, "alembic", "yaml")
+    assert "table only_a: only in alembic" in out
+    assert any("column y only in yaml" in line for line in out)
+    assert any("constraint only in alembic" in line for line in out)
+    assert any("column x differs: alembic=" in line and " yaml=" in line for line in out)
+
+
+def test_cli_labels(monkeypatch, capsys):
+    a, b = copy.deepcopy(BASE), copy.deepcopy(BASE)
+    b["t"]["columns"]["y"] = ["int", False, None]
+    snaps = {"u1": a, "u2": b}
+    monkeypatch.setattr(drift, "snapshot", snaps.get)
+    monkeypatch.setattr(sys, "argv", ["drift.py", "u1", "u2", "--label-a", "alembic", "--label-b", "yaml"])
+    assert drift.main() == 1
+    assert "column y only in yaml" in capsys.readouterr().out
