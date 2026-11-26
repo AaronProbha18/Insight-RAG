@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { type DocumentSummary, deleteDocument, listDocuments } from './api'
 
 /** Deletes one document; returns '' on success (404 = already gone) or the message to show. */
-export async function deleteOutcome(id: string, del: typeof deleteDocument = deleteDocument): Promise<string> {
+export async function deleteOutcome(id: string): Promise<string> {
   try {
-    await del(id)
+    await deleteDocument(id)
     return ''
   } catch {
     return "Couldn't delete the document. Try again."

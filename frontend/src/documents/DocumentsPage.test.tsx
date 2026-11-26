@@ -47,10 +47,11 @@ describe('DocumentsPage', () => {
   it('names every control and has a status region', () => {
     const html = render([alpha])
 
-    expect(html).toContain('Upload a PDF or Word document')
+    expect(html).toMatch(/<label[^>]*>Upload a PDF or Word document\s*<input type="file" accept="\.pdf,\.docx"/)
     expect(html).toMatch(/Search\s*<input[^>]*type="search"/)
     expect(html).toMatch(/Type\s*<select/)
     expect(html).toContain('role="status"')
+    expect(html).toContain('aria-live="polite"')
   })
 })
 
