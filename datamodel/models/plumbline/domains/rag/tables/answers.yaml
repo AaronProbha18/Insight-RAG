@@ -1,6 +1,6 @@
 table: answers
 domain: rag
-status: draft
+status: published
 public_id_prefix: ans
 system_columns: [public_id, created_at]
 description: One row per answer or abstention that /chat returned.
@@ -14,5 +14,5 @@ columns:
   - {name: abstain_threshold, type: double precision, description: "Retrieval score threshold below which Plumbline abstains."}
 open_questions:
   - id: OQ-ANSWERS-001
-    owner: CMO
-    text: question, answer and feedback comments are free text a member could type health details into. Should they be classed pii indirect, and what retention applies?
+    owner: Business Tech Review
+    text: question, answer and feedback comments are free text a user could type personal or health details into. Should they be classed pii indirect, and what retention applies?

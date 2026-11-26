@@ -156,7 +156,7 @@ function table(name){
 function openq(){
   return `<div class="crumb">Overview</div><h2 class="tname">Open questions</h2>
   <p class="small muted">A decision the model cannot make for itself. Answer it in the table's YAML (status, answer) and rebuild.</p>
-  ${["CTO","CMO","Product","CEO","Business Tech Review"].map(o=>{const qs=allQ.filter(q=>q.owner===o);return qs.length?`<h3 class="sec">${esc(o)} (${qs.length})</h3>`+qs.map(q=>question(q,true)).join(""):""}).join("")||'<p class="muted">None.</p>'}`;
+  ${[...new Set(allQ.map(q=>q.owner))].sort().map(o=>{const qs=allQ.filter(q=>q.owner===o);return qs.length?`<h3 class="sec">${esc(o)} (${qs.length})</h3>`+qs.map(q=>question(q,true)).join(""):""}).join("")||'<p class="muted">None.</p>'}`;
 }
 
 function route(){

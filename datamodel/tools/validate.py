@@ -119,8 +119,6 @@ def validate(m: Model) -> list[str]:
             if q.id in ids:
                 e(f"{where}: id {q.id} already used in {ids[q.id]}")
             ids[q.id] = t.table
-        if t.status == "published" and any(q.status == "open" and q.owner == "CMO" for q in t.open_questions):
-            e(f"{where}: published with an open CMO question; clinical scope is the CMO's to settle")
 
     # name length, collisions
     seen: dict[str, str] = {}

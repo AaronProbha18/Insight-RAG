@@ -62,7 +62,7 @@ class Index(Strict):
 
 class Question(Strict):
     id: str
-    owner: Literal["CTO", "CMO", "Product", "CEO", "Business Tech Review"]
+    owner: str  # who decides; free text
     status: Literal["open", "answered", "closed"] = "open"
     text: str
     answer: Optional[str] = None

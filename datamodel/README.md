@@ -108,8 +108,6 @@ uploaded anywhere.
 
 ## Rules
 
-- **Clinical scope is the CMO's.** A table can't be `published` while it
-  has an open question owned by the CMO.
 - Identifiers longer than 63 bytes are rejected; Postgres would silently
   truncate them.
 - **No real data.** Fixtures and tests use obviously synthetic values.

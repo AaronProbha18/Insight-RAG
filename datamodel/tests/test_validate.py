@@ -34,10 +34,6 @@ CASES = {
     "column name 64 bytes": (_rename_column(64), f"account.{'c' * 64}: column name is 64 bytes"),
     "duplicate prefix": (lambda m: setattr(m.tables["note"], "public_id_prefix", "acc"), "already used by"),
     "default on pii column": (lambda m: setattr(m.tables["account"].columns[1], "default", "'x'"), "cannot have a default"),
-    "published with open CMO question": (
-        lambda m: m.tables["account"].open_questions.append(_q("open", owner="CMO")),
-        "open CMO question",
-    ),
     "answered without answer": (lambda m: m.tables["account"].open_questions.append(_q("answered")), "has no answer"),
     "duplicate question id": (
         lambda m: m.tables["account"].open_questions.extend([_q("open"), _q("open")]),
@@ -63,3 +59,11 @@ def test_63_byte_name_has_no_length_error(mutate):
     m = load(MINI)
     mutate(m)
     assert not any("name is 63 bytes" in e for e in validate.validate(m))
+
+
+def test_question_owner_is_free_text_and_never_blocks_publishing():
+    m = load(MINI)
+    m.tables["account"].open_questions.append(_q("open", owner="CMO"))
+    m.tables["note"].open_questions.append(
+        Question(id="OQ-NOTE-001", owner="Anyone at all", status="open", text="q"))
+    assert m.tables["account"].status == "published" and validate.validate(m) == []

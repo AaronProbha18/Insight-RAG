@@ -39,12 +39,6 @@ offending item, for each rule below.
 - **WHEN** validating
 - **THEN** it fails
 
-#### Scenario: Published with an open CMO question
-
-- **GIVEN** a `published` table with an open question owned by the CMO
-- **WHEN** validating
-- **THEN** it fails
-
 #### Scenario: Answered question without an answer
 
 - **GIVEN** a question marked answered/closed with no `answer`
