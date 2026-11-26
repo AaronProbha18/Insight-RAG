@@ -47,7 +47,7 @@ frontend/                  Vite + React + assistant-ui + Tailwind v4
 evals/                     eval DATA only: corpus-src/, connectors/<name>/{corpus,golden.yaml},
                            judge/labelled.yaml, reports/ (gitignored scratch),
                            baselines/<change>/ (committed eval summaries)
-datamodel/                 YAML data model toolkit, own uv project; not Plumbline's schema (ADR 0004)
+datamodel/                 YAML data model toolkit, own uv project; models/plumbline mirrors the Alembic schema (ADR 0004)
 scripts/smoke.sh           full-stack smoke test
 docs/adr/                  architecture decision records - why things are the way they are
 docs/architecture/         overview.md: components, flows, boundary rules, data model
@@ -108,7 +108,9 @@ carry the handoff:
    contract, a boundary rule, or a command updates
    `docs/architecture/overview.md` and the matching guide in
    `docs/guides/` in the same PR. Docs describe what the code does; a rule
-   the code breaks is a bug in one of them.
+   the code breaks is a bug in one of them. A new Alembic revision also
+   updates `datamodel/models/plumbline/` in the same PR; `plumbline-drift`
+   fails otherwise (ADR 0004).
 
 ## Review
 
@@ -153,6 +155,7 @@ uv run --no-project --with reportlab --with python-docx python evals/generate_co
 # datamodel (from datamodel/; see datamodel/README.md)
 uv sync
 make check test                    # CI gate; Postgres tests need DATAMODEL_TEST_DATABASE_URL
+make validate MODEL=models/plumbline   # any target takes MODEL= (default models/sample)
 PYTHONPATH=tools uv run python tools/validate.py   # without make; same for ddl, explorer, migrate
 uv run pytest -q -rs
 

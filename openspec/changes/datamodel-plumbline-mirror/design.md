@@ -33,7 +33,7 @@ defaults that keep the sample unchanged (Q2a); the gate as a second job in
   docs only with no gate (C).
 - **Why**: B is a cutover on a live schema, and `vector(N)` has no clean
   home in it. C drifts, which is the problem #21 exists to fix.
-- **ADR**: docs/adr/0005-plumbline-schema-mirror.md (new, Proposed)
+- **ADR**: docs/adr/0004-yaml-data-model.md (extended; still Proposed)
 
 ### Models under `datamodel/models/<name>/`
 
@@ -46,7 +46,7 @@ defaults that keep the sample unchanged (Q2a); the gate as a second job in
 - **Alternatives**: `backend/schema/`, which breaks ADR 0004's isolation.
 - **Why**: one toolkit, several models; `datamodel/` still never reads
   `backend/`.
-- **ADR**: 0005
+- **ADR**: 0004
 
 ### Conventions in `model.yaml`
 
@@ -70,7 +70,7 @@ comments: false               # default true: COMMENT ON TABLE/COLUMN
   ignores names anyway, so this only matters for readable DDL.
 - **Alternatives**: no injection for Plumbline tables (Q2b, rejected: it
   loses the "can't forget system columns" guarantee).
-- **ADR**: 0005
+- **ADR**: 0004
 
 ### New types
 

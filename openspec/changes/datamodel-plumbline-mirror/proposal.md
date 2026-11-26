@@ -30,8 +30,8 @@ docs and the database disagree.
   compares a structural snapshot of the two. The snapshot covers columns,
   types, nullability, defaults, and constraint and index definitions. It
   ignores names, comments and `alembic_version`.
-- **ADR 0005** records the mirror decision: Alembic stays the source of
-  truth for Plumbline's schema, and YAML mirrors it, gated by CI.
+- **ADR 0004** is extended with the mirror decision: Alembic stays the
+  source of truth for Plumbline's schema, and YAML mirrors it, gated by CI.
 
 ## Non-Goals
 
@@ -61,7 +61,7 @@ docs and the database disagree.
 | Answer quality (retrieval, ranking, chunking, embeddings, prompts, graph) | No | Reads the schema only; no runtime code changes. |
 | Connector / ingestion | No | |
 | Auth / document ACLs | No | |
-| Public API or stream contract | No | `--model` and `model.yaml` are internal tooling contracts, recorded in ADR 0005. |
+| Public API or stream contract | No | `--model` and `model.yaml` are internal tooling contracts, recorded in ADR 0004. |
 | Persistence / migration | Yes | A CI gate reads Plumbline's migrated schema. Plumbline's schema and migrations are not changed. |
 | New external dependency or service | No | The gate reuses the pgvector image and the backend's existing dependencies. |
 
@@ -69,6 +69,6 @@ docs and the database disagree.
 
 `datamodel/` (tools, Makefile, tests, README; the sample moves under
 `models/`), `.github/workflows/datamodel.yml`,
-`docs/adr/0005-plumbline-schema-mirror.md`,
+`docs/adr/0004-yaml-data-model.md`,
 `docs/architecture/overview.md`, `AGENTS.md`. Backend runtime code is
 untouched. Architecture sign-off: business tech review.

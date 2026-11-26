@@ -175,12 +175,12 @@ The exported candidates file holds the same text.
   added when corpus size makes the scan slow.
 
 `datamodel/` is a separate toolkit: a YAML data model that generates DDL,
-migrations and an explorer for **other** schemas
+migrations and an explorer
 ([ADR 0004](../adr/0004-yaml-data-model.md),
-[datamodel/README.md](../../datamodel/README.md)). It is not Plumbline's
-schema, and it doesn't touch Plumbline's database or Alembic. Whether to
-align the two is
-[#28](https://github.com/AaronProbha18/Plumbline/issues/28).
+[datamodel/README.md](../../datamodel/README.md)). Alembic remains the
+source of Plumbline's schema; `datamodel/models/plumbline/` mirrors it, and
+the `plumbline-drift` CI job fails when the two differ. The toolkit never
+reads `backend/` or touches Plumbline's database outside that job.
 
 ## Configuration
 
