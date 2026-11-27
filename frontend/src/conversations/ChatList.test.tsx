@@ -93,13 +93,14 @@ describe('ChatList', () => {
 })
 
 describe('ChatRowView modes', () => {
-  it('rename: an input holding the title, with Save and Cancel', () => {
+  it('rename: an input holding the title, with Save and Cancel icon buttons', () => {
     const html = row('rename')
 
     expect(html).toMatch(/<input[^>]*aria-label="Chat title"[^>]*value="Refund window"|<input[^>]*value="Refund window"[^>]*aria-label="Chat title"/)
     expect(html).toContain('maxLength="200"')
-    expect(html).toContain('>Save<')
-    expect(html).toContain('>Cancel<')
+    expect(html).toContain('aria-label="Save title"')
+    expect(html).toContain('aria-label="Cancel rename"')
+    expect(html).toContain('lucide-message-circle')
     expect(html).not.toContain('href=')
   })
 
