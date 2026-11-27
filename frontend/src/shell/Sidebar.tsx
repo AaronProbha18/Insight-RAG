@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { Button } from '@/components/ui/button'
+import { ChatList, type ChatsProps } from '../conversations/ChatList'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { isPlainClick, navigate, type Page } from './route'
 
@@ -22,6 +23,7 @@ type Props = {
   onToggleCollapse?: () => void // omitted in the drawer, where collapsing means nothing
   onNewChat: () => void
   onNavigate?: () => void // after a navigating click, so the drawer can close
+  chats?: ChatsProps // the saved chats; the section is hidden when there are none or the sidebar is collapsed
 }
 
 /** A tooltip on the right of `children`, shown only when `show` (the collapsed, icon-only sidebar). */
@@ -36,7 +38,7 @@ function Tip({ label, show, children }: { label: string; show: boolean; children
 }
 
 /** Main navigation. Collapsed shows icons only; every item keeps its name as screen-reader text. */
-export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNewChat, onNavigate }: Props) {
+export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNewChat, onNavigate, chats }: Props) {
   const label = collapsed ? 'sr-only' : undefined
   // Collapsed: icons centred and spaced apart.
   const row = collapsed ? `${item} justify-center py-2.5` : `${item} py-1.5`
@@ -107,6 +109,8 @@ export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNe
             <span className={label}>New chat</span>
           </button>
         </Tip>
+
+        {chats && !collapsed && <ChatList chats={chats} onNavigate={onNavigate} />}
 
         <div className={stack}>
           <p className={group}>Knowledge</p>

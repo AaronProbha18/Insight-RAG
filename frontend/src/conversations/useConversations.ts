@@ -57,10 +57,12 @@ export function useConversations() {
     else refresh()
   }
 
+  /** Deletes a chat; true when it is gone. */
   async function remove(id: string) {
     const failure = await deleteOutcome(id)
     if (failure) setMessage(failure)
     else refresh()
+    return !failure
   }
 
   return { conversations, loaded, message, refresh, rename, remove }

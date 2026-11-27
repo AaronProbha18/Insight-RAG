@@ -4,6 +4,7 @@ import { FirstRun } from '../chat/FirstRun'
 import { DocumentsPage } from '../documents/DocumentsPage'
 import type { useDocuments } from '../documents/useDocuments'
 import { ConnectorsPage } from '../connectors/ConnectorsPage'
+import type { ChatsProps } from '../conversations/ChatList'
 import type { Saved } from '../conversations/useConversation'
 import type { useQuality } from '../quality/useQuality'
 import type { Target } from './chatTarget'
@@ -19,6 +20,7 @@ type Props = {
   saved: Saved // the saved chat being opened; unused for a new or just-saved chat
   onConversation: (id: string) => void
   onNewChat: () => void
+  chats?: ChatsProps
   documents: ReturnType<typeof useDocuments>
   quality: ReturnType<typeof useQuality>
 }
@@ -32,6 +34,7 @@ export function AppShell({
   saved,
   onConversation,
   onNewChat,
+  chats,
   documents,
   quality,
 }: Props) {
@@ -48,11 +51,12 @@ export function AppShell({
           collapsed={collapsed}
           onToggleCollapse={onToggleCollapse}
           onNewChat={onNewChat}
+          chats={chats}
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="border-b border-border p-1 md:hidden">
-          <SidebarDrawer page={page} documentCount={count} onNewChat={onNewChat} />
+          <SidebarDrawer page={page} documentCount={count} onNewChat={onNewChat} chats={chats} />
         </div>
         {documents.loaded && (
           <div hidden={page !== 'chat' || firstRun} className="min-h-0 flex-1">

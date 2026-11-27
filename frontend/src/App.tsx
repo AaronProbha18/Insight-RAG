@@ -21,6 +21,10 @@ export default function App() {
   const next = page === 'chat' ? syncTarget(target, chatId) : target
   if (next !== target) setTarget(next)
   const saved = useConversation(next.id && !next.adopted ? next.id : undefined)
+  const startNewChat = () => {
+    navigate('/')
+    setTarget((t) => newChat(t))
+  }
 
   return (
     <AppShell
@@ -34,9 +38,16 @@ export default function App() {
         replace(`/app/chats/${encodeURIComponent(id)}`)
         conversations.refresh()
       }}
-      onNewChat={() => {
-        navigate('/')
-        setTarget((t) => newChat(t))
+      onNewChat={startNewChat}
+      chats={{
+        items: conversations.conversations,
+        currentId: page === 'chat' ? next.id : undefined,
+        message: conversations.message,
+        onRename: (id, title) => void conversations.rename(id, title),
+        onDelete: async (id) => {
+          // A deleted chat must not stay open: its URL would name something that is gone.
+          if ((await conversations.remove(id)) && id === next.id) startNewChat()
+        },
       }}
       documents={documents}
       quality={quality}

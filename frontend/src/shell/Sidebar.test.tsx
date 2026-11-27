@@ -2,10 +2,21 @@
 import { existsSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import type { ChatsProps } from '../conversations/ChatList'
 import type { Page } from './route'
 import { Sidebar } from './Sidebar'
 
-const render = (page: Page = 'chat', collapsed = false) =>
+const chats: ChatsProps = {
+  items: [
+    { conversation_id: 'conv_A', title: 'Refund window', updated_at: '2026-11-02T10:00:00Z' },
+    { conversation_id: 'conv_B', title: 'Pet policy', updated_at: '2026-11-01T10:00:00Z' },
+  ],
+  currentId: 'conv_A',
+  message: '',
+  onRename: () => {},
+  onDelete: () => {},
+}
+const render = (page: Page = 'chat', collapsed = false, withChats?: ChatsProps) =>
   renderToStaticMarkup(
     <Sidebar
       page={page}
@@ -13,9 +24,34 @@ const render = (page: Page = 'chat', collapsed = false) =>
       collapsed={collapsed}
       onToggleCollapse={() => {}}
       onNewChat={() => {}}
+      chats={withChats}
     />,
   )
 const links = (html: string, href: string) => html.match(new RegExp(`<a[^>]*href="${href}"[^>]*>`, 'g')) ?? []
+
+describe('Sidebar Chats section', () => {
+  it('is hidden when there are no chats, and when the sidebar is collapsed', () => {
+    expect(render('chat', false, undefined)).not.toContain('Chats<')
+    expect(render('chat', false, { ...chats, items: [] })).not.toContain('Chats<')
+    expect(render('chat', true, chats)).not.toContain('Refund window')
+  })
+
+  it('sits between New chat and Knowledge, newest first, and marks the open chat', () => {
+    const html = render('chat', false, chats)
+    const at = ['New chat', '>Chats</h2>', 'Refund window', 'Pet policy', 'Knowledge'].map((t) => html.indexOf(t))
+
+    expect(at.every((i) => i >= 0)).toBe(true)
+    expect(at).toEqual([...at].sort((a, b) => a - b))
+    expect(links(html, '/app/chats/conv_A')[0]).toContain('aria-current="page"')
+    expect(links(html, '/app/chats/conv_B')[0]).not.toContain('aria-current')
+  })
+
+  it('does not take over the Documents or Connectors current-page marks', () => {
+    const html = render('documents', false, { ...chats, currentId: undefined })
+
+    expect(html.match(/aria-current="page"/g)).toHaveLength(1)
+  })
+})
 
 describe('Sidebar', () => {
   it('lists logo, New chat, Knowledge and Docs in order', () => {
