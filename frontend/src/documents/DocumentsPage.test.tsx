@@ -44,6 +44,13 @@ describe('DocumentsPage', () => {
     expect(render([])).toContain('No documents yet. Upload a PDF or DOCX to get started.')
   })
 
+  it('keeps the upload input keyboard-reachable with a visible focus style', () => {
+    const input = render([alpha]).match(/<input\b[^>]*type="file"[^>]*>/)![0]
+
+    expect(input).toContain('focus-visible:outline-2')
+    expect(input).not.toMatch(/tabindex="-1"|aria-disabled|\sdisabled=/)
+  })
+
   it('names every control and has a status region', () => {
     const html = render([alpha])
 
