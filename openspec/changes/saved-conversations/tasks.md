@@ -6,7 +6,7 @@
 ## 2. API
 
 - [x] 2.1 `POST /chat` takes optional `conversation_id`: unknown -> 404 before answering; none -> create on the first recorded answer in the same transaction; `record_answer` stores the conversation and touches `updated_at`; `done` carries `conversation_id`; failure creates nothing. Tests for all four "Conversations are stored" scenarios.
-- [ ] 2.2 `GET /conversations`, `GET /conversations/{id}`, `PATCH /conversations/{id}`, `DELETE /conversations/{id}` with 200/204/404/422 as in design; tests for each status, newest-first order and the deleted-source scenario.
+- [x] 2.2 `GET /conversations`, `GET /conversations/{id}`, `PATCH /conversations/{id}`, `DELETE /conversations/{id}` with 200/204/404/422 as in design; tests for each status, newest-first order and the deleted-source scenario.
 
 ## 3. Frontend
 

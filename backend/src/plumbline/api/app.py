@@ -280,6 +280,43 @@ def chat(
     return StreamingResponse(iter(events), media_type="text/event-stream")
 
 
+class RenameRequest(BaseModel):
+    title: str
+
+
+@app.get("/conversations")
+def list_conversations(conn: Conn) -> list[dict]:
+    return conversations.list_all(conn)
+
+
+@app.get("/conversations/{conversation_id}")
+def get_conversation(conversation_id: str, conn: Conn) -> dict:
+    conversation = conversations.get(conn, conversation_id)
+    if conversation is None:
+        raise HTTPException(404, "Conversation not found")
+    return conversation
+
+
+@app.patch("/conversations/{conversation_id}")
+def rename_conversation(
+    conversation_id: str, request: RenameRequest, conn: Conn
+) -> dict:
+    try:
+        renamed = conversations.rename(conn, conversation_id, request.title)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    if renamed is None:
+        raise HTTPException(404, "Conversation not found")
+    return renamed
+
+
+@app.delete("/conversations/{conversation_id}", status_code=204)
+def delete_conversation(conversation_id: str, conn: Conn) -> Response:
+    if not conversations.delete(conn, conversation_id):
+        raise HTTPException(404, "Conversation not found")
+    return Response(status_code=204)
+
+
 @app.post("/feedback", status_code=204)
 def post_feedback(request: FeedbackRequest, conn: Conn) -> Response:
     if not save_feedback(conn, request):
