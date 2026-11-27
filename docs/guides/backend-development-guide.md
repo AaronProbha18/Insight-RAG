@@ -80,6 +80,8 @@ code marks this with a `ponytail:` comment.
 | 200 | `GET /conversations` (newest first, `[]` when empty) and `GET /conversations/{conversation_id}`; `PATCH /conversations/{conversation_id}` returns the stored title and `updated_at` |
 | 204 | (also) `DELETE /conversations/{conversation_id}`; the answers and their feedback stay |
 | 404 | (also) an unknown `conversation_id` on any `/conversations/{conversation_id}` route, or in a `POST /chat` request (checked before anything is generated); the message is always "Conversation not found" |
+| 200 | (also) `GET /unanswered`: refused and thumbs-down questions grouped by question; `days` of 7, 30 or 90 limits the range, absent means all time |
+| 422 | (also) `GET /unanswered` with a `days` other than 7, 30 or 90 |
 | 200 | `GET /quality` always; no usable summary is `state: "not_measured"`, never an error |
 | 200 | (also) `GET /connectors` always; a connector that failed to load or declares another contract version is not listed |
 | 404 | (also) `POST /documents/samples` when the samples directory is missing; the message names the path |

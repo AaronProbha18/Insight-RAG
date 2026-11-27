@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 
-from plumbline import conversations, models
+from plumbline import conversations, models, unanswered
 from plumbline.config import check_legacy_env
 from plumbline.connectors import FileConnector, ParseError
 from plumbline.connectors.registry import load_connectors
@@ -288,6 +288,13 @@ class RenameRequest(BaseModel):
 @app.get("/conversations")
 def list_conversations(conn: Conn) -> list[dict]:
     return conversations.list_all(conn)
+
+
+@app.get("/unanswered")
+def list_unanswered(conn: Conn, days: int | None = None) -> dict:
+    if days not in (None, 7, 30, 90):
+        raise HTTPException(422, "days must be 7, 30 or 90")
+    return {"items": unanswered.list_groups(conn, days)}
 
 
 @app.get("/conversations/{conversation_id}")
