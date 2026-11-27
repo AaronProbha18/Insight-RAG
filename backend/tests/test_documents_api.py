@@ -202,3 +202,63 @@ def test_deleted_document_is_never_retrieved_or_cited(client, database_url):
     with psycopg.connect(database_url) as conn:
         hits = retrieve(conn, KeywordEmbeddings(), "zebra", 5)
     assert zebra["document_id"] not in {h.document_id for h in hits}
+
+
+def _samples(
+    tmp_path, monkeypatch, names=("returns-policy.pdf", "employee-handbook.pdf")
+):
+    for name in names:
+        (tmp_path / name).write_bytes((EVALS / "pdf" / "corpus" / name).read_bytes())
+    monkeypatch.setenv("PLUMBLINE_SAMPLES_DIR", str(tmp_path))
+
+
+def test_samples_all_indexed(client, tmp_path, monkeypatch):
+    _samples(tmp_path, monkeypatch)
+
+    r = client.post("/documents/samples")
+
+    assert r.status_code == 200
+    body = r.json()
+    assert [i["filename"] for i in body["indexed"]] == [
+        "employee-handbook.pdf",
+        "returns-policy.pdf",
+    ]
+    assert all(i["created"] for i in body["indexed"]) and body["failed"] == []
+    listed = {d["document_id"] for d in client.get("/documents").json()}
+    assert listed == {i["document_id"] for i in body["indexed"]}
+
+
+def test_samples_idempotent(client, tmp_path, monkeypatch, database_url):
+    _samples(tmp_path, monkeypatch)
+    client.post("/documents/samples")
+    with psycopg.connect(database_url) as c:
+        before = c.execute("SELECT count(*) FROM chunks").fetchone()[0]
+
+    r = client.post("/documents/samples")
+
+    assert not any(i["created"] for i in r.json()["indexed"])
+    assert len(client.get("/documents").json()) == 2
+    with psycopg.connect(database_url) as c:
+        assert c.execute("SELECT count(*) FROM chunks").fetchone()[0] == before
+
+
+def test_samples_corrupt_file_in_failed(client, tmp_path, monkeypatch):
+    _samples(tmp_path, monkeypatch, ("returns-policy.pdf",))
+    (tmp_path / "broken.pdf").write_bytes(b"not a pdf")
+
+    r = client.post("/documents/samples")
+
+    assert r.status_code == 200
+    body = r.json()
+    assert [f["filename"] for f in body["failed"]] == ["broken.pdf"]
+    assert body["failed"][0]["reason"]
+    assert [i["filename"] for i in body["indexed"]] == ["returns-policy.pdf"]
+
+
+def test_samples_dir_missing_404(client, tmp_path, monkeypatch):
+    missing = tmp_path / "nope"
+    monkeypatch.setenv("PLUMBLINE_SAMPLES_DIR", str(missing))
+
+    r = client.post("/documents/samples")
+
+    assert r.status_code == 404 and str(missing) in r.json()["detail"]

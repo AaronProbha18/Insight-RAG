@@ -79,6 +79,7 @@ code marks this with a `ponytail:` comment.
 | 404 | (also) `POST /feedback` for an unknown `answer_id`; the message is always "Answer not found" |
 | 200 | `GET /quality` always; no usable summary is `state: "not_measured"`, never an error |
 | 200 | (also) `GET /connectors` always; a connector that failed to load or declares another contract version is not listed |
+| 404 | (also) `POST /documents/samples` when the samples directory is missing; the message names the path |
 | 415 | no connector handles the file type; the message lists the supported types |
 | 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters) |
 | 500 | anything else; the client never sees internal details |
@@ -126,6 +127,19 @@ attribute stay out. A connector the
 registry skipped (it failed to load, or declares another contract version)
 is not listed. The names equal the keys of `/quality`, which the Connectors
 page uses to join the two. *Enforced by* `tests/test_connectors_api.py`.
+
+**2.7 `/documents/samples` indexes the shipped samples.** `POST` with no body
+runs `ingest()` on every file directly in `PLUMBLINE_SAMPLES_DIR` (the Docker
+image sets `/app/samples`, which holds the four PDFs from
+`evals/connectors/pdf/corpus`; unset in local dev, it defaults to that repo
+folder). The response is `{"indexed": [...], "failed": [...]}`: each `indexed`
+item is the upload response plus `filename`, each `failed` item is
+`{"filename", "reason"}`. It is 200 even when some files fail, so callers must
+read `failed`; only `ParseError` and `UnsupportedFileType` land there, and
+anything else is a 500 as for upload. A missing directory is a 404 naming the
+path. Calling it again adds nothing (`created: false`), because ingestion
+dedupes on the content hash. *Enforced by* the `test_samples_*` tests in
+`tests/test_documents_api.py`.
 
 ## 3. Errors
 
