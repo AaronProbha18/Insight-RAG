@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { ChatPane } from '../chat/ChatPane'
+import { FirstRun } from '../chat/FirstRun'
 import { DocumentsPage } from '../documents/DocumentsPage'
 import type { useDocuments } from '../documents/useDocuments'
 import { ConnectorsPage } from '../connectors/ConnectorsPage'
@@ -20,6 +22,8 @@ type Props = {
 /** Sidebar plus one page. The chat stays mounted (hidden) while Documents shows, so it survives navigation. */
 export function AppShell({ page, collapsed, onToggleCollapse, chatKey, onNewChat, documents, quality }: Props) {
   const count = documents.documents.length
+  const [samples, setSamples] = useState(false)
+  const firstRun = documents.loaded && count === 0 && !documents.message
   return (
     <div className="flex h-dvh">
       <div className="hidden md:block">
@@ -35,9 +39,21 @@ export function AppShell({ page, collapsed, onToggleCollapse, chatKey, onNewChat
         <div className="border-b border-border p-1 md:hidden">
           <SidebarDrawer page={page} documentCount={count} onNewChat={onNewChat} />
         </div>
-        <div hidden={page !== 'chat'} className="min-h-0 flex-1">
-          <ChatPane key={chatKey} />
-        </div>
+        {documents.loaded && (
+          <div hidden={page !== 'chat' || firstRun} className="min-h-0 flex-1">
+            <ChatPane key={chatKey} samples={samples} />
+          </div>
+        )}
+        {page === 'chat' && firstRun && (
+          <div className="min-h-0 flex-1">
+            <FirstRun
+              onIndexed={() => {
+                setSamples(true)
+                documents.refresh()
+              }}
+            />
+          </div>
+        )}
         {page === 'documents' && (
           <div className="min-h-0 flex-1 overflow-y-auto">
             <DocumentsPage {...documents} />

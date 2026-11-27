@@ -1,0 +1,9 @@
+## 1. First-run screen (#35)
+
+- [x] 1.1 `useDocuments` exposes `loaded` (true once the first list fetch settles, success or failure); test: false before the fetch resolves, true after, and true after a failed fetch.
+- [x] 1.2 `indexSamples()` in `documents/api.ts` calls `POST /documents/samples` and returns `{indexed, failed}`; test: parses the response and throws on a non-2xx status.
+- [x] 1.3 `FirstRun` component: mark, headline, citation line, three steps, **Upload documents** (navigates to `/app/documents`) and **Try the sample documents** (calls `indexSamples`, then `onIndexed`; shows an error and stays when nothing was indexed); test: Upload navigates; samples success calls `onIndexed`; empty `indexed` shows the error.
+- [x] 1.4 `AppShell` chat page: nothing until `loaded`, `FirstRun` when loaded with zero documents, chat otherwise; after samples load, `ChatPane` offers one suggested question about the samples. Test: GIVEN no documents WHEN the app opens THEN first-run shows and the sidebar shows zero documents; GIVEN documents WHEN all are deleted THEN first-run shows again; GIVEN samples indexed THEN the chat shows the sample suggestion; GIVEN samples run twice THEN the document list is unchanged (relies on the endpoint's idempotence from #40).
+- [x] 1.5 Accessibility: add `FirstRun` to `shell/a11y.test.tsx`; both actions are focusable buttons/links reachable by Tab with a visible focus style, and the text tokens used meet 4.5:1 in light and dark (`design-tokens.test.ts`).
+- [x] 1.6 Docs: describe the first-run screen and the sample action in `docs/guides/frontend-development-guide.md`; `mkdocs build --strict` passes.
+- [x] 1.7 Match the first-run screen to the First run (no documents) page of the Plumbline App Shell wireframe: its layout, type scale, spacing, radii, copy and step cards, using the app's own colour tokens (no wireframe hex values).

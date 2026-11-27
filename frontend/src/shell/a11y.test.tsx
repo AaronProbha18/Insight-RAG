@@ -3,12 +3,13 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { FirstRunView } from '../chat/FirstRun'
 import { ConnectorsView } from '../connectors/ConnectorsPage'
 import type { Quality } from '../quality/api'
 import { AppShell } from './AppShell'
 import type { Page } from './route'
 
-const documents = { documents: [], message: '', refresh: () => {}, remove: async () => {} }
+const documents = { documents: [], loaded: true, message: '', refresh: () => {}, remove: async () => {} }
 const render = (page: Page, collapsed: boolean) =>
   renderToStaticMarkup(
     <AppShell
@@ -60,6 +61,7 @@ describe('shell sources', () => {
     'Sidebar.tsx',
     'SidebarDrawer.tsx',
     'AppShell.tsx',
+    '../chat/FirstRun.tsx',
     '../documents/DocumentsPage.tsx',
     '../connectors/ConnectorCard.tsx',
     '../connectors/ConnectorsPage.tsx',
@@ -163,5 +165,35 @@ describe('Connectors page sources', () => {
 
   it('gives the page links a visible focus style', () => {
     expect(source('../connectors/ConnectorsPage.tsx')).toMatch(/const link =\s+'[^']*focus-visible:outline-2/)
+  })
+})
+
+describe('the first-run screen', () => {
+  const html = renderToStaticMarkup(<FirstRunView error="" busy={false} onUpload={() => {}} onTry={() => {}} />)
+  const source = readFileSync(fileURLToPath(new URL('../chat/FirstRun.tsx', import.meta.url)), 'utf-8')
+  const MEASURED = ['text-muted-foreground', 'text-foreground', 'text-destructive', 'bg-primary', 'text-primary-foreground', 'bg-muted', 'border-border']
+  const COLOUR = /\b(?:text|bg|border|outline)-(?:muted-foreground|primary-foreground|foreground|background|muted|destructive|border|primary|ring)(?![A-Za-z-])/g
+
+  it('names every control and has one h1', () => {
+    expect(unnamed(html)).toEqual([])
+    expect([...html.matchAll(/<h([1-6])\b/g)].map((m) => m[1])).toEqual(['1'])
+  })
+
+  it('has a native link and a native button, both in the tab order, with a focus style', () => {
+    const link = html.match(/<a\b[^>]*>/)![0]
+    const button = html.match(/<button\b[^>]*>/)![0]
+
+    expect(link).toContain('href="/app/documents"')
+    expect(link).toContain('focus-visible:')
+    expect(button).toContain('focus-visible:')
+    for (const el of [link, button]) expect(el).not.toMatch(/tabindex="-1"|aria-disabled|\sdisabled=/)
+  })
+
+  it('announces an error in a status region', () => {
+    expect(html).toContain('role="status"')
+  })
+
+  it('uses only colours whose contrast is measured in design-tokens.test.ts', () => {
+    for (const c of source.match(COLOUR) ?? []) expect(MEASURED, c).toContain(c)
   })
 })
