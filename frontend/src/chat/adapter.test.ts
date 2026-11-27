@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { chatAdapter } from './adapter'
+import { type ConversationRef, createChatAdapter } from './adapter'
 
 function respond(sse: string, status = 200) {
   vi.stubGlobal('fetch', vi.fn(async () => new Response(sse, { status })))
 }
 
-async function run() {
+async function run(conversation: ConversationRef = {}) {
   const options = {
     messages: [{ role: 'user', content: [{ type: 'text', text: 'refund window?' }] }],
     abortSignal: new AbortController().signal,
   } as any
   const updates = []
-  for await (const u of chatAdapter.run(options) as AsyncGenerator<any>) updates.push(u)
+  for await (const u of createChatAdapter(conversation).run(options) as AsyncGenerator<any>) updates.push(u)
   return updates
 }
 
@@ -61,7 +61,7 @@ describe('chatAdapter', () => {
   it('yields no answerId before an error', async () => {
     respond('event: delta\ndata: {"text": "x"}\n\nevent: error\ndata: {"message": "boom"}\n\n')
     const seen: any[] = []
-    const gen = chatAdapter.run({
+    const gen = createChatAdapter().run({
       messages: [{ role: 'user', content: [{ type: 'text', text: 'q' }] }],
       abortSignal: new AbortController().signal,
     } as any) as AsyncGenerator<any>
@@ -78,5 +78,49 @@ describe('chatAdapter', () => {
   it('throws on a non-200 response', async () => {
     respond('{"detail": "bad"}', 422)
     await expect(run()).rejects.toThrow('422')
+  })
+})
+
+describe('conversation id', () => {
+  const DONE =
+    'event: abstain\ndata: {"message": "No."}\n\n' +
+    'event: done\ndata: {"answer_id": "ans_1", "conversation_id": "conv_NEW"}\n\n'
+  const body = (call = 0) => JSON.parse((fetch as any).mock.calls[call][1].body)
+
+  it('sends no conversation_id for a new chat', async () => {
+    respond(DONE)
+    await run()
+    expect(body()).not.toHaveProperty('conversation_id')
+  })
+
+  it('sends the id of a saved chat', async () => {
+    respond(DONE)
+    await run({ id: 'conv_A' })
+    expect(body().conversation_id).toBe('conv_A')
+  })
+
+  it('learns the id from done, tells onId once, and sends it on the next question', async () => {
+    const onId = vi.fn()
+    const conversation: ConversationRef = { onId }
+    respond(DONE)
+
+    await run(conversation)
+    await run(conversation)
+
+    expect(conversation.id).toBe('conv_NEW')
+    expect(onId).toHaveBeenCalledTimes(1)
+    expect(onId).toHaveBeenCalledWith('conv_NEW')
+    expect(body(1).conversation_id).toBe('conv_NEW')
+  })
+
+  it('leaves the chat unsaved when done carries no id', async () => {
+    const onId = vi.fn()
+    respond('event: abstain\ndata: {"message": "No."}\n\nevent: done\ndata: {"answer_id": "ans_1"}\n\n')
+    const conversation: ConversationRef = { onId }
+
+    await run(conversation)
+
+    expect(conversation.id).toBeUndefined()
+    expect(onId).not.toHaveBeenCalled()
   })
 })
