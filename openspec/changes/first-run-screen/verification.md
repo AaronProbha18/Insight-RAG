@@ -22,13 +22,16 @@ This tier has no specs; each tasks.md test maps as:
 - 1.5 accessibility -> `shell/a11y.test.tsx` first-run block; contrast uses pairs already in `design-tokens.test.ts`.
 - 1.6 docs -> strict build above.
 
-**Not covered by automation (checked by nobody yet):** the hook behaviour in a browser (`loaded` flipping after the fetch; `FirstRun` calling `onIndexed`, `samples` flag, list refetch and the switch to the chat), and real Tab order, focus rings and light/dark themes. Listed as manual checks in the frontend guide. UNVERIFIED until a person runs the app.
+**Checked by hand (by the author, in a browser, against the local stack with the `plumbline-ollama` container):** the first-run screen on an empty list; its match to the `First run (no documents)` page of the Plumbline App Shell wireframe (task 1.7); the failure message when the samples can't be indexed (Ollama stopped); and the samples flow with Ollama running (first-run gives way to the chat). The author reported "LGTM". Not recorded: light versus dark theme, Tab order and focus rings, and deleting every document to bring first-run back; those stay open from the frontend guide's manual list.
+
+Automated checks re-run after task 1.7: `npm test` 28 files / 193 tests, `npm run lint`, `npm run build` all pass.
 
 ## Deviation
 
 - `trySamples` lives in `documents/useDocuments.ts`, not `chat/FirstRun.tsx` (avoids the `only-export-components` lint warning).
 - `App.test.tsx` now renders `ChatPane` instead of `<App />`, and `AppShell.test.tsx`/`a11y.test.tsx` fixtures gained `loaded`.
+- Task 1.7 (added after review): the screen follows the wireframe's layout, type scale, spacing, copy and step cards, with the app's own colour tokens instead of the wireframe's hex values.
 - The proposal says the sample question comes "from `returns-policy.md`"; the shipped sample is `returns-policy.pdf`, so the question is worded without a filename.
 - If the list refetch after indexing fails, the screen stays on first-run with no message.
 
-**Verdict: PASS**, with the manual browser checks above still open.
+**Verdict: PASS**, with the light/dark, keyboard and delete-all manual checks still open.
