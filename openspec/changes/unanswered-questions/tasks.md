@@ -12,4 +12,4 @@
 
 ## 3. Docs
 
-- [ ] 3.1 `docs/architecture/overview.md`: add `GET /unanswered` to the diagram, the "Where things live" table and a short flow. Check: the docs build passes (`docs/guides/docs-site.md`).
+- [x] 3.1 `docs/architecture/overview.md`: add `GET /unanswered` to the diagram, the "Where things live" table and a short flow. Check: the docs build passes (`docs/guides/docs-site.md`).

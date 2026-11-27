@@ -7,14 +7,15 @@ pgvector**, and is answered by a small **LangGraph** graph that runs inside
 the **FastAPI** process. A React + **assistant-ui** chat (the vendored
 styled kit on Tailwind, [ADR 0003](../adr/0003-styled-chat-kit.md)) is
 served from the same origin. It is a small app shell: a sidebar and one
-page at a time: the chat, a Documents page and a Connectors page.
+page at a time: the chat, a Documents page, a Connectors page and an Unanswered page.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /documents/samples; POST /chat SSE; POST /feedback; GET, PATCH, DELETE /conversations; GET /quality; GET /connectors| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /documents/samples; POST /chat SSE; POST /feedback; GET, PATCH, DELETE /conversations; GET /quality; GET /connectors; GET /unanswered| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
   API --> CONV[conversations.py] --> DB
+  API --> UNA[unanswered.py] --> DB
   ING --> C[connectors via entry points]
   ING --> DB[(Postgres + pgvector)]
   G --> R[retrieval.retrieve] --> DB
@@ -37,10 +38,11 @@ goes:
 | a file connector | its own package, registered under the `plumbline.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/plumbline/connectors/builtin/` |
 | an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
-| a UI page or component | `frontend/src/chat/`, `conversations/`, `documents/`, `connectors/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
+| a UI page or component | `frontend/src/chat/`, `conversations/`, `documents/`, `connectors/`, `unanswered/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
 | the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`); the Connectors page reads it |
 | the list of loaded connectors | `api/app.py` (`GET /connectors`, over the registry) |
 | saved conversations (list, open, rename, delete) | `backend/src/plumbline/conversations.py`, called by the `/conversations` routes and by `POST /chat` through the `Recorder` in `api/app.py` |
+| the unanswered list (refused and wrong-marked questions) | `backend/src/plumbline/unanswered.py`, called by `GET /unanswered`; the Unanswered page and the sidebar count read it |
 | answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
 
@@ -133,6 +135,21 @@ A conversation is a title plus the `answers` rows that point at it, in
    so a change replaces the earlier rating: **204**. An unknown `answer_id`
    is **404**, an invalid body **422**.
 
+### List unanswered questions: `GET /unanswered`
+
+1. `days` is 7, 30 or 90, or absent for all time; any other value is **422**.
+2. `unanswered.list_groups` reads `answers LEFT JOIN feedback` for events that
+   are a refusal (`abstained`) or a thumbs down, keeps those created in the
+   range, and groups them by question ignoring case and extra spaces. It has
+   no table of its own.
+3. Each group carries the latest question text, the count and last date of
+   its in-range events, and the latest event's `reason`: `not_in_documents`
+   for a refusal, or `marked_wrong` with the stored `feedback_reason` (null
+   when none was given). There are no scores, ids or answer text.
+4. The sidebar's Unanswered count is the number of groups from the same call
+   with `days=30`, refreshed after every chat answer; a refusal in the chat
+   links to the page.
+
 ### Review feedback: `plumbline-feedback-export`
 
 `feedback.export_candidates` turns every feedback row into a candidate in
@@ -181,13 +198,12 @@ by hand; nothing is added automatically ([evals README](https://github.com/Aaron
 ### Open a page: `/app/<page>`
 
 The chat is at `/`, a saved conversation at `/app/chats/{id}`, Documents at
-`/app/documents` and Connectors at `/app/connectors`. The UI owns routing
+`/app/documents`, Connectors at `/app/connectors` and Unanswered at `/app/unanswered`. The UI owns routing
 (`frontend/src/shell/route.ts`, over the History API), and client pages live
 under `/app/` so they cannot collide with an API path. In production,
 `api/app.py` serves `index.html` for `GET /app/{path}` when
 `PLUMBLINE_UI_DIR` is set, so a reload or a shared page link works; any
-other unknown path still gets the API's own 404. `GET /connectors` is the only new
-endpoint: the Documents page uses the same `/documents` routes as before, and the
+other unknown path still gets the API's own 404. The Documents page uses the `/documents` routes, the Unanswered page uses `GET /unanswered`, and the
 Connectors page joins `/connectors`, `/quality` and `/documents` in the
 browser, by connector name. The
 chat stays in memory while the person moves between pages
@@ -226,6 +242,8 @@ fails CI.
 | `answers` | one row per answer or abstention `/chat` returned | `public_id` is `ans_<ULID>`. Holds the question, answer text, `abstained`, model ids and abstain threshold, and `citations` as JSONB (`document_id`, `title`, `filename`, `locator`) **copied** so a later document delete doesn't lose it. `conversation_id` points at `conversations` with `ON DELETE SET NULL` (null for answers recorded before conversations existed, or after their chat was deleted). |
 | `conversations` | one row per saved chat | `public_id` is `conv_<ULID>`. `title` is 1 to 200 characters (`CHECK`); `updated_at` is set when an answer is added or the chat is renamed. Created with the first answer, so there are no empty ones. |
 | `feedback` | at most one row per answer | `answer_id` is unique; `ON DELETE CASCADE` from `answers`. `rating` up or down, optional `reason` (down only) and `comment` (max 2000), enforced by `CHECK`s. |
+
+The Unanswered list is a read-only query over `answers` and `feedback`; it has no table of its own.
 
 **Stored locally:** every question asked and every answer is kept, with no
 retention limit, so nobody should type real personal data into the chat.
