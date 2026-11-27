@@ -18,4 +18,4 @@
 
 ## 4. Docs
 
-- [ ] 4.1 `docs/architecture/overview.md` (diagram routes, Ask flow, new Conversations flow), backend and frontend guides; `mkdocs build --strict` passes.
+- [x] 4.1 `docs/architecture/overview.md` (diagram routes, Ask flow, new Conversations flow), backend and frontend guides; `mkdocs build --strict` passes.

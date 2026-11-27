@@ -25,17 +25,25 @@ backend side of the `/chat` contract is in the
 
 ```text
 src/
-  App.tsx              wiring only: route, collapse state, documents, chat key
+  App.tsx              wiring only: route, collapse state, documents, saved chats, which chat the pane shows
   shell/  route.ts     useRoute(), navigate(): pages over the History API
           collapsed.ts sidebar collapse, kept in localStorage
-          Sidebar.tsx  navigation: New chat, Documents, Connectors and quality, docs link
+          chatTarget.ts   what the chat pane shows: syncTarget, newChat, adopt
+          Sidebar.tsx  navigation: New chat, the Chats section, Documents, Connectors and quality, docs link
           SidebarDrawer.tsx  menu button + the sidebar as a drawer below md
           AppShell.tsx layout and page switch
   chat/   sse.ts       SSE parser
-          adapter.ts   assistant-ui adapter for POST /chat
+          adapter.ts   assistant-ui adapter for POST /chat (createChatAdapter)
+          restore.ts   saved turns -> initial thread messages
+          ChatHeader.tsx  conversation title and "Searching all N documents"
           ChatPane.tsx runtime, welcome suggestions and Thread
           Citations.tsx
           FirstRun.tsx first-run screen: upload link, "Try the sample documents" (trySamples)
+  conversations/ api.ts   GET, PATCH, DELETE /conversations: list, get, rename, delete
+          useConversations.ts  the sidebar list: fetched on mount and after refresh, a rename or a delete
+          useConversation.ts   one saved chat for the page that opens it: loading, found, not-found, error
+          ChatList.tsx         the sidebar Chats section: links, inline rename and delete confirm
+          saveAction.ts        what Save does with an entered title
   upload/ api.ts       POST /documents -> user-facing outcome
   documents/ api.ts    GET /documents, DELETE /documents/{id}, POST /documents/samples
           useDocuments.ts    list, `loaded`, refresh and delete, shared by page and sidebar count; trySamples
@@ -68,9 +76,11 @@ filesystems ignore case, and TypeScript then can't tell which file
 **1.3 Tests sit next to the code they test** (`sse.test.ts` beside
 `sse.ts`).
 
-**1.4 Pages are URLs under `/app/`.** The chat is at `/`, Documents at
-`/app/documents` and Connectors at `/app/connectors`. A client page never
-reuses an API path (`/documents` and `/connectors` are the API), so the prefix can't collide with a route. Routing is the built-in
+**1.4 Pages are URLs under `/app/`.** The chat is at `/`, a saved chat at
+`/app/chats/{id}` (`chatIdFor` reads the id; `replace(path)` changes the URL
+without a history entry), Documents at `/app/documents` and Connectors at
+`/app/connectors`. A client page never reuses an API path (`/documents`,
+`/connectors` and `/conversations` are the API), so the prefix can't collide with a route. Routing is the built-in
 `shell/route.ts`: `useRoute()` reads the path and `navigate(path)` pushes
 history; back and forward work through `popstate`. There is no router
 library, and one comes when pages need nested routes or loaders. Sidebar
@@ -88,13 +98,25 @@ outside `/app/` keep their API behaviour. *Enforced by*
 
 ```tsx
 // ✅ chat/ChatPane.tsx
-  const runtime = useLocalRuntime(chatAdapter)
+  const runtime = useLocalRuntime(adapter, { initialMessages })
 ```
 
 The runtime lives in `ChatPane`. `AppShell` keeps `ChatPane` mounted but
 `hidden` while another page shows, so the conversation survives
-navigation. New chat gives `ChatPane` a new `key`, which remounts it with
-an empty thread.
+navigation.
+
+**What the pane shows** is the `Target` in `App.tsx` (`shell/chatTarget.ts`):
+a `key`, the saved chat's `id` and whether it was `adopted`. A new `key`
+remounts the pane. `syncTarget` follows the URL, but only while the chat page
+is open, so a visit to Documents does not reset the chat. `newChat` gives an
+empty thread, and the sidebar list keeps the previous chat. A saved chat (`/app/chats/{id}`) is loaded with `useConversation`
+and mounted with its `turns`; `initialMessages` is read on mount only, which is
+why switching chats means a new `key`. After the first `done` of a new chat,
+`adopt` records the id under the same `key`, so the live thread stays while
+the URL is replaced with `/app/chats/{id}` and the list refreshes.
+`createChatAdapter(conversation)` sends the `conversation_id` it holds and
+learns it from `done`; the `onConversation` callback is captured when the
+pane mounts.
 
 On the chat page, `AppShell` shows nothing until `useDocuments` reports
 `loaded`, so there is no first-run flash. It then shows `FirstRun` when the
@@ -114,6 +136,13 @@ from the 2.1 spike).
 The `done` event's `answer_id` arrives in a last update as
 `metadata.custom.answerId`; it is absent on the error path, which is how the
 feedback controls know not to appear.
+
+A restored answer (`chat/restore.ts`) carries the same `metadata.custom`, so
+its citations and feedback controls render through the same components. Saved
+citations keep only `document_id`, `title`, `locator` and `indexed`: no `id` and
+no quoted `text`. `Citations` shows such a citation as `title — locator` with
+nothing to expand, and adds "Source no longer indexed" when `indexed` is
+false; the inline `[c3]` markers in a restored answer have no matching label.
 
 **2.3 Failures throw**, so assistant-ui marks the message as failed rather
 than showing partial text:
@@ -284,7 +313,13 @@ tested through `AppShell` with an explicit `page`. A component with no
 hooks, like `Sidebar`, can be called as a function; walk the element it
 returns and call a handler with a fake event (`shell/SidebarDrawer.test.tsx`).
 Stub `window` with `vi.stubGlobal` for code that uses the History API
-(`shell/route.test.ts`).
+(`shell/route.test.ts`). `AppShell` takes the saved chat's load result as a
+prop (`saved`), so its loading, not-found and error screens are static tests too.
+What a static render cannot show: that a restored thread keeps its
+`metadata.custom` after the runtime loads `initialMessages`, the sidebar list
+refreshing after a rename or delete, focus moving into the rename input, and
+the thread's height under the chat header. Check those by hand in the running
+app.
 
 A read-only thread can't run or cancel, so Stop, Copy (the clipboard),
 Regenerate and scrolling are checked by hand in a browser, and so is the
