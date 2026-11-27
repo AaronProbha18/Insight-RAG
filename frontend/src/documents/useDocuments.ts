@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { type DocumentSummary, deleteDocument, listDocuments } from './api'
+import { type DocumentSummary, deleteDocument, indexSamples, listDocuments } from './api'
 
 /** Deletes one document; returns '' on success (404 = already gone) or the message to show. */
 export async function deleteOutcome(id: string): Promise<string> {
@@ -8,6 +8,17 @@ export async function deleteOutcome(id: string): Promise<string> {
     return ''
   } catch {
     return "Couldn't delete the document. Try again."
+  }
+}
+
+const SAMPLES_FAILURE = "Couldn't index the sample documents. Try again."
+
+/** Indexes the sample documents; returns '' when something was indexed, else the message to show. */
+export async function trySamples(): Promise<string> {
+  try {
+    return (await indexSamples()).indexed.length > 0 ? '' : SAMPLES_FAILURE
+  } catch {
+    return SAMPLES_FAILURE
   }
 }
 

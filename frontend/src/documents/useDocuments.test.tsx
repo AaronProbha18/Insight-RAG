@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { deleteOutcome, loadDocuments, useDocuments } from './useDocuments'
+import { deleteOutcome, loadDocuments, trySamples, useDocuments } from './useDocuments'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -56,3 +56,29 @@ describe('useDocuments', () => {
     expect(renderToStaticMarkup(<Probe />)).toBe('<span>false</span>')
   })
 })
+
+function respondJson(status: number, body?: object) {
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(body === undefined ? null : JSON.stringify(body), { status })))
+}
+
+const FAILURE = "Couldn't index the sample documents. Try again."
+
+describe('trySamples', () => {
+  it('is empty when something was indexed', async () => {
+    respondJson(200, { indexed: [{ filename: 'returns-policy.md' }], failed: [] })
+    expect(await trySamples()).toBe('')
+  })
+
+  it('shows the error when nothing was indexed', async () => {
+    respondJson(200, { indexed: [], failed: [{ filename: 'a.pdf', reason: 'bad' }] })
+    expect(await trySamples()).toBe(FAILURE)
+  })
+
+  it('shows the same error on a 500 or when offline', async () => {
+    respondJson(500)
+    expect(await trySamples()).toBe(FAILURE)
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
+    expect(await trySamples()).toBe(FAILURE)
+  })
+})
+
