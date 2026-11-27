@@ -29,6 +29,15 @@ const render = (page: Page = 'chat', collapsed = false, withChats?: ChatsProps) 
   )
 const links = (html: string, href: string) => html.match(new RegExp(`<a[^>]*href="${href}"[^>]*>`, 'g')) ?? []
 
+describe('Sidebar Docs link', () => {
+  it('opens the docs site in a new tab', () => {
+    const link = render().match(/<a[^>]*href="https:\/\/plumbline-docs\.netlify\.app\/"[^>]*>/)?.[0] ?? ''
+
+    expect(link).toContain('target="_blank"')
+    expect(link).toContain('rel="noreferrer"')
+  })
+})
+
 describe('Sidebar Chats section', () => {
   it('is hidden when there are no chats, and when the sidebar is collapsed', () => {
     expect(render('chat', false, undefined)).not.toContain('Chats<')
