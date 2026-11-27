@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { Page } from './route'
 import { AppShell } from './AppShell'
 
-const documents = { documents: [], message: '', refresh: () => {}, remove: async () => {} }
+const documents = { documents: [], loaded: true, message: '', refresh: () => {}, remove: async () => {} }
 const render = (page: Page) =>
   renderToStaticMarkup(
     <AppShell

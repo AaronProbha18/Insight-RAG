@@ -8,7 +8,7 @@ import type { Quality } from '../quality/api'
 import { AppShell } from './AppShell'
 import type { Page } from './route'
 
-const documents = { documents: [], message: '', refresh: () => {}, remove: async () => {} }
+const documents = { documents: [], loaded: true, message: '', refresh: () => {}, remove: async () => {} }
 const render = (page: Page, collapsed: boolean) =>
   renderToStaticMarkup(
     <AppShell
