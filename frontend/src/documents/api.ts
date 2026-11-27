@@ -19,3 +19,15 @@ export async function deleteDocument(id: string): Promise<'deleted' | 'not-found
   if (response.status === 404) return 'not-found'
   throw new Error(`delete document failed (${response.status})`)
 }
+
+export type SampleResult = {
+  indexed: { filename: string }[]
+  failed: { filename: string; reason: string }[]
+}
+
+/** POST /documents/samples. Throws on any non-2xx; the caller shows a generic message. */
+export async function indexSamples(): Promise<SampleResult> {
+  const response = await fetch('/documents/samples', { method: 'POST' })
+  if (!response.ok) throw new Error(`index samples failed (${response.status})`)
+  return response.json()
+}

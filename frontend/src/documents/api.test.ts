@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { deleteDocument, listDocuments } from './api'
+import { deleteDocument, indexSamples, listDocuments } from './api'
 
 function respond(status: number, body?: object) {
   vi.stubGlobal(
@@ -82,5 +82,29 @@ describe('deleteDocument', () => {
     offline()
 
     await expect(deleteDocument('doc_A')).rejects.toThrow()
+  })
+})
+
+describe('indexSamples', () => {
+  it('POSTs to /documents/samples and returns the parsed result', async () => {
+    const result = { indexed: [{ filename: 'returns-policy.md' }], failed: [] }
+    respond(200, result)
+
+    expect(await indexSamples()).toEqual(result)
+    const [url, init] = (fetch as any).mock.calls[0]
+    expect(url).toBe('/documents/samples')
+    expect(init.method).toBe('POST')
+  })
+
+  it('throws on 404 and 500', async () => {
+    respond(404, { detail: 'samples directory not found: /x' })
+    await expect(indexSamples()).rejects.toThrow()
+    respond(500)
+    await expect(indexSamples()).rejects.toThrow()
+  })
+
+  it('throws when offline', async () => {
+    offline()
+    await expect(indexSamples()).rejects.toThrow()
   })
 })
