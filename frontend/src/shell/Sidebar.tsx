@@ -1,5 +1,6 @@
 import {
   BookOpenIcon,
+  CircleHelpIcon,
   FileTextIcon,
   MessageSquarePlusIcon,
   PanelLeftCloseIcon,
@@ -19,6 +20,7 @@ const item =
 type Props = {
   page: Page
   documentCount: number
+  unansweredCount: number // groups in the last 30 days
   collapsed: boolean
   onToggleCollapse?: () => void // omitted in the drawer, where collapsing means nothing
   onNewChat: () => void
@@ -38,7 +40,7 @@ function Tip({ label, show, children }: { label: string; show: boolean; children
 }
 
 /** Main navigation. Collapsed shows icons only; every item keeps its name as screen-reader text. */
-export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNewChat, onNavigate, chats }: Props) {
+export function Sidebar({ page, documentCount, unansweredCount, collapsed, onToggleCollapse, onNewChat, onNavigate, chats }: Props) {
   const label = collapsed ? 'sr-only' : undefined
   // Collapsed: icons centred and spaced apart.
   const row = collapsed ? `${item} justify-center py-2.5` : `${item} py-1.5`
@@ -115,6 +117,7 @@ export function Sidebar({ page, documentCount, collapsed, onToggleCollapse, onNe
         <div className={stack}>
           <p className={group}>Knowledge</p>
           {pageLink('/app/documents', page === 'documents', FileTextIcon, `Documents (${documentCount})`)}
+          {pageLink('/app/unanswered', page === 'unanswered', CircleHelpIcon, `Unanswered (${unansweredCount})`)}
           {pageLink('/app/connectors', page === 'connectors', PlugIcon, 'Connectors and quality')}
         </div>
 

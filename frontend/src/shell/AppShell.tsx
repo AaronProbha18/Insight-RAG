@@ -23,6 +23,8 @@ type Props = {
   onConversation: (id: string) => void
   onNewChat: () => void
   chats?: ChatsProps
+  unansweredCount: number
+  onAnswer?: () => void // after every chat answer, so the count can refresh
   documents: ReturnType<typeof useDocuments>
   quality: ReturnType<typeof useQuality>
 }
@@ -37,6 +39,8 @@ export function AppShell({
   onConversation,
   onNewChat,
   chats,
+  unansweredCount,
+  onAnswer,
   documents,
   quality,
 }: Props) {
@@ -54,6 +58,7 @@ export function AppShell({
         <Sidebar
           page={page}
           documentCount={count}
+          unansweredCount={unansweredCount}
           collapsed={collapsed}
           onToggleCollapse={onToggleCollapse}
           onNewChat={onNewChat}
@@ -62,7 +67,7 @@ export function AppShell({
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="border-b border-border p-1 md:hidden">
-          <SidebarDrawer page={page} documentCount={count} onNewChat={onNewChat} chats={chats} />
+          <SidebarDrawer page={page} documentCount={count} unansweredCount={unansweredCount} onNewChat={onNewChat} chats={chats} />
         </div>
         {documents.loaded && (
           <div hidden={page !== 'chat' || firstRun} className="min-h-0 flex-1">
@@ -79,6 +84,7 @@ export function AppShell({
                     conversationId={saved.status === 'found' ? saved.conversation.conversation_id : undefined}
                     turns={saved.status === 'found' ? saved.conversation.turns : undefined}
                     onConversation={onConversation}
+                    onAnswer={onAnswer}
                   />
                 </div>
               </div>

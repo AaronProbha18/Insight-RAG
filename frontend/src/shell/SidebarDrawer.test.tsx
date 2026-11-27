@@ -30,6 +30,7 @@ function setup(extra: Partial<Parameters<typeof Sidebar>[0]> = {}) {
   const tree = Sidebar({
     page: 'chat',
     documentCount: 1,
+    unansweredCount: 0,
     collapsed: false,
     onNewChat: () => calls.push('newChat'),
     onNavigate: () => calls.push('navigate'),
@@ -40,7 +41,7 @@ function setup(extra: Partial<Parameters<typeof Sidebar>[0]> = {}) {
 
 describe('SidebarDrawer', () => {
   it('shows a named menu button only below md, with the drawer closed', () => {
-    const html = renderToStaticMarkup(<SidebarDrawer page="chat" documentCount={0} onNewChat={() => {}} />)
+    const html = renderToStaticMarkup(<SidebarDrawer page="chat" documentCount={0} unansweredCount={0} onNewChat={() => {}} />)
 
     expect(html).toMatch(/<button[^>]*aria-label="Open menu"[^>]*class="[^"]*md:hidden|<button[^>]*class="[^"]*md:hidden[^"]*"[^>]*aria-label="Open menu"/)
     expect(html).not.toContain('role="dialog"')
@@ -78,9 +79,9 @@ describe('Sidebar navigation callbacks', () => {
   })
 
   it('has no collapse button without onToggleCollapse', () => {
-    const without = renderToStaticMarkup(<Sidebar page="chat" documentCount={0} collapsed={false} onNewChat={() => {}} />)
+    const without = renderToStaticMarkup(<Sidebar page="chat" documentCount={0} unansweredCount={0} collapsed={false} onNewChat={() => {}} />)
     const withIt = renderToStaticMarkup(
-      <Sidebar page="chat" documentCount={0} collapsed={false} onNewChat={() => {}} onToggleCollapse={() => {}} />,
+      <Sidebar page="chat" documentCount={0} unansweredCount={0} collapsed={false} onNewChat={() => {}} onToggleCollapse={() => {}} />,
     )
 
     expect(without).not.toContain('Collapse sidebar')

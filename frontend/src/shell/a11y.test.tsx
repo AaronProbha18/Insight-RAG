@@ -32,6 +32,7 @@ const render = (page: Page, collapsed: boolean, withChats?: ChatsProps) =>
       onConversation={() => {}}
       onNewChat={() => {}}
       chats={withChats}
+      unansweredCount={0}
       documents={documents}
       quality={{ quality: null, message: '' }}
     />,
@@ -68,7 +69,7 @@ describe.each([
 
   it('announces the current page once, on Documents or on Connectors and quality', () => {
     const current = html.match(/aria-current="page"/g) ?? []
-    expect(current.length).toBe({ chat: 0, documents: 1, connectors: 1, unanswered: 0 }[page])
+    expect(current.length).toBe({ chat: 0, documents: 1, connectors: 1, unanswered: 1 }[page])
   })
 })
 

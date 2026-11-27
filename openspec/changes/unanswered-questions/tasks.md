@@ -7,7 +7,7 @@
 
 - [x] 2.1 `frontend/src/unanswered/api.ts` and `useUnanswered.ts` (fetch with `days`, `refresh()`, as `useConversations` does), plus the `/app/unanswered` page in `shell/route.ts`. Tests: fetch URL per range, refresh refetches, the route maps the path.
 - [x] 2.2 `UnansweredPage.tsx`: rows (question, "Asked N times", last date, reason text using the `FeedbackControls` labels, Add a document link to `/app/documents`), range filter defaulting to Last 30 days, empty state. Tests for each, plus a keyboard/a11y test in the style of `shell/a11y.test.tsx`.
-- [ ] 2.3 Sidebar **Unanswered** item showing the last-30-days group count, wired through `App.tsx` and `AppShell`; `App.tsx` refreshes it after each chat answer next to `conversations.refresh()`. Tests: the item shows the count, and the count refreshes after an answer.
+- [x] 2.3 Sidebar **Unanswered** item showing the last-30-days group count, wired through `App.tsx` and `AppShell`; `App.tsx` refreshes it after each chat answer next to `conversations.refresh()`. Tests: the item shows the count, and the count refreshes after an answer.
 - [ ] 2.4 Refused assistant messages show an "Added to Unanswered" link to `/app/unanswered` (find the rendering component first, per design). Test: an abstained message has the link, an answered one does not.
 
 ## 3. Docs
