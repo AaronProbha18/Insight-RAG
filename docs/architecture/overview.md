@@ -11,9 +11,10 @@ page at a time: the chat, a Documents page and a Connectors page.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /documents/samples; POST /chat SSE; POST /feedback; GET /quality; GET /connectors| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /documents/samples; POST /chat SSE; POST /feedback; GET, PATCH, DELETE /conversations; GET /quality; GET /connectors| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
+  API --> CONV[conversations.py] --> DB
   ING --> C[connectors via entry points]
   ING --> DB[(Postgres + pgvector)]
   G --> R[retrieval.retrieve] --> DB
@@ -36,9 +37,10 @@ goes:
 | a file connector | its own package, registered under the `plumbline.connectors` entry point ([guide](../guides/connector-development-guide.md)); built-ins in `backend/src/plumbline/connectors/builtin/` |
 | an API route | `backend/src/plumbline/api/app.py` (thin: validate, call a module, map errors to status codes) |
 | a schema change | a new revision in `backend/migrations/versions/` |
-| a UI page or component | `frontend/src/chat/`, `documents/`, `connectors/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
+| a UI page or component | `frontend/src/chat/`, `conversations/`, `documents/`, `connectors/` or `shell/` (navigation and layout), or a new folder per feature; vendored kit parts in `frontend/src/components/` ([guide §4.1](../guides/frontend-development-guide.md#4-components)) |
 | the quality summary the UI shows | `backend/src/plumbline/quality.py` (`GET /quality`); the Connectors page reads it |
 | the list of loaded connectors | `api/app.py` (`GET /connectors`, over the registry) |
+| saved conversations (list, open, rename, delete) | `backend/src/plumbline/conversations.py`, called by the `/conversations` routes and by `POST /chat` through the `Recorder` in `api/app.py` |
 | answer feedback and its export | `backend/src/plumbline/feedback.py` (`plumbline-feedback-export`) |
 | an eval set | `evals/connectors/<name>/{corpus/,golden.yaml}` |
 
@@ -80,7 +82,9 @@ the steps above apply to each file. Unreadable or unsupported files go into
 ### Ask: `POST /chat`
 
 1. `api/app.py` `chat` takes the last user message as the question and
-   builds the graph with an injected retriever and LLM.
+   builds the graph with an injected retriever and LLM. The request may
+   carry a `conversation_id`; an unknown one is **404** before anything
+   runs, so no model call and no row.
 2. `graph.build_graph` runs `retrieve` (`retrieval.retrieve`: exact cosine
    top-k).
 3. If there are no chunks, or the best score is below
@@ -90,13 +94,36 @@ the steps above apply to each file. Unreadable or unsupported files go into
    must answer only from them and cite every claim. A reply of
    `NOT_IN_SOURCES`, or one with no valid citation, becomes an
    abstention.
-5. The result is recorded as one `answers` row (`feedback.record_answer`).
+5. The result is recorded as one `answers` row (`feedback.record_answer`),
+   through the `Recorder` in `api/app.py`. In one transaction it also
+   creates the conversation, titled from the question, when the request
+   named none, stores the answer's `conversation_id` and sets the
+   conversation's `updated_at`. Answers are grouped only: the model still
+   sees just the last message.
 6. The whole result is computed **before** the response starts (D8,
    option A), then streamed as SSE: `delta…`, `citations`, `done`; or
-   `abstain`, `done`; each `done` carries the answer's public `answer_id`.
-   If anything fails, including recording, the stream is a single `error`
-   with a generic message and no `answer_id`. There is never a confidence
+   `abstain`, `done`; each `done` carries the answer's public `answer_id`
+   and the `conversation_id`. If anything fails, including recording, the
+   stream is a single `error` with a generic message, no `answer_id`, and
+   no conversation created. There is never a confidence
    score.
+
+### Saved conversations: `/conversations`
+
+A conversation is a title plus the `answers` rows that point at it, in
+`created_at` order. Each route calls one function in `conversations.py`.
+
+1. `GET /conversations` lists them, newest `updated_at` first: `conversation_id`,
+   `title`, `updated_at`.
+2. `GET /conversations/{id}` returns the title and the turns (question,
+   answer, `abstained`, `answer_id` and citations). Each citation carries
+   `indexed`: true while its document still exists in `documents`, so a
+   deleted source still shows, marked. An unknown id is **404**.
+3. `PATCH /conversations/{id}` renames it. The title is trimmed and must be 1
+   to 200 characters, else **422**; an unknown id is **404**.
+4. `DELETE /conversations/{id}` is **204**, or **404** for an unknown id. The
+   answers and their feedback stay (`answers.conversation_id` becomes null),
+   because feedback feeds the export.
 
 ### Rate an answer: `POST /feedback`
 
@@ -153,8 +180,8 @@ by hand; nothing is added automatically ([evals README](https://github.com/Aaron
 
 ### Open a page: `/app/<page>`
 
-The chat is at `/`, Documents at `/app/documents` and Connectors at
-`/app/connectors`. The UI owns routing
+The chat is at `/`, a saved conversation at `/app/chats/{id}`, Documents at
+`/app/documents` and Connectors at `/app/connectors`. The UI owns routing
 (`frontend/src/shell/route.ts`, over the History API), and client pages live
 under `/app/` so they cannot collide with an API path. In production,
 `api/app.py` serves `index.html` for `GET /app/{path}` when
@@ -165,6 +192,10 @@ Connectors page joins `/connectors`, `/quality` and `/documents` in the
 browser, by connector name. The
 chat stays in memory while the person moves between pages
 ([guide §1.4](../guides/frontend-development-guide.md#1-code-organisation)).
+A saved conversation is loaded with `GET /conversations/{id}` when its URL
+opens. After the first answer of a new chat the URL is replaced with
+`/app/chats/{id}` (no history entry) and the sidebar list refreshes; New
+chat goes back to `/` with an empty thread and leaves the list as it was.
 
 ## Boundary rules
 
@@ -192,11 +223,15 @@ fails CI.
 | --- | --- | --- |
 | `documents` | one row per unique file | `content_hash` (SHA-256) is unique: the idempotency key. `public_id` is `doc_<ULID>`, the only id clients ever see. |
 | `chunks` | text + locator + `embedding vector(N)` | `ON DELETE CASCADE` from `documents`; unique `(document_id, ordinal)` |
-| `answers` | one row per answer or abstention `/chat` returned | `public_id` is `ans_<ULID>`. Holds the question, answer text, `abstained`, model ids and abstain threshold, and `citations` as JSONB (`document_id`, `title`, `filename`, `locator`) **copied** so a later document delete doesn't lose it. |
+| `answers` | one row per answer or abstention `/chat` returned | `public_id` is `ans_<ULID>`. Holds the question, answer text, `abstained`, model ids and abstain threshold, and `citations` as JSONB (`document_id`, `title`, `filename`, `locator`) **copied** so a later document delete doesn't lose it. `conversation_id` points at `conversations` with `ON DELETE SET NULL` (null for answers recorded before conversations existed, or after their chat was deleted). |
+| `conversations` | one row per saved chat | `public_id` is `conv_<ULID>`. `title` is 1 to 200 characters (`CHECK`); `updated_at` is set when an answer is added or the chat is renamed. Created with the first answer, so there are no empty ones. |
 | `feedback` | at most one row per answer | `answer_id` is unique; `ON DELETE CASCADE` from `answers`. `rating` up or down, optional `reason` (down only) and `comment` (max 2000), enforced by `CHECK`s. |
 
 **Stored locally:** every question asked and every answer is kept, with no
 retention limit, so nobody should type real personal data into the chat.
+A conversation's title is its first question (or a name the person typed),
+so it carries the same text; the open question on classifying it and on
+retention is OQ-ANSWERS-001.
 The exported candidates file holds the same text.
 
 - Internal integer ids never leave the backend.

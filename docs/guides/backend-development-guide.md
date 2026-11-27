@@ -77,15 +77,18 @@ code marks this with a `ponytail:` comment.
 | 404 | `DELETE /documents/{document_id}` for an unknown or already-deleted id; the message is always "Document not found" |
 | 204 | (also) `POST /feedback` stored the rating, or replaced the earlier one for that answer |
 | 404 | (also) `POST /feedback` for an unknown `answer_id`; the message is always "Answer not found" |
+| 200 | `GET /conversations` (newest first, `[]` when empty) and `GET /conversations/{conversation_id}`; `PATCH /conversations/{conversation_id}` returns the stored title and `updated_at` |
+| 204 | (also) `DELETE /conversations/{conversation_id}`; the answers and their feedback stay |
+| 404 | (also) an unknown `conversation_id` on any `/conversations/{conversation_id}` route, or in a `POST /chat` request (checked before anything is generated); the message is always "Conversation not found" |
 | 200 | `GET /quality` always; no usable summary is `state: "not_measured"`, never an error |
 | 200 | (also) `GET /connectors` always; a connector that failed to load or declares another contract version is not listed |
 | 404 | (also) `POST /documents/samples` when the samples directory is missing; the message names the path |
 | 415 | no connector handles the file type; the message lists the supported types |
-| 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters) |
+| 422 | the connector can't read the file (`ParseError`), or the request body is invalid (for `/feedback`: unknown rating or reason, a reason on thumbs up, a comment over 2000 characters; for `PATCH /conversations/{id}`: a title that is empty or over 200 characters after trimming, or a missing `title`) |
 | 500 | anything else; the client never sees internal details |
 
-**2.2 Public ids only.** Clients see `document_id` (`doc_<ULID>`) and
-`answer_id` (`ans_<ULID>`). Internal integer ids, `RetrievedChunk.chunk_id`
+**2.2 Public ids only.** Clients see `document_id` (`doc_<ULID>`),
+`answer_id` (`ans_<ULID>`) and `conversation_id` (`conv_<ULID>`). Internal integer ids, `RetrievedChunk.chunk_id`
 and a source file's `filename` (kept on the recorded answer for the
 feedback export) never leave the backend: `/chat` strips `filename` from the
 `citations` event.
@@ -97,10 +100,16 @@ confidence or a retrieval score. Trust comes from citations and evals.
 **2.4 `/chat` is a contract.** Its SSE events (`delta`, `citations`,
 `abstain`, `error`, `done`) are fixed in design D8, and
 `frontend/src/chat/adapter.ts` consumes them. Changing one means changing
-the other **in the same PR**. `done` carries `{"answer_id": "ans_<ULID>"}`
+the other **in the same PR**. The request may carry `conversation_id`
+(`conv_<ULID>`): an unknown one is a 404 before the graph runs. `done`
+carries `{"answer_id": "ans_<ULID>", "conversation_id": "conv_<ULID>"}`
 for answers and abstentions, and is absent on the error path. An answer is
-recorded (`feedback.record_answer`) before it streams; if recording fails
-the client gets `error`, never an answer it cannot rate.
+recorded before it streams, by the `Recorder` that `get_recorder` returns:
+in one transaction it creates the conversation when the request named none,
+inserts the answer (`feedback.record_answer`) and touches the conversation.
+If recording fails the client gets `error`, never an answer it cannot
+rate, and no conversation is created. `/chat` still answers only the last
+message; a conversation groups answers and does not give the model history.
 
 **2.5 `/quality` is an allowlist.** `quality.load_quality` reads the eval
 runner's summary file (`PLUMBLINE_EVAL_SUMMARY`, default
@@ -268,7 +277,9 @@ recording or scripted LLMs that keep the prompts they receive.
 
 **8.1a `/chat` tests inject a fake recorder** through the `get_recorder`
 dependency (`FakeRecorder` in `tests/test_chat_api.py`), so they need no
-database; `tests/test_feedback.py` checks the stored row against real tables.
+database. The fake has the same two members as `Recorder`: `resolve(conversation_id)`
+and a call that returns `(answer_id, conversation_id)`. The real `Recorder` is
+tested on real tables in `tests/test_conversations.py`; `tests/test_feedback.py` checks the stored row against real tables.
 
 **8.2 Database tests are marked `db`** and use the `database_url` and
 `migrate` fixtures from `tests/conftest.py`. Each run gets its own

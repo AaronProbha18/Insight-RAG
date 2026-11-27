@@ -63,9 +63,9 @@ def test_downgrade_removes_tables(migrate, database_url):
     tables = _query(
         database_url,
         "SELECT to_regclass('documents'), to_regclass('chunks'),"
-        " to_regclass('answers'), to_regclass('feedback')",
+        " to_regclass('answers'), to_regclass('feedback'), to_regclass('conversations')",
     )
-    assert tables == [(None, None, None, None)]
+    assert tables == [(None, None, None, None, None)]
     migrate()  # upgrades cleanly again
 
 
@@ -127,6 +127,52 @@ def test_feedback_checks_accept_valid(migrate, database_url):
             " VALUES (%s, 'down', 'should_have_answered', %s)",
             (answer_id, "x" * 2000),
         )
+
+
+def test_downgrade_one_step_keeps_answers(migrate, database_url):
+    migrate()
+    command.downgrade(Config(INI), "0002")
+
+    cols = _query(
+        database_url,
+        "SELECT column_name FROM information_schema.columns WHERE table_name = 'answers'",
+    )
+    assert "conversation_id" not in {c for (c,) in cols}
+    assert _query(database_url, "SELECT to_regclass('conversations')") == [(None,)]
+    migrate()  # upgrades cleanly again
+
+
+def test_deleting_a_conversation_keeps_its_answers(migrate, database_url):
+    migrate()
+    with psycopg.connect(database_url) as conn:
+        (conv_id,) = conn.execute(
+            "INSERT INTO conversations (public_id, title) VALUES ('conv_x', 't') RETURNING id"
+        ).fetchone()
+        answer_id = _answer(conn)
+        conn.execute(
+            "UPDATE answers SET conversation_id = %s WHERE id = %s",
+            (conv_id, answer_id),
+        )
+        conn.execute("DELETE FROM conversations WHERE id = %s", (conv_id,))
+        row = conn.execute(
+            "SELECT conversation_id FROM answers WHERE id = %s", (answer_id,)
+        ).fetchone()
+
+    assert row == (None,)
+
+
+@pytest.mark.parametrize(
+    "title, ok", [("", False), ("x" * 201, False), ("x" * 200, True)]
+)
+def test_conversation_title_length(migrate, database_url, title, ok):
+    migrate()
+    with psycopg.connect(database_url) as conn:
+        insert = "INSERT INTO conversations (public_id, title) VALUES ('conv_x', %s)"
+        if ok:
+            conn.execute(insert, (title,))
+        else:
+            with pytest.raises(psycopg.errors.CheckViolation):
+                conn.execute(insert, (title,))
 
 
 def test_missing_dim_fails_clearly(migrate, monkeypatch):

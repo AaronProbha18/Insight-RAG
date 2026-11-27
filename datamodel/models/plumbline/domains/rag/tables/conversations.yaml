@@ -1,0 +1,16 @@
+table: conversations
+domain: rag
+status: published
+public_id_prefix: conv
+system_columns: [public_id, created_at, updated_at]
+description: A saved chat. Its turns are the answers rows that point at it.
+columns:
+  - {name: title, type: text, description: "Shown in the sidebar: the first question cut to 80 characters, or the name the person gave it. 1-200 characters."}
+checks:
+  - {name: conversations_title_check, expr: "char_length(title) BETWEEN 1 AND 200"}
+indexes:
+  - {columns: [updated_at]}
+open_questions:
+  - id: OQ-CONVERSATIONS-001
+    owner: Business Tech Review
+    text: Titles come from the first question, so they share OQ-ANSWERS-001 (personal details typed into free text; retention). No separate decision here.

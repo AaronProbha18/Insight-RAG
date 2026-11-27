@@ -5,19 +5,33 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { FirstRunView } from '../chat/FirstRun'
 import { ConnectorsView } from '../connectors/ConnectorsPage'
+import type { ChatsProps } from '../conversations/ChatList'
 import type { Quality } from '../quality/api'
 import { AppShell } from './AppShell'
 import type { Page } from './route'
 
 const documents = { documents: [], loaded: true, message: '', refresh: () => {}, remove: async () => {} }
-const render = (page: Page, collapsed: boolean) =>
+const chats: ChatsProps = {
+  items: [
+    { conversation_id: 'conv_A', title: 'Refund window', updated_at: '2026-11-02T10:00:00Z' },
+    { conversation_id: 'conv_B', title: 'Pet policy', updated_at: '2026-11-01T10:00:00Z' },
+  ],
+  currentId: 'conv_A',
+  message: '',
+  onRename: () => {},
+  onDelete: () => {},
+}
+const render = (page: Page, collapsed: boolean, withChats?: ChatsProps) =>
   renderToStaticMarkup(
     <AppShell
       page={page}
       collapsed={collapsed}
       onToggleCollapse={() => {}}
-      chatKey={0}
+      chat={{ key: 0, adopted: false }}
+      saved={{ status: 'loading' }}
+      onConversation={() => {}}
       onNewChat={() => {}}
+      chats={withChats}
       documents={documents}
       quality={{ quality: null, message: '' }}
     />,
@@ -61,7 +75,9 @@ describe('shell sources', () => {
     'Sidebar.tsx',
     'SidebarDrawer.tsx',
     'AppShell.tsx',
+    '../chat/ChatHeader.tsx',
     '../chat/FirstRun.tsx',
+    '../conversations/ChatList.tsx',
     '../documents/DocumentsPage.tsx',
     '../connectors/ConnectorCard.tsx',
     '../connectors/ConnectorsPage.tsx',
@@ -76,6 +92,26 @@ describe('shell sources', () => {
   it.each(files)('%s uses tokens, never colour literals or palette classes', (f) => {
     expect(source(f)).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(/)
     expect(source(f)).not.toMatch(/\b(text|bg|border|ring)-(red|amber|blue|green|gray|slate|zinc|neutral|stone|orange|yellow)-\d/)
+  })
+})
+
+describe('keyboard reach in the Chats list', () => {
+  const html = render('chat', false, chats)
+
+  it('names every control, with the chats in the sidebar', () => {
+    expect(html).toContain('Refund window')
+    expect(unnamed(html)).toEqual([])
+  })
+
+  it('has a link and Rename and Delete buttons per chat, none out of the tab order', () => {
+    expect(html).toContain('href="/app/chats/conv_A"')
+    expect(html).toContain('href="/app/chats/conv_B"')
+    expect((html.match(/aria-label="(Rename|Delete) /g) ?? []).length).toBe(4)
+    expect(html).not.toMatch(/tabindex="-1"|aria-disabled/)
+  })
+
+  it('announces the open chat as the one current page', () => {
+    expect(html.match(/aria-current="page"/g)).toHaveLength(1)
   })
 })
 

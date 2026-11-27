@@ -38,4 +38,28 @@ describe('Citations', () => {
     expect(html).not.toContain('<script>')
     expect(html).toContain('&lt;script&gt;')
   })
+
+  it('shows a restored citation as a plain row, with nothing to expand', () => {
+    const html = renderToStaticMarkup(
+      <Citations citations={[{ document_id: 'doc_1', title: 'Returns Policy', locator: 'p. 1', indexed: true }]} />,
+    )
+
+    expect(html).toContain('Returns Policy — p. 1')
+    expect(html).not.toContain('<details')
+    expect(html).not.toContain('no longer indexed')
+  })
+
+  it('notes a source that is no longer indexed, and keeps the citation', () => {
+    const html = renderToStaticMarkup(
+      <Citations
+        citations={[
+          { document_id: 'doc_1', title: 'Returns Policy', locator: 'p. 1', indexed: false },
+          { document_id: 'doc_2', title: 'Handbook', locator: 'p. 2', indexed: true },
+        ]}
+      />,
+    )
+
+    expect(html.match(/Source no longer indexed/g)).toHaveLength(1)
+    expect(html).toMatch(/Returns Policy — p\. 1<\/span><span[^>]*>Source no longer indexed/)
+  })
 })

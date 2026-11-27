@@ -1,6 +1,9 @@
+import { useMemo, useState } from 'react'
 import { AssistantRuntimeProvider, AuiConfig, Suggestions, useLocalRuntime } from '@assistant-ui/react'
 import { Thread } from '@/components/assistant-ui/elements/thread.aui'
-import { chatAdapter } from './adapter'
+import type { Turn } from '@/conversations/api'
+import { createChatAdapter } from './adapter'
+import { turnsToMessages } from './restore'
 
 // Welcome-screen suggestions: generic, so they fit any uploaded documents.
 const generic = [
@@ -21,9 +24,20 @@ const sampleConfig = AuiConfig({
   ]),
 })
 
+type ChatPaneProps = {
+  samples?: boolean
+  /** The saved chat this pane shows, with its turns. Read on mount: change `key` to switch chats. */
+  conversationId?: string
+  turns?: Turn[]
+  /** Called once, with the id the server gave a new chat after its first answer. Captured on mount. */
+  onConversation?: (id: string) => void
+}
+
 /** The chat. The runtime lives here, so remounting it (a new `key`) starts an empty thread. */
-export function ChatPane({ samples = false }: { samples?: boolean }) {
-  const runtime = useLocalRuntime(chatAdapter)
+export function ChatPane({ samples = false, conversationId, turns, onConversation }: ChatPaneProps) {
+  const [adapter] = useState(() => createChatAdapter({ id: conversationId, onId: onConversation }))
+  const initialMessages = useMemo(() => (turns ? turnsToMessages(turns) : undefined), [turns])
+  const runtime = useLocalRuntime(adapter, { initialMessages })
   return (
     <AssistantRuntimeProvider runtime={runtime} config={samples ? sampleConfig : config}>
       <Thread />

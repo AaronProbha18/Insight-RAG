@@ -12,6 +12,9 @@ columns:
   - {name: chat_model, type: text, description: "Chat model that produced the answer."}
   - {name: embedding_model, type: text, description: "Embedding model used for retrieval."}
   - {name: abstain_threshold, type: double precision, description: "Retrieval score threshold below which Plumbline abstains."}
+  - {name: conversation_id, type: bigint, nullable: true, references: conversations.id, on_delete: set null, description: "The conversation this answer belongs to. Null for answers recorded before conversations, or after their conversation was deleted."}
+indexes:
+  - {columns: [conversation_id]}
 open_questions:
   - id: OQ-ANSWERS-001
     owner: Business Tech Review

@@ -34,10 +34,16 @@ class RecordingLLM:
 class FakeRecorder:
     def __init__(self):
         self.calls = []
+        self.conversation_ids = []
+        self.known = {"conv_KNOWN"}
 
-    def __call__(self, question, result, threshold):
+    def resolve(self, conversation_id):
+        return conversation_id in self.known
+
+    def __call__(self, question, result, threshold, conversation_id=None):
         self.calls.append((question, result, threshold))
-        return "ans_FAKE"
+        self.conversation_ids.append(conversation_id)
+        return "ans_FAKE", conversation_id or "conv_NEW"
 
 
 @pytest.fixture
@@ -49,14 +55,21 @@ def recorder():
 def chat(monkeypatch, recorder):
     monkeypatch.delenv("PLUMBLINE_ABSTAIN_THRESHOLD", raising=False)
 
-    def run(chunks, llm=None, question="What is the refund window?", recorder=recorder):
+    def run(
+        chunks,
+        llm=None,
+        question="What is the refund window?",
+        recorder=recorder,
+        conversation_id=None,
+    ):
         llm = llm or RecordingLLM()
         app.dependency_overrides[get_retriever] = lambda: lambda q, k: chunks[:k]
         app.dependency_overrides[get_llm] = lambda: llm
         app.dependency_overrides[get_recorder] = lambda: recorder
-        r = TestClient(app).post(
-            "/chat", json={"messages": [{"role": "user", "content": question}]}
-        )
+        body = {"messages": [{"role": "user", "content": question}]}
+        if conversation_id:
+            body["conversation_id"] = conversation_id
+        r = TestClient(app).post("/chat", json=body)
         assert r.status_code == 200
         assert r.headers["content-type"].startswith("text/event-stream")
         events = []
@@ -152,8 +165,9 @@ def test_done_carries_answer_id_for_answers_and_abstentions(chat, recorder):
     answered, _ = chat([_chunk(1, 0.9), _chunk(2, 0.8)])
     abstained, _ = chat([_chunk(1, 0.1)])
 
-    assert answered[-1] == ("done", {"answer_id": "ans_FAKE"})
-    assert abstained[-1] == ("done", {"answer_id": "ans_FAKE"})
+    done = {"answer_id": "ans_FAKE", "conversation_id": "conv_NEW"}
+    assert answered[-1] == ("done", done)
+    assert abstained[-1] == ("done", done)
     assert [r["abstained"] for _, r, _ in recorder.calls] == [False, True]
 
 
@@ -187,3 +201,42 @@ def test_recording_failure_sends_error_not_the_answer(chat):
     events, _ = chat([_chunk(1, 0.9), _chunk(2, 0.8)], recorder=boom)
 
     assert events == [("error", {"message": "answer generation failed"})]
+
+
+def test_follow_up_joins_the_conversation(chat, recorder):
+    events, _ = chat([_chunk(1, 0.9), _chunk(2, 0.8)], conversation_id="conv_KNOWN")
+
+    assert recorder.conversation_ids == ["conv_KNOWN"]
+    assert events[-1] == (
+        "done",
+        {"answer_id": "ans_FAKE", "conversation_id": "conv_KNOWN"},
+    )
+
+
+def test_unknown_conversation_is_404_before_answering(recorder):
+    llm = RecordingLLM()
+    app.dependency_overrides[get_retriever] = lambda: lambda q, k: [_chunk(1, 0.9)]
+    app.dependency_overrides[get_llm] = lambda: llm
+    app.dependency_overrides[get_recorder] = lambda: recorder
+    try:
+        r = TestClient(app).post(
+            "/chat",
+            json={
+                "messages": [{"role": "user", "content": "q"}],
+                "conversation_id": "conv_missing",
+            },
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert r.status_code == 404
+    assert r.json() == {"detail": "Conversation not found"}
+    assert llm.calls == 0
+    assert recorder.calls == []
+
+
+def test_failed_answer_creates_no_conversation(chat, recorder):
+    events, _ = chat([_chunk(1, 0.9)], RecordingLLM(fail=True))
+
+    assert recorder.calls == []
+    assert "conversation_id" not in json.dumps(events)

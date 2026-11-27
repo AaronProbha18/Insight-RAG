@@ -6,7 +6,7 @@ import {
   type ThreadMessage,
   useLocalRuntime,
 } from '@assistant-ui/react'
-import { chatAdapter } from '@/chat/adapter'
+import { createChatAdapter } from '@/chat/adapter'
 import { Thread } from './thread.aui'
 
 const button = (name: string) =>
@@ -14,7 +14,7 @@ const button = (name: string) =>
 
 function Live() {
   return (
-    <AssistantRuntimeProvider runtime={useLocalRuntime(chatAdapter)}>
+    <AssistantRuntimeProvider runtime={useLocalRuntime(createChatAdapter())}>
       <Thread />
     </AssistantRuntimeProvider>
   )
@@ -46,7 +46,7 @@ const conversation = (status: 'complete' | 'running', custom: object = {}) =>
 
 function Readonly({ status, custom }: { status: 'complete' | 'running'; custom?: object }) {
   return (
-    <AssistantRuntimeProvider runtime={useLocalRuntime(chatAdapter)}>
+    <AssistantRuntimeProvider runtime={useLocalRuntime(createChatAdapter())}>
       <ReadonlyThreadProvider messages={conversation(status, custom)}>
         <Thread />
       </ReadonlyThreadProvider>

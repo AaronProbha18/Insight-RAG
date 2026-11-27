@@ -8,7 +8,8 @@ COLUMNS = {
     "documents": ["id", "public_id", "content_hash", "title", "filename", "connector", "created_at"],
     "chunks": ["id", "document_id", "ordinal", "text", "locator", "embedding"],
     "answers": ["id", "public_id", "question", "answer", "abstained", "citations", "chat_model",
-                "embedding_model", "abstain_threshold", "created_at"],
+                "embedding_model", "abstain_threshold", "conversation_id", "created_at"],
+    "conversations": ["id", "public_id", "title", "created_at", "updated_at"],
     "feedback": ["id", "answer_id", "rating", "reason", "comment", "updated_at"],
 }
 
