@@ -25,6 +25,7 @@ const render = (
       onConversation={() => {}}
       onNewChat={() => {}}
       chats={chats}
+      unansweredCount={0}
       documents={{ ...documents, ...docs }}
       quality={{ quality: null, message: '' }}
     />,

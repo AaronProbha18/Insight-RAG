@@ -31,11 +31,13 @@ type ChatPaneProps = {
   turns?: Turn[]
   /** Called once, with the id the server gave a new chat after its first answer. Captured on mount. */
   onConversation?: (id: string) => void
+  /** Called after every answer or refusal, once it is recorded. Captured on mount. */
+  onAnswer?: () => void
 }
 
 /** The chat. The runtime lives here, so remounting it (a new `key`) starts an empty thread. */
-export function ChatPane({ samples = false, conversationId, turns, onConversation }: ChatPaneProps) {
-  const [adapter] = useState(() => createChatAdapter({ id: conversationId, onId: onConversation }))
+export function ChatPane({ samples = false, conversationId, turns, onConversation, onAnswer }: ChatPaneProps) {
+  const [adapter] = useState(() => createChatAdapter({ id: conversationId, onId: onConversation, onAnswer }))
   const initialMessages = useMemo(() => (turns ? turnsToMessages(turns) : undefined), [turns])
   const runtime = useLocalRuntime(adapter, { initialMessages })
   return (

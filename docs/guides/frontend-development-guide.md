@@ -29,7 +29,7 @@ src/
   shell/  route.ts     useRoute(), navigate(): pages over the History API
           collapsed.ts sidebar collapse, kept in localStorage
           chatTarget.ts   what the chat pane shows: syncTarget, newChat, adopt
-          Sidebar.tsx  navigation: New chat, the Chats section, Documents, Connectors and quality, docs link
+          Sidebar.tsx  navigation: New chat, the Chats section, Documents, Unanswered (count), Connectors and quality, docs link
           SidebarDrawer.tsx  menu button + the sidebar as a drawer below md
           AppShell.tsx layout and page switch
   chat/   sse.ts       SSE parser
@@ -38,6 +38,7 @@ src/
           ChatHeader.tsx  conversation title and "Searching all N documents"
           ChatPane.tsx runtime, welcome suggestions and Thread
           Citations.tsx
+          AddedToUnanswered.tsx  "Added to Unanswered" link under a recorded refusal
           FirstRun.tsx first-run screen: upload link, "Try the sample documents" (trySamples)
   conversations/ api.ts   GET, PATCH, DELETE /conversations: list, get, rename, delete
           useConversations.ts  the sidebar list: fetched on mount and after refresh, a rename or a delete
@@ -55,6 +56,9 @@ src/
           ConnectorCard.tsx  one connector: subtitle, status pill, metric bars, last-checked footer
           ConnectorsPage.tsx title, intro, 0.80 explainer, card grid, Build your own card;
                              joins /connectors, /quality and /documents by connector name
+  unanswered/ api.ts   GET /unanswered?days=
+          useUnanswered.ts   the refused and wrong-marked groups for a range: fetched on mount, on a range change and after refresh
+          UnansweredPage.tsx title, Date range select, rows (question, Asked N times, last date, reason text, Add a document link), empty state
   quality/ api.ts      GET /quality
           useQuality.ts      the latest eval result, fetched once in App and passed to the Connectors page
   components/
@@ -78,9 +82,9 @@ filesystems ignore case, and TypeScript then can't tell which file
 
 **1.4 Pages are URLs under `/app/`.** The chat is at `/`, a saved chat at
 `/app/chats/{id}` (`chatIdFor` reads the id; `replace(path)` changes the URL
-without a history entry), Documents at `/app/documents` and Connectors at
-`/app/connectors`. A client page never reuses an API path (`/documents`,
-`/connectors` and `/conversations` are the API), so the prefix can't collide with a route. Routing is the built-in
+without a history entry), Documents at `/app/documents`, Connectors at
+`/app/connectors` and Unanswered at `/app/unanswered`. A client page never reuses an API path (`/documents`,
+`/connectors`, `/conversations` and `/unanswered` are the API), so the prefix can't collide with a route. Routing is the built-in
 `shell/route.ts`: `useRoute()` reads the path and `navigate(path)` pushes
 history; back and forward work through `popstate`. There is no router
 library, and one comes when pages need nested routes or loaders. Sidebar
@@ -248,7 +252,7 @@ for an empty list, so abstentions show no sources without a special case:
   bottom"), suggestions via their text, and each source via its
   `<summary>`. *Checked by* `src/App.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
-- **The sidebar:** a `<nav aria-label="Main">`. The current page is `aria-current="page"` on its link. Documents is a real link whose text includes the count ("Documents (n)"). "Connectors and quality" is a real link to `/app/connectors`, marked current there. There is no Quality item, no Insights group and no quality state in the sidebar. Collapsed to icons, every item keeps its name as `sr-only` text, and the collapse button is "Collapse sidebar" or "Expand sidebar" with `aria-expanded`. Below `md` a button named "Open menu" opens the sidebar as a drawer, with base-ui's focus trap and Escape. *Checked by* `shell/Sidebar.test.tsx`, `shell/SidebarDrawer.test.tsx` and `shell/AppShell.test.tsx`.
+- **The sidebar:** a `<nav aria-label="Main">`. The current page is `aria-current="page"` on its link. Documents is a real link whose text includes the count ("Documents (n)"). Unanswered is a real link to `/app/unanswered` whose text includes the number of groups in the last 30 days ("Unanswered (n)"); `App` refreshes it through the adapter's `onAnswer`, which fires after every answer or refusal. "Connectors and quality" is a real link to `/app/connectors`, marked current there. There is no Quality item, no Insights group and no quality state in the sidebar. Collapsed to icons, every item keeps its name as `sr-only` text, and the collapse button is "Collapse sidebar" or "Expand sidebar" with `aria-expanded`. Below `md` a button named "Open menu" opens the sidebar as a drawer, with base-ui's focus trap and Escape. *Checked by* `shell/Sidebar.test.tsx`, `shell/SidebarDrawer.test.tsx` and `shell/AppShell.test.tsx`.
 - **The Documents page:** the file input, the Search box and the Type select each have a visible label, each delete button is named `Delete <title>`, deleting asks for confirmation in an alert dialog, and load/delete failures appear in a `role="status"` region. *Checked by* `documents/DocumentList.test.tsx` and `documents/DocumentsPage.test.tsx`.
 - **The Connectors page:** each connector is a card (`<section>` named by the connector). Passes, Below bar and Not measured are words next to an `aria-hidden` icon, never colour alone; the metric bars are `aria-hidden` and the number is text; a configuration mismatch ("This result is not current") and load or error messages are `role="status"`. The two external links ("How it's measured", "Connector guide") are real `<a>` elements with a visible focus ring and `rel="noreferrer"`, and the "Build your own" card appears only once the page has loaded. *Checked by* `connectors/ConnectorCard.test.tsx`, `connectors/ConnectorsPage.test.tsx`, `shell/Sidebar.test.tsx` and `shell/a11y.test.tsx`.
 - **The first-run screen:** one `<h1>`; Upload documents is a real link to `/app/documents` (plain click only is handled, as in the sidebar); Try the sample documents is a native button, disabled while it runs; a failure appears in a `role="status"` line with a generic message. *Checked by* `chat/FirstRun.test.tsx` and `shell/a11y.test.tsx`.
@@ -258,6 +262,8 @@ for an empty list, so abstentions show no sources without a special case:
   ("Feedback recorded" or a generic failure) is a `role="status"` line.
   *Checked by* `feedback/FeedbackControls.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
+- **The Unanswered page:** the Date range select is named by an `sr-only` label (a visible one is not needed because the options say what they are); each row's reason is text ("Not in your documents", "Marked wrong: wrong source"), never colour alone; each Add a document link is a real `<a href="/app/documents">` named with its question (plain click only is handled); the empty state is text; a load failure is a `role="status"` line. *Checked by* `unanswered/UnansweredPage.test.tsx` and `shell/a11y.test.tsx`.
+- **"Added to Unanswered":** a real `<a href="/app/unanswered">` under a refusal, shown only once the refusal is recorded (it has an `answerId`); plain click only is handled. *Checked by* `chat/AddedToUnanswered.test.tsx` and `components/assistant-ui/elements/thread.aui.test.tsx`.
 - **Async results are announced:** the upload outcome on the Documents
   page lives in a `role="status"` / `aria-live="polite"` region.
 - **Focus is always visible:** controls use `focus-visible:` outline or
@@ -334,7 +340,9 @@ the page, focus rings, light and dark themes) and the first-run screen (Tab
 reaches Upload documents then Try the sample documents, focus rings, light
 and dark themes; the samples button indexes them, the screen gives way to the
 chat with the sample question, and deleting every document brings it back)
-and the shell: New
+and the Unanswered page (Tab reaches the Date range select then each Add a
+document link, the select changes the list, focus rings, light and dark
+themes) and the shell: New
 chat clears a conversation, including while an answer streams; going to
 Documents and back leaves the chat unchanged; the drawer opens from the menu
 button, closes on Escape, the backdrop and navigation, and returns focus to

@@ -7,6 +7,7 @@ import type { useDocuments } from '../documents/useDocuments'
 import { ConnectorsPage } from '../connectors/ConnectorsPage'
 import type { ChatsProps } from '../conversations/ChatList'
 import type { Saved } from '../conversations/useConversation'
+import { UnansweredPage } from '../unanswered/UnansweredPage'
 import type { useQuality } from '../quality/useQuality'
 import type { Target } from './chatTarget'
 import type { Page } from './route'
@@ -22,6 +23,8 @@ type Props = {
   onConversation: (id: string) => void
   onNewChat: () => void
   chats?: ChatsProps
+  unansweredCount: number
+  onAnswer?: () => void // after every chat answer, so the count can refresh
   documents: ReturnType<typeof useDocuments>
   quality: ReturnType<typeof useQuality>
 }
@@ -36,6 +39,8 @@ export function AppShell({
   onConversation,
   onNewChat,
   chats,
+  unansweredCount,
+  onAnswer,
   documents,
   quality,
 }: Props) {
@@ -53,6 +58,7 @@ export function AppShell({
         <Sidebar
           page={page}
           documentCount={count}
+          unansweredCount={unansweredCount}
           collapsed={collapsed}
           onToggleCollapse={onToggleCollapse}
           onNewChat={onNewChat}
@@ -61,7 +67,7 @@ export function AppShell({
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="border-b border-border p-1 md:hidden">
-          <SidebarDrawer page={page} documentCount={count} onNewChat={onNewChat} chats={chats} />
+          <SidebarDrawer page={page} documentCount={count} unansweredCount={unansweredCount} onNewChat={onNewChat} chats={chats} />
         </div>
         {documents.loaded && (
           <div hidden={page !== 'chat' || firstRun} className="min-h-0 flex-1">
@@ -78,6 +84,7 @@ export function AppShell({
                     conversationId={saved.status === 'found' ? saved.conversation.conversation_id : undefined}
                     turns={saved.status === 'found' ? saved.conversation.turns : undefined}
                     onConversation={onConversation}
+                    onAnswer={onAnswer}
                   />
                 </div>
               </div>
@@ -102,6 +109,11 @@ export function AppShell({
         {page === 'connectors' && (
           <div className="min-h-0 flex-1 overflow-y-auto">
             <ConnectorsPage quality={quality.quality} qualityMessage={quality.message} documents={documents.documents} />
+          </div>
+        )}
+        {page === 'unanswered' && (
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <UnansweredPage />
           </div>
         )}
       </div>

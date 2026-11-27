@@ -21,6 +21,7 @@ const render = (page: Page = 'chat', collapsed = false, withChats?: ChatsProps) 
     <Sidebar
       page={page}
       documentCount={3}
+      unansweredCount={4}
       collapsed={collapsed}
       onToggleCollapse={() => {}}
       onNewChat={() => {}}
@@ -65,7 +66,7 @@ describe('Sidebar Chats section', () => {
 describe('Sidebar', () => {
   it('lists logo, New chat, Knowledge and Docs in order', () => {
     const html = render()
-    const order = ['Plumbline', 'New chat', 'Knowledge', 'Documents (3)', 'Connectors and quality', 'Docs<']
+    const order = ['Plumbline', 'New chat', 'Knowledge', 'Documents (3)', 'Unanswered (4)', 'Connectors and quality', 'Docs<']
     const at = order.map((t) => html.indexOf(t))
 
     expect(at.every((i) => i >= 0)).toBe(true)
@@ -90,6 +91,13 @@ describe('Sidebar', () => {
     expect(links(render('chat'), '/app/connectors')[0]).not.toContain('aria-current')
   })
 
+  it('links Unanswered with its count, current only on that page', () => {
+    expect(links(render(), '/app/unanswered')).toHaveLength(1)
+    expect(render()).toContain('Unanswered (4)')
+    expect(links(render('unanswered'), '/app/unanswered')[0]).toContain('aria-current="page"')
+    expect(links(render('chat'), '/app/unanswered')[0]).not.toContain('aria-current')
+  })
+
   it('has no quality state in the sidebar', () => {
     expect(render()).not.toMatch(/Quality: |Passes|Below bar|Not measured/)
   })
@@ -105,7 +113,7 @@ describe('Sidebar', () => {
 
     expect(html).toContain('aria-label="Expand sidebar"')
     expect(html).toContain('aria-expanded="false"')
-    for (const name of ['Plumbline', 'New chat', 'Documents (3)', 'Connectors and quality', 'Docs'])
+    for (const name of ['Plumbline', 'New chat', 'Documents (3)', 'Unanswered (4)', 'Connectors and quality', 'Docs'])
       expect(html).toContain(`<span class="sr-only">${name}</span>`)
   })
 
@@ -127,7 +135,7 @@ describe('Sidebar', () => {
   it('has tooltips on the icon-only items, and only when collapsed', () => {
     const triggers = (html: string) => html.match(/data-slot="tooltip-trigger"/g)?.length ?? 0
 
-    expect(triggers(render('chat', true))).toBe(5) // expand, New chat, Documents, Connectors and quality, Docs
+    expect(triggers(render('chat', true))).toBe(6) // expand, New chat, Documents, Unanswered, Connectors and quality, Docs
     expect(triggers(render('chat', false))).toBe(0)
   })
 

@@ -12,7 +12,7 @@ export type Citation = {
 }
 
 /** The conversation a chat belongs to: sent with each question, learned from the first `done`. */
-export type ConversationRef = { id?: string; onId?: (id: string) => void }
+export type ConversationRef = { id?: string; onId?: (id: string) => void; onAnswer?: () => void }
 
 /** Streams POST /chat (wire format: design.md D8) into assistant-ui. */
 export const createChatAdapter = (conversation: ConversationRef = {}): ChatModelAdapter => ({
@@ -44,6 +44,7 @@ export const createChatAdapter = (conversation: ConversationRef = {}): ChatModel
       } else if (event === 'error') throw new Error(data.message)
       else if (event === 'done') {
         answerId = data.answer_id
+        conversation.onAnswer?.()
         if (data.conversation_id && data.conversation_id !== conversation.id) {
           conversation.id = data.conversation_id
           conversation.onId?.(data.conversation_id)

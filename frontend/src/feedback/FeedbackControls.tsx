@@ -3,17 +3,10 @@ import { ThumbsDownIcon, ThumbsUpIcon } from 'lucide-react'
 import { TooltipIconButton } from '@/components/assistant-ui/elements/tooltip-icon-button'
 import { Button } from '@/components/ui/button'
 import { sendFeedback, type Feedback } from './api'
+import { REASONS } from './reasons'
 
 type Reason = NonNullable<Feedback['reason']>
 type Rating = Feedback['rating']
-
-const REASONS: { value: Reason; label: string }[] = [
-  { value: 'wrong', label: 'Wrong' },
-  { value: 'incomplete', label: 'Incomplete' },
-  { value: 'wrong_source', label: 'Wrong source' },
-  { value: 'should_have_answered', label: 'Should have answered' },
-  { value: 'other', label: 'Other' },
-]
 
 export type FeedbackState =
   | { kind: 'idle' }

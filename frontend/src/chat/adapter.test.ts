@@ -113,6 +113,18 @@ describe('conversation id', () => {
     expect(body(1).conversation_id).toBe('conv_NEW')
   })
 
+  it('calls onAnswer on every done, also for a refusal and when the id is already known', async () => {
+    const onAnswer = vi.fn()
+    const conversation: ConversationRef = { onAnswer }
+    respond(DONE)
+    await run(conversation)
+    await run(conversation)
+    expect(onAnswer).toHaveBeenCalledTimes(2)
+    respond('event: abstain\ndata: {"message": "No."}\n\nevent: done\ndata: {"answer_id": "ans_1"}\n\n')
+    await run(conversation)
+    expect(onAnswer).toHaveBeenCalledTimes(3)
+  })
+
   it('leaves the chat unsaved when done carries no id', async () => {
     const onId = vi.fn()
     respond('event: abstain\ndata: {"message": "No."}\n\nevent: done\ndata: {"answer_id": "ans_1"}\n\n')

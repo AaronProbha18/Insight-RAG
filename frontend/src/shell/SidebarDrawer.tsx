@@ -6,10 +6,10 @@ import type { ChatsProps } from '../conversations/ChatList'
 import type { Page } from './route'
 import { Sidebar } from './Sidebar'
 
-type Props = { page: Page; documentCount: number; onNewChat: () => void; chats?: ChatsProps }
+type Props = { page: Page; documentCount: number; unansweredCount: number; onNewChat: () => void; chats?: ChatsProps }
 
 /** Below md: a menu button that opens the sidebar as a drawer. Both are hidden from md up. */
-export function SidebarDrawer({ page, documentCount, onNewChat, chats }: Props) {
+export function SidebarDrawer({ page, documentCount, unansweredCount, onNewChat, chats }: Props) {
   const [open, setOpen] = useState(false)
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -23,6 +23,7 @@ export function SidebarDrawer({ page, documentCount, onNewChat, chats }: Props) 
           <Sidebar
             page={page}
             documentCount={documentCount}
+            unansweredCount={unansweredCount}
             collapsed={false}
             onNewChat={onNewChat}
             chats={chats}
