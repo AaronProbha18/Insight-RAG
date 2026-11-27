@@ -57,6 +57,7 @@ src/
                              joins /connectors, /quality and /documents by connector name
   unanswered/ api.ts   GET /unanswered?days=
           useUnanswered.ts   the refused and wrong-marked groups for a range: fetched on mount, on a range change and after refresh
+          UnansweredPage.tsx title, Date range select, rows (question, Asked N times, last date, reason text, Add a document link), empty state
   quality/ api.ts      GET /quality
           useQuality.ts      the latest eval result, fetched once in App and passed to the Connectors page
   components/
@@ -260,6 +261,7 @@ for an empty list, so abstentions show no sources without a special case:
   ("Feedback recorded" or a generic failure) is a `role="status"` line.
   *Checked by* `feedback/FeedbackControls.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
+- **The Unanswered page:** the Date range select has a visible label; each row's reason is text ("Not in your documents", "Marked wrong: wrong source"), never colour alone; each Add a document link is a real `<a href="/app/documents">` named with its question (plain click only is handled); the empty state is text; a load failure is a `role="status"` line. *Checked by* `unanswered/UnansweredPage.test.tsx` and `shell/a11y.test.tsx`.
 - **Async results are announced:** the upload outcome on the Documents
   page lives in a `role="status"` / `aria-live="polite"` region.
 - **Focus is always visible:** controls use `focus-visible:` outline or
@@ -336,7 +338,9 @@ the page, focus rings, light and dark themes) and the first-run screen (Tab
 reaches Upload documents then Try the sample documents, focus rings, light
 and dark themes; the samples button indexes them, the screen gives way to the
 chat with the sample question, and deleting every document brings it back)
-and the shell: New
+and the Unanswered page (Tab reaches the Date range select then each Add a
+document link, the select changes the list, focus rings, light and dark
+themes) and the shell: New
 chat clears a conversation, including while an answer streams; going to
 Documents and back leaves the chat unchanged; the drawer opens from the menu
 button, closes on Escape, the backdrop and navigation, and returns focus to

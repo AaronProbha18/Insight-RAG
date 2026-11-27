@@ -7,6 +7,7 @@ import type { useDocuments } from '../documents/useDocuments'
 import { ConnectorsPage } from '../connectors/ConnectorsPage'
 import type { ChatsProps } from '../conversations/ChatList'
 import type { Saved } from '../conversations/useConversation'
+import { UnansweredPage } from '../unanswered/UnansweredPage'
 import type { useQuality } from '../quality/useQuality'
 import type { Target } from './chatTarget'
 import type { Page } from './route'
@@ -102,6 +103,11 @@ export function AppShell({
         {page === 'connectors' && (
           <div className="min-h-0 flex-1 overflow-y-auto">
             <ConnectorsPage quality={quality.quality} qualityMessage={quality.message} documents={documents.documents} />
+          </div>
+        )}
+        {page === 'unanswered' && (
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <UnansweredPage />
           </div>
         )}
       </div>

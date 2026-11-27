@@ -57,6 +57,8 @@ describe.each([
   ['documents', true],
   ['connectors', false],
   ['connectors', true],
+  ['unanswered', false],
+  ['unanswered', true],
 ] as const)('AppShell on %s, collapsed=%s', (page, collapsed) => {
   const html = render(page, collapsed)
 
@@ -66,7 +68,7 @@ describe.each([
 
   it('announces the current page once, on Documents or on Connectors and quality', () => {
     const current = html.match(/aria-current="page"/g) ?? []
-    expect(current.length).toBe({ chat: 0, documents: 1, connectors: 1 }[page])
+    expect(current.length).toBe({ chat: 0, documents: 1, connectors: 1, unanswered: 0 }[page])
   })
 })
 
@@ -81,6 +83,7 @@ describe('shell sources', () => {
     '../documents/DocumentsPage.tsx',
     '../connectors/ConnectorCard.tsx',
     '../connectors/ConnectorsPage.tsx',
+    '../unanswered/UnansweredPage.tsx',
   ]
   const source = (f: string) => readFileSync(fileURLToPath(new URL(f, import.meta.url)), 'utf-8')
 
