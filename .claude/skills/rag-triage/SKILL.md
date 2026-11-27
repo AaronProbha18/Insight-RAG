@@ -67,8 +67,7 @@ it back to the issue. Never edit code.
    - Labels (all defined in `.github/labels.yml`):
      `gh issue edit <N> --remove-label status:needs-triage --add-label
      status:ready-for-dev,area:<…>`, plus
-     `answer-quality-change` per the Route step's label rule (never for
-     the route alone), and `db-change` if the form said "Yes" or "Not sure",
+     `answer-quality-change` per the Route step's label rule, and `db-change` if the form said "Yes" or "Not sure",
      or the change adds an Alembic revision. If triage itself is stuck on a
      decision, add `status:blocked` and say what it's waiting for.
    - Board: `bash scripts/board.sh <N> Ready`.

@@ -84,7 +84,7 @@ carry the handoff:
 | `type:*` | feature, bug, chore, docs | what kind of work; issue and PR |
 | `area:*` | backend, frontend, connector, evals, docs, infra | where it lands; issue and PR |
 | `status:*` | needs-triage -> ready-for-dev -> in-progress; blocked | where the issue is in the loops; issues only |
-| `answer-quality-change` | | can change answers (form "Yes", or triage finds a retrieval, prompting, ranking, chunking, model or judge change; the `rag-standard` route alone does not count): an eval run is required before merge |
+| `answer-quality-change` | | can change answers (form "Yes", or triage finds a retrieval, prompting, ranking, chunking, model or judge change): an eval run is required before merge |
 | `db-change` | | adds or changes an Alembic revision: update `datamodel/models/plumbline` in the same PR; the `plumbline-drift` CI job must pass |
 
 1. **Tier.** `rag-standard` is the default (proposal -> design -> specs +
