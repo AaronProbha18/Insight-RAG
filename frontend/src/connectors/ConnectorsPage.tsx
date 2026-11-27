@@ -3,11 +3,11 @@ import { countByConnector } from '../documents/pageLogic'
 import type { Quality } from '../quality/api'
 import type { Connector } from './api'
 import { ConnectorCard } from './ConnectorCard'
+import { DOCS_URL } from '@/lib/docsSite'
 import { useConnectors } from './useConnectors'
 
-const REPO = 'https://github.com/AaronProbha18/Plumbline/blob/main'
-const MEASURED_URL = `${REPO}/evals/README.md`
-const GUIDE_URL = `${REPO}/docs/guides/connector-development-guide.md`
+const MEASURED_URL = `${DOCS_URL}architecture/overview/#evaluate-plumbline-eval`
+const GUIDE_URL = `${DOCS_URL}guides/connector-development-guide/`
 const link =
   'rounded-sm font-medium text-foreground underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
 

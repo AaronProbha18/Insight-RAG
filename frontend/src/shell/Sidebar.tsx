@@ -11,9 +11,9 @@ import type { ReactElement } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChatList, type ChatsProps } from '../conversations/ChatList'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { DOCS_URL } from '@/lib/docsSite'
 import { isPlainClick, navigate, type Page } from './route'
 
-const DOCS_URL = 'https://plumbline-docs.netlify.app/'
 const item =
   'flex items-center gap-2 rounded-md px-2 text-sm outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50'
 
