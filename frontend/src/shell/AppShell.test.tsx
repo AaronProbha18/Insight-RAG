@@ -3,8 +3,9 @@ import { describe, expect, it } from 'vitest'
 import type { Page } from './route'
 import { AppShell } from './AppShell'
 
-const documents = { documents: [], loaded: true, message: '', refresh: () => {}, remove: async () => {} }
-const render = (page: Page) =>
+const doc = { document_id: 'doc_1', title: 'a.md', connector: 'markdown', created_at: '2026-01-01' }
+const documents = { documents: [doc], loaded: true, message: '', refresh: () => {}, remove: async () => {} }
+const render = (page: Page, docs: Partial<typeof documents> = {}) =>
   renderToStaticMarkup(
     <AppShell
       page={page}
@@ -12,7 +13,7 @@ const render = (page: Page) =>
       onToggleCollapse={() => {}}
       chatKey={0}
       onNewChat={() => {}}
-      documents={documents}
+      documents={{ ...documents, ...docs }}
       quality={{ quality: null, message: '' }}
     />,
   )
@@ -56,5 +57,38 @@ describe('AppShell', () => {
   it('has no upload bar on any page but Documents', () => {
     expect(render('chat')).not.toContain('Upload a PDF or Word document')
     expect(render('documents')).toContain('Upload a PDF or Word document')
+  })
+
+  describe('first run', () => {
+    const HEADLINE = 'Ask questions about your documents'
+    const empty = { documents: [] }
+
+    it('shows first-run, not the chat, with no documents, and the sidebar counts zero', () => {
+      const html = render('chat', empty)
+      expect(html).toContain(HEADLINE)
+      expect(html).toContain('Documents (0)')
+      expect(html).toContain('<div hidden=""')
+    })
+
+    it('shows nothing for the chat page until the list has loaded', () => {
+      const html = render('chat', { ...empty, loaded: false })
+      expect(html).not.toContain(HEADLINE)
+      expect(html).not.toContain(THREAD)
+    })
+
+    it('shows the chat, not first-run, when documents exist; first-run again once all are gone', () => {
+      expect(render('chat')).not.toContain(HEADLINE)
+      expect(render('chat', empty)).toContain(HEADLINE)
+    })
+
+    it('shows the chat when the list failed to load', () => {
+      const html = render('chat', { ...empty, message: "Couldn't load documents. Try again." })
+      expect(html).not.toContain(HEADLINE)
+      expect(html).toContain(THREAD)
+    })
+
+    it('does not show first-run on the Documents page', () => {
+      expect(render('documents', empty)).not.toContain(HEADLINE)
+    })
   })
 })
