@@ -49,7 +49,7 @@ describe('FirstRunView', () => {
   it('shows the headline, three steps and the error only when set', () => {
     const html = renderToStaticMarkup(<FirstRunView {...props} />)
     expect(html).toContain('Ask questions about your documents')
-    expect(html.match(/<li>/g)).toHaveLength(3)
+    expect(html.match(/<li /g)).toHaveLength(3)
     expect(html).not.toContain(FAILURE)
     expect(renderToStaticMarkup(<FirstRunView {...props} error={FAILURE} />)).toContain(FAILURE)
   })

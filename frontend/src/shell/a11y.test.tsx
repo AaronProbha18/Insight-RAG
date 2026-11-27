@@ -171,7 +171,7 @@ describe('Connectors page sources', () => {
 describe('the first-run screen', () => {
   const html = renderToStaticMarkup(<FirstRunView error="" busy={false} onUpload={() => {}} onTry={() => {}} />)
   const source = readFileSync(fileURLToPath(new URL('../chat/FirstRun.tsx', import.meta.url)), 'utf-8')
-  const MEASURED = ['text-muted-foreground', 'text-foreground', 'bg-primary', 'text-primary-foreground', 'bg-background']
+  const MEASURED = ['text-muted-foreground', 'text-foreground', 'text-destructive', 'bg-primary', 'text-primary-foreground', 'bg-muted', 'border-border']
   const COLOUR = /\b(?:text|bg|border|outline)-(?:muted-foreground|primary-foreground|foreground|background|muted|destructive|border|primary|ring)(?![A-Za-z-])/g
 
   it('names every control and has one h1', () => {
