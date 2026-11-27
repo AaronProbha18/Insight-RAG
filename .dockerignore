@@ -11,3 +11,4 @@
 openspec
 docs
 evals
+!evals/connectors/pdf/corpus/*.pdf

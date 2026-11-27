@@ -18,9 +18,10 @@ RUN uv sync --frozen --no-dev --no-install-project --extra "$PROVIDER"
 COPY backend/ ./
 RUN uv sync --frozen --no-dev --extra "$PROVIDER"
 COPY --from=ui /frontend/dist /app/static
+COPY evals/connectors/pdf/corpus/*.pdf /app/samples/
 
 RUN useradd --create-home app
 USER app
-ENV PATH="/app/backend/.venv/bin:$PATH" PLUMBLINE_UI_DIR=/app/static
+ENV PATH="/app/backend/.venv/bin:$PATH" PLUMBLINE_UI_DIR=/app/static PLUMBLINE_SAMPLES_DIR=/app/samples
 EXPOSE 8000
 CMD ["sh", "-c", "alembic upgrade head && fastapi run src/plumbline/api/app.py --host 0.0.0.0 --port 8000"]

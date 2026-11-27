@@ -4,7 +4,7 @@
 
 ## 2. Image
 
-- [ ] 2.1 Ship the samples in the image: a `.dockerignore` re-include for `evals/connectors/pdf/corpus/*.pdf`, `COPY` to `/app/samples`, and `ENV PLUMBLINE_SAMPLES_DIR=/app/samples`. Check: `docker build`, then `docker run --rm <img> sh -c "ls /app/samples; ls /app"` shows the four PDFs and no `evals`/golden/baseline files. Paste the output into verification.
+- [x] 2.1 Ship the samples in the image: a `.dockerignore` re-include for `evals/connectors/pdf/corpus/*.pdf`, `COPY` to `/app/samples`, and `ENV PLUMBLINE_SAMPLES_DIR=/app/samples`. Check: `docker build`, then `docker run --rm <img> sh -c "ls /app/samples; ls /app"` shows the four PDFs and no `evals`/golden/baseline files. Paste the output into verification.
 
 ## 3. Docs
 
