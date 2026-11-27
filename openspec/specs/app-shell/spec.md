@@ -60,8 +60,9 @@ page.
 
 ### Requirement: Chat survives navigation
 
-The current chat SHALL stay in memory while the person moves between pages.
-New chat SHALL clear it.
+The current conversation SHALL stay open while the person moves between pages.
+New chat SHALL open an empty conversation and SHALL keep the previous one in
+the Chats list.
 
 #### Scenario: Return to an unchanged chat
 
@@ -73,7 +74,7 @@ New chat SHALL clear it.
 
 - **GIVEN** a chat with answers
 - **WHEN** the person activates New chat
-- **THEN** the chat page shows an empty thread
+- **THEN** the chat page shows an empty thread, and the previous conversation stays in the Chats list
 
 ### Requirement: Collapsible and responsive sidebar
 
