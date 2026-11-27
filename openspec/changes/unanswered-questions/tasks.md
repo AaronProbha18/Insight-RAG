@@ -1,6 +1,6 @@
 ## 1. Backend
 
-- [ ] 1.1 `backend/src/plumbline/unanswered.py` `list_groups(conn, days)`: the grouped query (design D1-D4). Tests against the test database: case/space grouping with count and latest date, "marked wrong" with `feedback_reason`, the latest event's reason wins, 40 days ago excluded from 30, all time when `days` is None, empty list.
+- [x] 1.1 `backend/src/plumbline/unanswered.py` `list_groups(conn, days)`: the grouped query (design D1-D4). Tests against the test database: case/space grouping with count and latest date, "marked wrong" with `feedback_reason`, the latest event's reason wins, 40 days ago excluded from 30, all time when `days` is None, empty list.
 - [ ] 1.2 `GET /unanswered` route in `api/app.py`: accepts `days` in {7, 30, 90} or absent (else 422) and calls `list_groups`. API tests: 200 shape, 422 on `days=5`, no scores, ids or answer text in the body.
 
 ## 2. Frontend
