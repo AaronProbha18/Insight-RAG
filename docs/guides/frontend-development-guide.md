@@ -55,6 +55,8 @@ src/
           ConnectorCard.tsx  one connector: subtitle, status pill, metric bars, last-checked footer
           ConnectorsPage.tsx title, intro, 0.80 explainer, card grid, Build your own card;
                              joins /connectors, /quality and /documents by connector name
+  unanswered/ api.ts   GET /unanswered?days=
+          useUnanswered.ts   the refused and wrong-marked groups for a range: fetched on mount, on a range change and after refresh
   quality/ api.ts      GET /quality
           useQuality.ts      the latest eval result, fetched once in App and passed to the Connectors page
   components/
@@ -78,9 +80,9 @@ filesystems ignore case, and TypeScript then can't tell which file
 
 **1.4 Pages are URLs under `/app/`.** The chat is at `/`, a saved chat at
 `/app/chats/{id}` (`chatIdFor` reads the id; `replace(path)` changes the URL
-without a history entry), Documents at `/app/documents` and Connectors at
-`/app/connectors`. A client page never reuses an API path (`/documents`,
-`/connectors` and `/conversations` are the API), so the prefix can't collide with a route. Routing is the built-in
+without a history entry), Documents at `/app/documents`, Connectors at
+`/app/connectors` and Unanswered at `/app/unanswered`. A client page never reuses an API path (`/documents`,
+`/connectors`, `/conversations` and `/unanswered` are the API), so the prefix can't collide with a route. Routing is the built-in
 `shell/route.ts`: `useRoute()` reads the path and `navigate(path)` pushes
 history; back and forward work through `popstate`. There is no router
 library, and one comes when pages need nested routes or loaders. Sidebar

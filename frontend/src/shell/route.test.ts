@@ -27,6 +27,8 @@ describe('pageFor', () => {
     expect(pageFor('/')).toBe('chat')
     expect(pageFor('/app/documents')).toBe('documents')
     expect(pageFor('/app/documents/')).toBe('documents')
+    expect(pageFor('/app/unanswered')).toBe('unanswered')
+    expect(pageFor('/app/unanswered/')).toBe('unanswered')
     expect(pageFor('/app/unknown')).toBe('chat')
     expect(pageFor('/documents')).toBe('chat')
     expect(pageFor('/x')).toBe('chat')

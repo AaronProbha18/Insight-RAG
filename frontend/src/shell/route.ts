@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from 'react'
 
-export type Page = 'chat' | 'documents' | 'connectors'
+export type Page = 'chat' | 'documents' | 'connectors' | 'unanswered'
 
 // Pages live under /app/; "/documents" and "/connectors" are the API, so they stay chat.
-const pages: Record<string, Page> = { '/app/documents': 'documents', '/app/connectors': 'connectors' }
+const pages: Record<string, Page> = { '/app/documents': 'documents', '/app/connectors': 'connectors', '/app/unanswered': 'unanswered' }
 
 export function pageFor(pathname: string): Page {
   return pages[pathname.replace(/\/$/, '')] ?? 'chat'
