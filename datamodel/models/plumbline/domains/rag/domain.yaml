@@ -3,4 +3,4 @@ title: Retrieval-augmented generation
 layer: runtime
 load_order: 10
 depends_on: []
-description: Uploaded documents, their embedded chunks, the answers Plumbline gave and the feedback on them.
+description: Uploaded documents, their embedded chunks, the answers Plumbline gave, the conversations they belong to and the feedback on them.

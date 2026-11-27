@@ -97,7 +97,7 @@ CREATE TABLE conversations (
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX conversations_updated_at ON conversations (updated_at DESC);
+CREATE INDEX conversations_updated_at ON conversations (updated_at);
 ALTER TABLE answers ADD COLUMN conversation_id bigint
   REFERENCES conversations(id) ON DELETE SET NULL;
 CREATE INDEX answers_conversation_id ON answers (conversation_id);

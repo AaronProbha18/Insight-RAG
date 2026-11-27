@@ -1,6 +1,6 @@
 ## 1. Storage
 
-- [ ] 1.1 Alembic revision `0003_conversations` (table, index, `answers.conversation_id` `ON DELETE SET NULL`, downgrade) and the `datamodel/models/plumbline` mirror (new `conversations.yaml` referencing OQ-ANSWERS-001, `answers.yaml` column, regenerated `build/`); test: upgrade/downgrade round-trip, and `plumbline-drift` passes.
+- [x] 1.1 Alembic revision `0003_conversations` (table, index, `answers.conversation_id` `ON DELETE SET NULL`, downgrade) and the `datamodel/models/plumbline` mirror (new `conversations.yaml` referencing OQ-ANSWERS-001, `answers.yaml` column, regenerated `build/`); test: upgrade/downgrade round-trip, and `plumbline-drift` passes.
 - [ ] 1.2 `conversations.py`: `create` (title rule D5), `resolve`, `touch`, `list_all`, `get` (with `indexed` per citation), `rename` (1-200 after trim), `delete`; tests for each, including title truncation, deleted-source `indexed: false`, and delete leaving answers and feedback.
 
 ## 2. API
