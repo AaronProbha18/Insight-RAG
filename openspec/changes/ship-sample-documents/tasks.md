@@ -8,4 +8,4 @@
 
 ## 3. Docs
 
-- [ ] 3.1 Document the samples path, `PLUMBLINE_SAMPLES_DIR` and `POST /documents/samples` (request, response, 404) in `docs/guides/backend-development-guide.md`, and add a line in `docs/architecture/overview.md` if that page lists endpoints.
+- [x] 3.1 Document the samples path, `PLUMBLINE_SAMPLES_DIR` and `POST /documents/samples` (request, response, 404) in `docs/guides/backend-development-guide.md`, and add a line in `docs/architecture/overview.md` if that page lists endpoints.

@@ -11,7 +11,7 @@ page at a time: the chat, a Documents page and a Connectors page.
 
 ```mermaid
 flowchart LR
-  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /chat SSE; POST /feedback; GET /quality; GET /connectors| API[FastAPI api/app.py]
+  UI[Browser: React + assistant-ui] -->|POST, GET, DELETE /documents; POST /documents/samples; POST /chat SSE; POST /feedback; GET /quality; GET /connectors| API[FastAPI api/app.py]
   API --> ING[ingestion.ingest]
   API --> G[graph.build_graph]
   ING --> C[connectors via entry points]
@@ -58,6 +58,13 @@ goes:
    its section's locator.
 6. **Embed before writing anything**, so a provider failure stores nothing.
 7. Insert the document and all chunks in **one transaction** → **201**.
+
+### Index the samples: `POST /documents/samples`
+
+`api/app.py` `index_samples` runs `ingestion.ingest` on each file directly
+in `PLUMBLINE_SAMPLES_DIR` (`/app/samples` in the image), in name order, so
+the steps above apply to each file. Unreadable or unsupported files go into
+`failed`; the rest go into `indexed`. A missing directory returns **404**.
 
 ### Delete: `DELETE /documents/{document_id}`
 
