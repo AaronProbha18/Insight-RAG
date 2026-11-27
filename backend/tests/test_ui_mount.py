@@ -35,7 +35,7 @@ def test_app_path_serves_index(monkeypatch, tmp_path):
 
     client = _client(monkeypatch, tmp_path)
 
-    for path in ("/app/documents", "/app/connectors"):
+    for path in ("/app/documents", "/app/connectors", "/app/chats/conv_X"):
         response = client.get(path)
 
         assert response.status_code == 200

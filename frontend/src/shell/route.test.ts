@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { currentPage, isPlainClick, navigate, pageFor, subscribe } from './route'
+import { chatIdFor, currentPage, isPlainClick, navigate, pageFor, replace, subscribe } from './route'
 
 // Node has no window, so stub the few parts of it the router touches.
 function stubWindow() {
@@ -8,6 +8,9 @@ function stubWindow() {
     location: { pathname: '/' },
     history: {
       pushState: vi.fn((_s: unknown, _t: string, path: string) => {
+        win.location.pathname = path
+      }),
+      replaceState: vi.fn((_s: unknown, _t: string, path: string) => {
         win.location.pathname = path
       }),
     },
@@ -38,6 +41,23 @@ describe('pageFor', () => {
   })
 })
 
+describe('chat URLs', () => {
+  it('names the saved chat in /app/chats/{id}, with or without a trailing slash', () => {
+    expect(chatIdFor('/app/chats/conv_A')).toBe('conv_A')
+    expect(chatIdFor('/app/chats/conv_A/')).toBe('conv_A')
+    expect(chatIdFor('/app/chats/a%2Fb')).toBe('a/b')
+  })
+
+  it('names no chat for any other path', () => {
+    for (const path of ['/', '/app/chats', '/app/chats/', '/app/chats/a/b', '/chats/conv_A', '/app/documents'])
+      expect(chatIdFor(path)).toBeUndefined()
+  })
+
+  it('is the chat page, not a new page', () => {
+    expect(pageFor('/app/chats/conv_A')).toBe('chat')
+  })
+})
+
 describe('navigation', () => {
   let win: ReturnType<typeof stubWindow>
   beforeEach(() => {
@@ -52,6 +72,18 @@ describe('navigation', () => {
 
     expect(win.history.pushState).toHaveBeenCalledWith(null, '', '/app/documents')
     expect(currentPage()).toBe('documents')
+    expect(listener).toHaveBeenCalledTimes(1)
+  })
+
+  it('replace changes the URL without a history entry and notifies once', () => {
+    const listener = vi.fn()
+    subscribe(listener)
+
+    replace('/app/chats/conv_A')
+
+    expect(win.history.replaceState).toHaveBeenCalledWith(null, '', '/app/chats/conv_A')
+    expect(win.history.pushState).not.toHaveBeenCalled()
+    expect(chatIdFor(win.location.pathname)).toBe('conv_A')
     expect(listener).toHaveBeenCalledTimes(1)
   })
 

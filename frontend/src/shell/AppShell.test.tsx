@@ -1,17 +1,26 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import type { Saved } from '../conversations/useConversation'
+import type { Target } from './chatTarget'
 import type { Page } from './route'
 import { AppShell } from './AppShell'
 
 const doc = { document_id: 'doc_1', title: 'a.md', connector: 'markdown', created_at: '2026-01-01' }
 const documents = { documents: [doc], loaded: true, message: '', refresh: () => {}, remove: async () => {} }
-const render = (page: Page, docs: Partial<typeof documents> = {}) =>
+const render = (
+  page: Page,
+  docs: Partial<typeof documents> = {},
+  chat: Target = { key: 0, adopted: false },
+  saved: Saved = { status: 'loading' },
+) =>
   renderToStaticMarkup(
     <AppShell
       page={page}
       collapsed={false}
       onToggleCollapse={() => {}}
-      chatKey={0}
+      chat={chat}
+      saved={saved}
+      onConversation={() => {}}
       onNewChat={() => {}}
       documents={{ ...documents, ...docs }}
       quality={{ quality: null, message: '' }}
@@ -92,3 +101,51 @@ describe('AppShell', () => {
     })
   })
 })
+
+describe('AppShell opening a saved chat', () => {
+  const opening: Target = { key: 1, id: 'conv_A', adopted: false }
+  const found: Saved = {
+    status: 'found',
+    conversation: { conversation_id: 'conv_A', title: 'Refunds', turns: [] },
+  }
+
+  it('shows the thread once the saved chat has loaded', () => {
+    expect(render('chat', {}, opening, found)).toContain(THREAD)
+  })
+
+  it('shows no thread while it loads', () => {
+    const html = render('chat', {}, opening, { status: 'loading' })
+
+    expect(html).toContain('Loading chat')
+    expect(html).not.toContain(THREAD)
+  })
+
+  it('says "Conversation not found" for an unknown id, with no thread', () => {
+    const html = render('chat', {}, opening, { status: 'not-found' })
+
+    expect(html).toContain('Conversation not found')
+    expect(html).not.toContain(THREAD)
+  })
+
+  it("explains a failed load without the server's detail", () => {
+    const html = render('chat', {}, opening, { status: 'error' })
+
+    expect(html).toContain("Couldn&#x27;t load this chat. Try again.")
+    expect(html).not.toContain(THREAD)
+  })
+
+  it('keeps the live thread of a new chat that was just saved', () => {
+    const html = render('chat', {}, { key: 1, id: 'conv_A', adopted: true }, { status: 'loading' })
+
+    expect(html).toContain(THREAD)
+    expect(html).not.toContain('Loading chat')
+  })
+
+  it('shows an empty chat for New chat', () => {
+    const html = render('chat', {}, { key: 2, adopted: false })
+
+    expect(html).toContain(THREAD)
+    expect(html).not.toContain('Conversation not found')
+  })
+})
+

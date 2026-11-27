@@ -16,7 +16,9 @@ const render = (page: Page, collapsed: boolean) =>
       page={page}
       collapsed={collapsed}
       onToggleCollapse={() => {}}
-      chatKey={0}
+      chat={{ key: 0, adopted: false }}
+      saved={{ status: 'loading' }}
+      onConversation={() => {}}
       onNewChat={() => {}}
       documents={documents}
       quality={{ quality: null, message: '' }}
