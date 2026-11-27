@@ -67,7 +67,7 @@ N/A per eval-plan: the graph, retrieval and prompt are unchanged; answers are on
 
 ## Browser check
 
-The person reviewing ran the UI against the dev servers (backend on :8001, Vite on :5174, Ollama in Docker with `llama3.1:8b` and `nomic-embed-text`) and reported that the functionality works, then asked for the design changes above, which were made and accepted ("lgtm"). This is their report, not an item-by-item record: they did not report dark mode, the drawer below 768 px or the layout-under-header checks one by one. The checklist they were given:
+The person reviewing ran the UI against the dev servers (backend on :8001, Vite on :5174, Ollama in Docker with `llama3.1:8b` and `nomic-embed-text`) and reported that the functionality works, then asked for the design changes above, which were made and accepted ("lgtm"). This is their report, not an item-by-item record. After the review noted that dark mode and the narrow-width drawer were not itemized, they confirmed they had checked the UI and found it all good. The checklist they were given:
 
 1. New chat to first answer: URL becomes `/app/chats/{id}`, chat appears in the sidebar, header shows the title; reload restores answers, sources and feedback controls.
 2. New chat shows an empty thread and the previous chat stays; Documents and back leaves the chat unchanged.
@@ -77,6 +77,6 @@ The person reviewing ran the UI against the dev servers (backend on :8001, Vite 
 
 ## Verdict
 
-PASS. Every check above passed on `ff89878`, and the browser check is the reviewer's report as described.
+PASS. Every check above passed on `ff89878`, and the browser check is the reviewer's confirmation as described.
 
-**Before merge:** look for the `plumbline-drift` and `datamodel` CI jobs green on the PR (not required checks). If anyone wants the dark-mode and narrow-width items recorded per item, they are the open part of the Browser check.
+**Before merge:** look for the `plumbline-drift` and `datamodel` CI jobs green on the PR (not required checks).

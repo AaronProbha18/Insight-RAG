@@ -316,11 +316,10 @@ returns and call a handler with a fake event (`shell/SidebarDrawer.test.tsx`).
 Stub `window` with `vi.stubGlobal` for code that uses the History API
 (`shell/route.test.ts`). `AppShell` takes the saved chat's load result as a
 prop (`saved`), so its loading, not-found and error screens are static tests too.
-What a static render cannot show: that a restored thread keeps its
-`metadata.custom` after the runtime loads `initialMessages`, the sidebar list
-refreshing after a rename or delete, focus moving into the rename input, and
-the thread's height under the chat header. Check those by hand in the running
-app.
+A static render cannot show these, so check them by hand in the running app:
+that a restored thread keeps its `metadata.custom` after the runtime loads
+`initialMessages`, the sidebar list refreshing after a rename or delete, focus
+moving into the rename input, and the thread's height under the chat header.
 
 A read-only thread can't run or cancel, so Stop, Copy (the clipboard),
 Regenerate and scrolling are checked by hand in a browser, and so is the
