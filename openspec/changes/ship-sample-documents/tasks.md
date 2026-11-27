@@ -1,6 +1,6 @@
 ## 1. Endpoint
 
-- [ ] 1.1 Add `POST /documents/samples` in `backend/src/plumbline/api/app.py`. It resolves `PLUMBLINE_SAMPLES_DIR`, defaulting to the repo's `evals/connectors/pdf/corpus`, and returns 404 if the directory is missing. It calls `ingest()` on each top-level file and collects `indexed`/`failed`. Tests (API, temp samples dir): all indexed and listed by `GET /documents`; a second call duplicates nothing (`created: false`, document and chunk counts unchanged); a corrupt file lands in `failed` with a reason while the others index; a missing dir returns 404.
+- [x] 1.1 Add `POST /documents/samples` in `backend/src/plumbline/api/app.py`. It resolves `PLUMBLINE_SAMPLES_DIR`, defaulting to the repo's `evals/connectors/pdf/corpus`, and returns 404 if the directory is missing. It calls `ingest()` on each top-level file and collects `indexed`/`failed`. Tests (API, temp samples dir): all indexed and listed by `GET /documents`; a second call duplicates nothing (`created: false`, document and chunk counts unchanged); a corrupt file lands in `failed` with a reason while the others index; a missing dir returns 404.
 
 ## 2. Image
 

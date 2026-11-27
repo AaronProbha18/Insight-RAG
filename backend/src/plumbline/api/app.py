@@ -152,6 +152,27 @@ def upload_document(
     return asdict(result)
 
 
+@app.post("/documents/samples")
+def index_samples(
+    conn: Conn,
+    connectors: Annotated[dict[str, FileConnector], Depends(get_connectors)],
+    embeddings: Annotated[object, Depends(get_embeddings)],
+) -> dict:
+    default = Path(__file__).parents[3].parent / "evals/connectors/pdf/corpus"
+    directory = Path(os.environ.get("PLUMBLINE_SAMPLES_DIR", default))
+    if not directory.is_dir():
+        raise HTTPException(404, f"samples directory not found: {directory}")
+    indexed, failed = [], []
+    for path in sorted(p for p in directory.iterdir() if p.is_file()):
+        try:
+            result = ingest(conn, path.read_bytes(), path.name, connectors, embeddings)
+        except (UnsupportedFileType, ParseError) as exc:
+            failed.append({"filename": path.name, "reason": str(exc)})
+        else:
+            indexed.append({"filename": path.name, **asdict(result)})
+    return {"indexed": indexed, "failed": failed}
+
+
 @app.get("/documents")
 def list_documents(conn: Conn) -> list[dict]:
     rows = conn.execute(
