@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 
-from plumbline import models
+from plumbline import conversations, models
 from plumbline.config import check_legacy_env
 from plumbline.connectors import FileConnector, ParseError
 from plumbline.connectors.registry import load_connectors
@@ -83,16 +83,39 @@ def get_retriever(conn: Conn, embeddings: Annotated[object, Depends(get_embeddin
     return lambda question, top_k: retrieve(conn, embeddings, question, top_k)
 
 
-def get_recorder(conn: Conn):
-    """Records an answer; model ids and threshold come from the environment."""
-    return lambda question, result, threshold: record_answer(
-        conn,
-        question,
-        result,
-        chat_model=os.environ.get("PLUMBLINE_LLM", ""),
-        embedding_model=os.environ.get("PLUMBLINE_EMBEDDINGS", ""),
-        threshold=threshold,
-    )
+class Recorder:
+    """Records an answer in a conversation; model ids come from the environment."""
+
+    def __init__(self, conn: psycopg.Connection):
+        self.conn = conn
+
+    def resolve(self, conversation_id: str) -> bool:
+        return conversations.resolve(self.conn, conversation_id) is not None
+
+    def __call__(
+        self, question, result, threshold, conversation_id: str | None = None
+    ) -> tuple[str, str]:
+        """Return (answer_id, conversation_id); a new conversation if none is given."""
+        with self.conn.transaction():
+            if conversation_id is None:
+                conv_id, conversation_id = conversations.create(self.conn, question)
+            else:
+                conv_id = conversations.resolve(self.conn, conversation_id)
+            answer_id = record_answer(
+                self.conn,
+                question,
+                result,
+                chat_model=os.environ.get("PLUMBLINE_LLM", ""),
+                embedding_model=os.environ.get("PLUMBLINE_EMBEDDINGS", ""),
+                threshold=threshold,
+                conversation_id=conv_id,
+            )
+            conversations.touch(self.conn, conv_id)
+        return answer_id, conversation_id
+
+
+def get_recorder(conn: Conn) -> Recorder:
+    return Recorder(conn)
 
 
 @app.get("/health")
@@ -199,6 +222,7 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[Message]
+    conversation_id: str | None = None
 
     @field_validator("messages")
     @classmethod
@@ -223,13 +247,17 @@ def chat(
     llm: Annotated[object, Depends(get_llm)],
     recorder: Annotated[object, Depends(get_recorder)],
 ) -> StreamingResponse:
+    if request.conversation_id and not recorder.resolve(request.conversation_id):
+        raise HTTPException(404, "Conversation not found")
     threshold = float(os.environ.get("PLUMBLINE_ABSTAIN_THRESHOLD", DEFAULT_THRESHOLD))
     # Option A (design D8): run to completion first, so only verified answers stream.
     try:
         question = request.messages[-1].content
         result = build_graph(retriever, llm, threshold).invoke({"question": question})
         # An answer that can't be recorded can't be rated, so it is not streamed.
-        answer_id = recorder(question, result, threshold)
+        answer_id, conversation_id = recorder(
+            question, result, threshold, request.conversation_id
+        )
     except Exception:
         log.exception("answer generation failed")
         events = [_sse("error", {"message": "answer generation failed"})]
@@ -246,7 +274,9 @@ def chat(
                 for c in result["citations"]
             ]
             events.append(_sse("citations", {"citations": public}))
-        events.append(_sse("done", {"answer_id": answer_id}))
+        events.append(
+            _sse("done", {"answer_id": answer_id, "conversation_id": conversation_id})
+        )
     return StreamingResponse(iter(events), media_type="text/event-stream")
 
 

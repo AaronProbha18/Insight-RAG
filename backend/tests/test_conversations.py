@@ -2,6 +2,7 @@ import psycopg
 import pytest
 
 from plumbline import conversations
+from plumbline.api.app import Recorder
 from plumbline.feedback import record_answer
 
 pytestmark = pytest.mark.db
@@ -151,3 +152,30 @@ def test_delete_keeps_answers_and_feedback(conn):
         " LEFT JOIN feedback f ON f.answer_id = a.id GROUP BY a.conversation_id"
     ).fetchall()
     assert row == (None, 1)
+
+
+RESULT = {"answer": "a", "citations": [], "abstained": False}
+
+
+def test_recorder_creates_then_joins(conn):
+    record = Recorder(conn)
+
+    first_answer, conv = record("First question", RESULT, 0.3)
+    before = conversations.list_all(conn)[0]["updated_at"]
+    second_answer, joined = record("Second", RESULT, 0.3, conv)
+
+    assert joined == conv and first_answer != second_answer
+    assert [t["question"] for t in conversations.get(conn, conv)["turns"]] == [
+        "First question",
+        "Second",
+    ]
+    assert conversations.get(conn, conv)["title"] == "First question"
+    assert conversations.list_all(conn)[0]["updated_at"] > before
+    assert record.resolve(conv) and not record.resolve("conv_missing")
+
+
+def test_recorder_failure_leaves_no_conversation(conn):
+    with pytest.raises(KeyError):
+        Recorder(conn)("q", {"answer": "a", "abstained": False}, 0.3)  # no citations
+
+    assert conversations.list_all(conn) == []
