@@ -38,6 +38,7 @@ src/
           ChatHeader.tsx  conversation title and "Searching all N documents"
           ChatPane.tsx runtime, welcome suggestions and Thread
           Citations.tsx
+          AddedToUnanswered.tsx  "Added to Unanswered" link under a recorded refusal
           FirstRun.tsx first-run screen: upload link, "Try the sample documents" (trySamples)
   conversations/ api.ts   GET, PATCH, DELETE /conversations: list, get, rename, delete
           useConversations.ts  the sidebar list: fetched on mount and after refresh, a rename or a delete
@@ -262,6 +263,7 @@ for an empty list, so abstentions show no sources without a special case:
   *Checked by* `feedback/FeedbackControls.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
 - **The Unanswered page:** the Date range select has a visible label; each row's reason is text ("Not in your documents", "Marked wrong: wrong source"), never colour alone; each Add a document link is a real `<a href="/app/documents">` named with its question (plain click only is handled); the empty state is text; a load failure is a `role="status"` line. *Checked by* `unanswered/UnansweredPage.test.tsx` and `shell/a11y.test.tsx`.
+- **"Added to Unanswered":** a real `<a href="/app/unanswered">` under a refusal, shown only once the refusal is recorded (it has an `answerId`); plain click only is handled. *Checked by* `chat/AddedToUnanswered.test.tsx` and `components/assistant-ui/elements/thread.aui.test.tsx`.
 - **Async results are announced:** the upload outcome on the Documents
   page lives in a `role="status"` / `aria-live="polite"` region.
 - **Focus is always visible:** controls use `focus-visible:` outline or

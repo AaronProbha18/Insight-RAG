@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import type { FC } from "react";
 import { type Citation } from "@/chat/adapter";
+import { AddedToUnanswered } from "@/chat/AddedToUnanswered";
 import { Citations } from "@/chat/Citations";
 import { FeedbackControls } from "@/feedback/FeedbackControls";
 
@@ -231,6 +232,10 @@ const AssistantMessage: FC = () => {
   const citations = useAuiState(
     (s) => (s.message.metadata.custom?.citations as Citation[]) ?? NO_CITATIONS,
   );
+  const abstained = useAuiState((s) => s.message.metadata.custom?.abstained === true);
+  const answerId = useAuiState(
+    (s) => s.message.metadata.custom?.answerId as string | undefined,
+  );
 
   return (
     <MessagePrimitive.Root
@@ -244,6 +249,7 @@ const AssistantMessage: FC = () => {
       >
         <MessagePrimitive.Parts components={{ Text: MarkdownText }} />
         <Citations citations={citations} />
+        <AddedToUnanswered abstained={abstained} answerId={answerId} />
         <MessageError />
       </div>
 

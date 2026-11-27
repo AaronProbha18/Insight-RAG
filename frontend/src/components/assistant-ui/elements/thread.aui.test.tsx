@@ -82,6 +82,14 @@ describe('thread controls have accessible names', () => {
     }
   })
 
+  it('links a recorded refusal to Unanswered, and an answer does not', () => {
+    const html = (custom: object) => renderToStaticMarkup(<Readonly status="complete" custom={custom} />)
+
+    expect(html({ citations: [], abstained: true, answerId: 'ans_1' })).toContain('href="/app/unanswered"')
+    expect(html({ citations: [], abstained: false, answerId: 'ans_1' })).not.toContain('Added to Unanswered')
+    expect(html({ citations: [], abstained: true })).not.toContain('Added to Unanswered')
+  })
+
   it('offers no feedback while running or without an answer id', () => {
     const running = renderToStaticMarkup(<Readonly status="running" custom={{ answerId: 'ans_1' }} />)
     const unrecorded = renderToStaticMarkup(<Readonly status="complete" />)
