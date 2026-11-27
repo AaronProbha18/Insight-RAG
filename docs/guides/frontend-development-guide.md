@@ -42,7 +42,7 @@ src/
   conversations/ api.ts   GET, PATCH, DELETE /conversations: list, get, rename, delete
           useConversations.ts  the sidebar list: fetched on mount and after refresh, a rename or a delete
           useConversation.ts   one saved chat for the page that opens it: loading, found, not-found, error
-          ChatList.tsx         the sidebar Chats section: links, inline rename and delete confirm
+          ChatList.tsx         the sidebar Chats section: a bubble icon and link per chat; Rename and Delete show on hover or focus (always on touch); inline rename and delete confirm
           saveAction.ts        what Save does with an entered title
   upload/ api.ts       POST /documents -> user-facing outcome
   documents/ api.ts    GET /documents, DELETE /documents/{id}, POST /documents/samples

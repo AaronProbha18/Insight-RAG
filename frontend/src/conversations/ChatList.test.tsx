@@ -66,6 +66,24 @@ describe('ChatList', () => {
     expect(html).not.toMatch(/tabindex="-1"|aria-disabled|disabled=""/)
   })
 
+  it('starts each row with a chat bubble icon, hidden from screen readers', () => {
+    const html = renderToStaticMarkup(<ChatList chats={chats()} />)
+
+    expect(html.match(/<svg[^>]*lucide-message-circle[^>]*aria-hidden="true"/g)).toHaveLength(2)
+  })
+
+  it('shows Rename and Delete only on hover or keyboard focus, and always on touch screens', () => {
+    const html = renderToStaticMarkup(<ChatList chats={chats({ items: [chat] })} />)
+    const actions = html.match(/<div class="[^"]*opacity-0[^"]*">/)?.[0] ?? ''
+
+    expect(actions).toContain('group-hover/row:opacity-100')
+    expect(actions).toContain('group-focus-within/row:opacity-100')
+    expect(actions).toContain('pointer-coarse:opacity-100')
+    expect(actions).not.toMatch(/\bhidden\b|display/) // opacity, so the buttons stay focusable
+    expect(html).toContain('aria-label="Rename Refund window"')
+    expect(html).toContain('aria-label="Delete Refund window"')
+  })
+
   it('shows a failure message from the last rename or delete', () => {
     const html = renderToStaticMarkup(<ChatList chats={chats({ message: "Couldn't delete the chat. Try again." })} />)
 

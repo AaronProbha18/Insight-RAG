@@ -1,4 +1,4 @@
-import { PencilIcon, Trash2Icon } from 'lucide-react'
+import { MessageCircleIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { isPlainClick, navigate } from '../shell/route'
@@ -85,7 +85,7 @@ export function ChatRowView({
     )
   }
   return (
-    <li className="flex items-center gap-1">
+    <li className="group/row relative">
       <a
         href={href}
         aria-current={current ? 'page' : undefined}
@@ -96,16 +96,21 @@ export function ChatRowView({
           }
           onNavigate?.()
         }}
-        className="min-w-0 flex-1 truncate rounded-md px-2 py-1.5 text-sm outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:bg-muted aria-[current=page]:font-medium"
+        className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 aria-[current=page]:bg-muted aria-[current=page]:font-medium"
       >
-        {chat.title}
+        <MessageCircleIcon aria-hidden="true" className="size-4 shrink-0" />
+        <span className="min-w-0 flex-1 truncate">{chat.title}</span>
       </a>
-      <Button type="button" variant="ghost" size="icon-sm" aria-label={`Rename ${chat.title}`} onClick={onStartRename}>
-        <PencilIcon aria-hidden="true" />
-      </Button>
-      <Button type="button" variant="ghost" size="icon-sm" aria-label={`Delete ${chat.title}`} onClick={onStartDelete}>
-        <Trash2Icon aria-hidden="true" />
-      </Button>
+      {/* Shown on hover and on keyboard focus (opacity, not display, so they stay focusable), and always
+          on touch screens, which have no hover. */}
+      <div className="absolute inset-y-0 right-1 flex items-center gap-0.5 rounded-md bg-muted opacity-0 transition-opacity group-focus-within/row:opacity-100 group-hover/row:opacity-100 pointer-coarse:opacity-100">
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={`Rename ${chat.title}`} onClick={onStartRename}>
+          <PencilIcon aria-hidden="true" />
+        </Button>
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={`Delete ${chat.title}`} onClick={onStartDelete}>
+          <Trash2Icon aria-hidden="true" />
+        </Button>
+      </div>
     </li>
   )
 }
