@@ -3,9 +3,7 @@
 ## Purpose
 
 What the chat interface shows and lets a user do: empty state, markdown answers, stop/copy/regenerate, scrolling, citations, upload, accessibility and theming. Introduced by the `assistant-ui-styled-chat` change (issue #3, ADR 0003).
-
 ## Requirements
-
 ### Requirement: Empty-state welcome and suggestions
 
 The chat SHALL show a welcome message and at least one suggested question when the thread has no messages, and selecting a suggestion SHALL send it as the user's question.
@@ -121,7 +119,7 @@ The chat SHALL give every control an accessible name and a visible focus indicat
 #### Scenario: Keyboard-only use
 
 - **GIVEN** a keyboard-only user
-- **WHEN** they upload a file, ask a question, stop, copy, regenerate and open a source
+- **WHEN** they ask a question, stop, copy, regenerate and open a source
 - **THEN** every step is reachable with a visible focus indicator
 
 ### Requirement: Chat with streamed answers
@@ -171,3 +169,4 @@ meeting 4.5:1 contrast in both themes.
 - **GIVEN** an assistant message that is still running or ended with an error
 - **WHEN** it is shown
 - **THEN** no feedback controls are shown for it
+

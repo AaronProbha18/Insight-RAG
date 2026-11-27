@@ -262,8 +262,9 @@ for an empty list, so abstentions show no sources without a special case:
   page lives in a `role="status"` / `aria-live="polite"` region.
 - **Focus is always visible:** controls use `focus-visible:` outline or
   ring utilities (the kit's buttons have them built in).
-- **Keyboard-only use works:** upload, ask, stop, copy, regenerate and open
-  a source without a mouse. Check this by hand whenever you add a control.
+- **Keyboard-only use works:** ask, stop, copy, regenerate and open a source
+  in the chat, and upload on the Documents page, without a mouse. Check this
+  by hand whenever you add a control.
 
 ## 6. Styling
 

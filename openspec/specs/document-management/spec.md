@@ -3,9 +3,7 @@
 ## Purpose
 
 Listing and deleting indexed documents, through the API and the chat UI: what a person sees, what deletion removes, and that a deleted document is never used again. Introduced by the `document-list-delete` change (issue #12).
-
 ## Requirements
-
 ### Requirement: Document list
 
 The Documents page SHALL list indexed documents with title, type and date
@@ -88,3 +86,14 @@ contrast in both themes.
 - **GIVEN** the list and its delete controls
 - **WHEN** used by keyboard only
 - **THEN** every control has an accessible name and a visible focus ring, delete asks for confirmation, and text meets 4.5:1 contrast in both themes
+
+### Requirement: Keyboard-only upload
+
+Uploading a file on the Documents page SHALL work by keyboard alone, with a visible focus indicator on every control the upload uses.
+
+#### Scenario: Keyboard-only upload
+
+- **GIVEN** a keyboard-only user on the Documents page
+- **WHEN** they upload a file
+- **THEN** every step is reachable with a visible focus indicator
+
