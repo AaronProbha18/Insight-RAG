@@ -13,9 +13,9 @@ const COLOUR = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(/
  * contrast depends on what is painted behind them.
  */
 const PAIRS: [text: string, background: string][] = [
-  ['--foreground', '--background'], // page text, Connectors page and cards
+  ['--foreground', '--background'], // page text, Connectors page and cards, chat header title
   ['--foreground', '--muted'], // assistant messages, user bubble, current sidebar item, metric bar fill and 0.80 mark on their track
-  ['--muted-foreground', '--background'], // secondary text, card extensions, run line and the first-run citation line
+  ['--muted-foreground', '--background'], // secondary text, card extensions, run line, the first-run citation line and the chat header scope label
   ['--muted-foreground', '--muted'], // secondary text on muted surfaces
   ['--primary-foreground', '--primary'], // primary buttons, incl. Upload documents on the first-run screen
   ['--secondary-foreground', '--secondary'], // secondary buttons
@@ -79,6 +79,14 @@ describe('design tokens', () => {
       expect(t[bg], `${bg} missing`).toBeDefined()
       expect(contrast(t[fg], t[bg]), `${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5)
     }
+  })
+
+  it('measures every text colour the chat header uses, on the background it sits on', () => {
+    const source = readFileSync(fileURLToPath(new URL('./chat/ChatHeader.tsx', import.meta.url)), 'utf-8')
+    const colours = [...source.matchAll(/\btext-([a-z-]+)\b/g)].map((m) => m[1]).filter((c) => !/^(xs|sm|base|lg|xl|\d+xl)$/.test(c))
+
+    expect(colours.length).toBeGreaterThan(0)
+    for (const c of colours) expect(PAIRS, `text-${c} is not measured`).toContainEqual([`--${c}`, '--background'])
   })
 
   it('computes contrast like the WCAG formula', () => {

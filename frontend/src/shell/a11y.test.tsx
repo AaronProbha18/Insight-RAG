@@ -75,6 +75,7 @@ describe('shell sources', () => {
     'Sidebar.tsx',
     'SidebarDrawer.tsx',
     'AppShell.tsx',
+    '../chat/ChatHeader.tsx',
     '../chat/FirstRun.tsx',
     '../conversations/ChatList.tsx',
     '../documents/DocumentsPage.tsx',
