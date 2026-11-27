@@ -262,7 +262,7 @@ for an empty list, so abstentions show no sources without a special case:
   ("Feedback recorded" or a generic failure) is a `role="status"` line.
   *Checked by* `feedback/FeedbackControls.test.tsx` and
   `components/assistant-ui/elements/thread.aui.test.tsx`.
-- **The Unanswered page:** the Date range select is named by an `sr-only` label (the design shows none); each row's reason is text ("Not in your documents", "Marked wrong: wrong source"), never colour alone; each Add a document link is a real `<a href="/app/documents">` named with its question (plain click only is handled); the empty state is text; a load failure is a `role="status"` line. *Checked by* `unanswered/UnansweredPage.test.tsx` and `shell/a11y.test.tsx`.
+- **The Unanswered page:** the Date range select is named by an `sr-only` label (a visible one is not needed because the options say what they are); each row's reason is text ("Not in your documents", "Marked wrong: wrong source"), never colour alone; each Add a document link is a real `<a href="/app/documents">` named with its question (plain click only is handled); the empty state is text; a load failure is a `role="status"` line. *Checked by* `unanswered/UnansweredPage.test.tsx` and `shell/a11y.test.tsx`.
 - **"Added to Unanswered":** a real `<a href="/app/unanswered">` under a refusal, shown only once the refusal is recorded (it has an `answerId`); plain click only is handled. *Checked by* `chat/AddedToUnanswered.test.tsx` and `components/assistant-ui/elements/thread.aui.test.tsx`.
 - **Async results are announced:** the upload outcome on the Documents
   page lives in a `role="status"` / `aria-live="polite"` region.

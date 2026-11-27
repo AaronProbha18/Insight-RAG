@@ -27,6 +27,7 @@ ORDER BY agg.last_at DESC, l.key
 
 def list_groups(conn: psycopg.Connection, days: int | None) -> list[dict]:
     """Groups, newest last_asked_at first; `days` None means all time."""
+    # ponytail: unbounded; add a LIMIT or dismissal when the list gets long
     keys = ("question", "count", "last_asked_at", "reason", "feedback_reason")
     rows = conn.execute(_QUERY, {"days": days}).fetchall()
     return [dict(zip(keys, row)) for row in rows]

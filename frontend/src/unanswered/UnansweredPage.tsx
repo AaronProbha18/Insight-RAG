@@ -95,6 +95,7 @@ export function UnansweredView({ items, message, days, onDays }: ViewProps) {
 }
 
 /** Unanswered page: refused and wrong-marked questions for a range, default Last 30 days. */
+// ponytail: no loaded flag, so the empty state flashes before the first response; add `loaded` like useDocuments if it matters
 export function UnansweredPage() {
   const [days, setDays] = useState<Range>(30)
   return <UnansweredView {...useUnanswered(days)} days={days} onDays={setDays} />
