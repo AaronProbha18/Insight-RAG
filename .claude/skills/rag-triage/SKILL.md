@@ -36,7 +36,14 @@ it back to the issue. Never edit code.
      connectors, ingestion, a public contract or the database: schema
      `rag-standard`.
    - Otherwise: `rag-rapid`. When unsure, use `rag-standard`.
-   - Tell the user the route and why, and wait for approval.
+   - **Answer-quality label**, decided apart from the tier: the form
+     says "Yes", or triage finds the change touches retrieval, prompting,
+     ranking, chunking, the model or the judge. A table, a read-only
+     endpoint or a UI page alone does not. Form "No" but such a path
+     found: the comment names the reason and asks before adding the
+     label. Form "Not sure": resolve it and record the decision.
+   - Tell the user the route, the label decision and why, and wait for
+     approval.
 
 3. **Explore**: invoke `opsx:explore` with the issue's title, problem,
    outcome and acceptance criteria. Read
@@ -60,8 +67,7 @@ it back to the issue. Never edit code.
    - Labels (all defined in `.github/labels.yml`):
      `gh issue edit <N> --remove-label status:needs-triage --add-label
      status:ready-for-dev,area:<…>`, plus
-     `answer-quality-change` if the form said "Yes" or the route is
-     `rag-standard`, and `db-change` if the form said "Yes" or "Not sure",
+     `answer-quality-change` per the Route step's label rule, and `db-change` if the form said "Yes" or "Not sure",
      or the change adds an Alembic revision. If triage itself is stuck on a
      decision, add `status:blocked` and say what it's waiting for.
    - Board: `bash scripts/board.sh <N> Ready`.
