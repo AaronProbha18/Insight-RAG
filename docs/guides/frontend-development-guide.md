@@ -35,9 +35,10 @@ src/
           adapter.ts   assistant-ui adapter for POST /chat
           ChatPane.tsx runtime, welcome suggestions and Thread
           Citations.tsx
+          FirstRun.tsx first-run screen: upload link, "Try the sample documents" (trySamples)
   upload/ api.ts       POST /documents -> user-facing outcome
-  documents/ api.ts    GET /documents, DELETE /documents/{id}
-          useDocuments.ts    list, refresh and delete, shared by page and sidebar count
+  documents/ api.ts    GET /documents, DELETE /documents/{id}, POST /documents/samples
+          useDocuments.ts    list, `loaded`, refresh and delete, shared by page and sidebar count; trySamples
           pageLogic.ts       title search, type filter, upload-then-refresh, count per connector
           DocumentList.tsx   rows: title, type, date, delete button
           DocumentsPage.tsx  upload, search, type filter, list, delete confirm
@@ -95,6 +96,12 @@ The runtime lives in `ChatPane`. `AppShell` keeps `ChatPane` mounted but
 navigation. New chat gives `ChatPane` a new `key`, which remounts it with
 an empty thread.
 
+On the chat page, `AppShell` shows nothing until `useDocuments` reports
+`loaded`, so there is no first-run flash. It then shows `FirstRun` when the
+list is empty and loaded without an error, and the chat otherwise. `ChatPane`
+stays mounted but hidden while `FirstRun` shows, so deleting every document
+does not lose the conversation.
+
 **2.2 Citations travel in `metadata.custom`**, not in assistant-ui
 `source` parts. Those can't carry a locator or the quoted text (finding
 from the 2.1 spike).
@@ -136,6 +143,10 @@ markup. They are generic so they fit any uploaded documents:
 // ✅ chat/ChatPane.tsx
     <AssistantRuntimeProvider runtime={runtime} config={config}>
 ```
+
+After **Try the sample documents** indexes the samples (`POST
+/documents/samples`, idempotent), `AppShell` passes `samples` to `ChatPane`,
+which puts one question about the sample returns policy first.
 
 ## 3. Calling the API
 
@@ -210,6 +221,7 @@ for an empty list, so abstentions show no sources without a special case:
 - **The sidebar:** a `<nav aria-label="Main">`. The current page is `aria-current="page"` on its link. Documents is a real link whose text includes the count ("Documents (n)"). "Connectors and quality" is a real link to `/app/connectors`, marked current there. There is no Quality item, no Insights group and no quality state in the sidebar. Collapsed to icons, every item keeps its name as `sr-only` text, and the collapse button is "Collapse sidebar" or "Expand sidebar" with `aria-expanded`. Below `md` a button named "Open menu" opens the sidebar as a drawer, with base-ui's focus trap and Escape. *Checked by* `shell/Sidebar.test.tsx`, `shell/SidebarDrawer.test.tsx` and `shell/AppShell.test.tsx`.
 - **The Documents page:** the file input, the Search box and the Type select each have a visible label, each delete button is named `Delete <title>`, deleting asks for confirmation in an alert dialog, and load/delete failures appear in a `role="status"` region. *Checked by* `documents/DocumentList.test.tsx` and `documents/DocumentsPage.test.tsx`.
 - **The Connectors page:** each connector is a card (`<section>` named by the connector). Passes, Below bar and Not measured are words next to an `aria-hidden` icon, never colour alone; the metric bars are `aria-hidden` and the number is text; a configuration mismatch ("This result is not current") and load or error messages are `role="status"`. The two external links ("How it's measured", "Connector guide") are real `<a>` elements with a visible focus ring and `rel="noreferrer"`, and the "Build your own" card appears only once the page has loaded. *Checked by* `connectors/ConnectorCard.test.tsx`, `connectors/ConnectorsPage.test.tsx`, `shell/Sidebar.test.tsx` and `shell/a11y.test.tsx`.
+- **The first-run screen:** one `<h1>`; Upload documents is a real link to `/app/documents` (plain click only is handled, as in the sidebar); Try the sample documents is a native button, disabled while it runs; a failure appears in a `role="status"` line with a generic message. *Checked by* `chat/FirstRun.test.tsx` and `shell/a11y.test.tsx`.
 - **Feedback controls:** "Good answer" and "Bad answer" are named buttons
   with `aria-pressed`; the thumbs-down form is a native `<fieldset>` with a
   `<legend>`, radio inputs and a labelled textarea; the outcome
@@ -282,7 +294,11 @@ Bad button; focus rings; light and dark themes) and the
 Documents page (Tab order, search and type filter, upload outcome, delete
 confirm and cancel, focus rings, light and dark themes) and the
 Connectors page (Tab reaches the Connectors and quality link, Enter opens
-the page, focus rings, light and dark themes) and the shell: New
+the page, focus rings, light and dark themes) and the first-run screen (Tab
+reaches Upload documents then Try the sample documents, focus rings, light
+and dark themes; the samples button indexes them, the screen gives way to the
+chat with the sample question, and deleting every document brings it back)
+and the shell: New
 chat clears a conversation, including while an answer streams; going to
 Documents and back leaves the chat unchanged; the drawer opens from the menu
 button, closes on Escape, the backdrop and navigation, and returns focus to
