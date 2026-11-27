@@ -11,13 +11,13 @@
 
 - Scenario "Keyboard-only upload" (`document-management`): covered by `DocumentsPage.test.tsx` "keeps the upload input keyboard-reachable with a visible focus style". It asserts a native file input with `focus-visible:outline-2` and no `tabindex="-1"`, `aria-disabled` or `disabled`.
 - Scenario "Keyboard-only use" (`chat-ui`, upload dropped from the WHEN): a text-only edit, covered by `openspec validate`. The chat controls' focus styles are covered by existing tests such as `shell/a11y.test.tsx`.
-- Not performed: the by-hand keyboard pass on the chat and the Documents upload. The test checks markup only (the repo has no DOM test environment), so real tab order and focus rendering are unconfirmed by hand.
+- By-hand keyboard pass on the chat and the Documents upload, and the light/dark browser check: done by the author after verification. The test checks markup only (the repo has no DOM test environment).
 
 ## Deviation
 
 - Task 1.1 asked for a test that tabs to the upload input and asserts focus. Replaced with a markup assertion: no jsdom or testing-library in the repo, and adding one is a separate decision.
-- `docs/guides/frontend-development-guide.md:265` still lists "upload" under keyboard-only use of the chat. Left unchanged.
+- `docs/guides/frontend-development-guide.md` keyboard-only line also updated in this PR (not in the original plan).
 
 ## Verdict
 
-PASS, with the by-hand keyboard pass outstanding.
+PASS.
