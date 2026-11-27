@@ -18,6 +18,7 @@ from plumbline import conversations, models
 from plumbline.config import check_legacy_env
 from plumbline.connectors import FileConnector, ParseError
 from plumbline.connectors.registry import load_connectors
+from plumbline.conversations import InvalidTitle
 from plumbline.db import database_url
 from plumbline.feedback import FeedbackRequest, record_answer, save_feedback
 from plumbline.graph import DEFAULT_THRESHOLD, build_graph
@@ -303,7 +304,7 @@ def rename_conversation(
 ) -> dict:
     try:
         renamed = conversations.rename(conn, conversation_id, request.title)
-    except ValueError as exc:
+    except InvalidTitle as exc:
         raise HTTPException(422, str(exc)) from exc
     if renamed is None:
         raise HTTPException(404, "Conversation not found")

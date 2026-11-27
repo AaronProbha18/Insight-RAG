@@ -109,9 +109,10 @@ navigation.
 a `key`, the saved chat's `id` and whether it was `adopted`. A new `key`
 remounts the pane. `syncTarget` follows the URL, but only while the chat page
 is open, so a visit to Documents does not reset the chat. `newChat` gives an
-empty thread, and the sidebar list keeps the previous chat. A saved chat (`/app/chats/{id}`) is loaded with `useConversation`
-and mounted with its `turns`; `initialMessages` is read on mount only, which is
-why switching chats means a new `key`. After the first `done` of a new chat,
+empty thread, and the sidebar list keeps the previous chat.
+`useConversation` loads a saved chat (`/app/chats/{id}`) and `AppShell` mounts
+it with its `turns`; `initialMessages` is read on mount only, which is why
+switching chats means a new `key`. After the first `done` of a new chat,
 `adopt` records the id under the same `key`, so the live thread stays while
 the URL is replaced with `/app/chats/{id}` and the list refreshes.
 `createChatAdapter(conversation)` sends the `conversation_id` it holds and

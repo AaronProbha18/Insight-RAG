@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adopt, newChat, syncTarget, type Target } from './chatTarget'
+import { adopt, leavesAfterDelete, newChat, syncTarget, type Target } from './chatTarget'
 
 const empty: Target = { key: 0, adopted: false }
 
@@ -39,5 +39,14 @@ describe('newChat', () => {
   it('starts an empty thread with a fresh pane, from a saved or an adopted chat', () => {
     expect(newChat({ key: 2, id: 'conv_A', adopted: true })).toEqual({ key: 3, adopted: false })
     expect(syncTarget(newChat({ key: 2, id: 'conv_A', adopted: false }), undefined).id).toBeUndefined()
+  })
+})
+
+describe('leavesAfterDelete', () => {
+  it('leaves only when the delete worked and the deleted chat is the open one', () => {
+    expect(leavesAfterDelete(true, 'conv_A', 'conv_A')).toBe(true)
+    expect(leavesAfterDelete(true, 'conv_B', 'conv_A')).toBe(false)
+    expect(leavesAfterDelete(true, 'conv_B', undefined)).toBe(false)
+    expect(leavesAfterDelete(false, 'conv_A', 'conv_A')).toBe(false)
   })
 })

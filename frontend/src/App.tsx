@@ -5,7 +5,7 @@ import { useDocuments } from './documents/useDocuments'
 import { useQuality } from './quality/useQuality'
 import { AppShell } from './shell/AppShell'
 import { useCollapsed } from './shell/collapsed'
-import { adopt, newChat, syncTarget, type Target } from './shell/chatTarget'
+import { adopt, leavesAfterDelete, newChat, syncTarget, type Target } from './shell/chatTarget'
 import { navigate, replace, useChatId, useRoute } from './shell/route'
 
 export default function App() {
@@ -45,8 +45,7 @@ export default function App() {
         message: conversations.message,
         onRename: (id, title) => void conversations.rename(id, title),
         onDelete: async (id) => {
-          // A deleted chat must not stay open: its URL would name something that is gone.
-          if ((await conversations.remove(id)) && id === next.id) startNewChat()
+          if (leavesAfterDelete(await conversations.remove(id), id, next.id)) startNewChat()
         },
       }}
       documents={documents}

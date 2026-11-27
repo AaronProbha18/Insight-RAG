@@ -125,7 +125,7 @@ def test_rename_trims_and_updates(conn):
 def test_rename_rejects_invalid_titles(conn, title):
     _, public_id = conversations.create(conn, "old")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(conversations.InvalidTitle):
         conversations.rename(conn, public_id, title)
 
     assert conversations.get(conn, public_id)["title"] == "old"

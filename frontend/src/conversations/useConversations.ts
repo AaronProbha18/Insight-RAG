@@ -34,7 +34,6 @@ export async function deleteOutcome(id: string): Promise<string> {
 export function useConversations() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([])
   const [message, setMessage] = useState('')
-  const [loaded, setLoaded] = useState(false)
   const [version, setVersion] = useState(0)
   const refresh = useCallback(() => setVersion((v) => v + 1), [])
 
@@ -44,7 +43,6 @@ export function useConversations() {
       if (stale) return
       if (result.conversations) setConversations(result.conversations)
       setMessage(result.message)
-      setLoaded(true)
     })
     return () => {
       stale = true
@@ -65,5 +63,5 @@ export function useConversations() {
     return !failure
   }
 
-  return { conversations, loaded, message, refresh, rename, remove }
+  return { conversations, message, refresh, rename, remove }
 }

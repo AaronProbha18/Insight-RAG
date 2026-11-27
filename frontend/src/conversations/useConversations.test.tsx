@@ -75,11 +75,10 @@ describe('deleteOutcome', () => {
 })
 
 describe('useConversations', () => {
-  it('is not loaded, with an empty list, on the first render', () => {
+  it('starts with an empty list on the first render', () => {
     function Probe() {
-      const { loaded, conversations } = useConversations()
-      return <span>{`${loaded}:${conversations.length}`}</span>
+      return <span>{useConversations().conversations.length}</span>
     }
-    expect(renderToStaticMarkup(<Probe />)).toBe('<span>false:0</span>')
+    expect(renderToStaticMarkup(<Probe />)).toBe('<span>0</span>')
   })
 })

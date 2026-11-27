@@ -1,14 +1,9 @@
+import type { Citation } from '../chat/adapter'
+
 export type ConversationSummary = {
   conversation_id: string
   title: string
   updated_at: string
-}
-
-export type Citation = {
-  document_id: string
-  title: string
-  locator: string
-  indexed: boolean
 }
 
 export type Turn = {

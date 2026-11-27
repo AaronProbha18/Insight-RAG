@@ -8,6 +8,10 @@ TITLE_CUT = 80
 TITLE_MAX = 200
 
 
+class InvalidTitle(ValueError):
+    """A title that is empty or longer than 200 characters after trimming."""
+
+
 def create(conn: psycopg.Connection, first_question: str) -> tuple[int, str]:
     """Insert a conversation titled from its first question; return (id, public_id)."""
     title = " ".join(first_question.split())
@@ -86,10 +90,10 @@ def get(conn: psycopg.Connection, public_id: str) -> dict | None:
 
 
 def rename(conn: psycopg.Connection, public_id: str, title: str) -> dict | None:
-    """Set a new title (1-200 characters after trimming); None when unknown."""
+    """Set a new title; None when unknown. Raises InvalidTitle outside 1-200 characters."""
     title = title.strip()
     if not 1 <= len(title) <= TITLE_MAX:
-        raise ValueError(f"title must be 1-{TITLE_MAX} characters")
+        raise InvalidTitle(f"title must be 1-{TITLE_MAX} characters")
     row = conn.execute(
         "UPDATE conversations SET title = %s, updated_at = now() WHERE public_id = %s"
         " RETURNING public_id, title, updated_at",
