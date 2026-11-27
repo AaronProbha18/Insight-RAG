@@ -65,14 +65,14 @@ describe('ConnectorsView', () => {
       expect(html).toContain('>Connectors and quality</h1>')
       expect(html).toContain('A connector reads one file type and turns it into passages Plumbline can cite.')
       expect(html).toContain('The bar is 0.80 on correctness, faithfulness and abstention.')
-      expect(html).toMatch(/<a href="https:\/\/github.com\/AaronProbha18\/Plumbline\/blob\/main\/evals\/README.md"[^>]*rel="noreferrer"[^>]*>How it&#x27;s measured<\/a>/)
+      expect(html).toMatch(/<a href="https:\/\/plumbline-docs.netlify.app\/architecture\/overview\/#evaluate-plumbline-eval"[^>]*rel="noreferrer"[^>]*>How it&#x27;s measured<\/a>/)
     }
   })
 
   it('ends with Build your own, linking to the connector guide, once loaded', () => {
     for (const html of [view(), view({ connectors: [] })]) {
       expect(html).toContain('<section aria-label="Build your own"')
-      expect(html).toContain('href="https://github.com/AaronProbha18/Plumbline/blob/main/docs/guides/connector-development-guide.md"')
+      expect(html).toContain('href="https://plumbline-docs.netlify.app/guides/connector-development-guide/"')
       expect(html).toContain('Connector guide')
     }
     expect(view().indexOf('Build your own')).toBeGreaterThan(view().indexOf('PDF'))

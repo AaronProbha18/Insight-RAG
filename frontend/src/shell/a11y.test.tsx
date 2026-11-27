@@ -183,7 +183,7 @@ describe('the loaded Connectors page', () => {
 
     expect(external).toHaveLength(2)
     for (const a of external) {
-      expect(a).toContain('href="https://github.com/')
+      expect(a).toContain('href="https://plumbline-docs.netlify.app/')
       expect(a).toContain('rel="noreferrer"')
     }
     expect(html).not.toMatch(/tabindex|aria-disabled/)
